@@ -1,0 +1,8 @@
+{
+  "name": "Sharanya L Shetty - 3D Portfolio",
+  "description": "Interactive 3D floating island portfolio of Sharanya L Shetty, CSE student specializing in backend and blockchain.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Nunito', sans-serif;
+  --font-heading: 'Fraunces', Georgia, serif;
+  --font-handwriting: 'Caveat', cursive;
+}
+
+body {
+  font-family: 'Nunito', sans-serif;
+  color: #334155;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #0B1B2D;
+}
+
+.font-heading {
+  font-family: 'Fraunces', Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+.font-handwriting {
+  font-family: 'Caveat', cursive;
+}
+
+.font-sans {
+  font-family: 'Nunito', sans-serif;
+}
+
+/* Tactile handcrafted buttons: 2px dark navy border, solid 4px offset shadow */
+.btn-chunky-teal {
+  background-color: #1AA6A6;
+  color: #ffffff;
+  border: 2px solid #0B1B2D;
+  box-shadow: 4px 4px 0 #0B1B2D;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-chunky-teal:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #0B1B2D;
+  background-color: #158F8F;
+}
+
+.btn-chunky-teal:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 #0B1B2D;
+}
+
+.btn-chunky-light {
+  background-color: #FFFFFF;
+  color: #0B1B2D;
+  border: 2px solid #0B1B2D;
+  box-shadow: 4px 4px 0 #0B1B2D;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-chunky-light:hover {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 #0B1B2D;
+  background-color: #FFFDF9;
+}
+
+.btn-chunky-light:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 #0B1B2D;
+}
+
+/* Handcrafted solid cards */
+.card-solid {
+  background-color: #FFF8E7;
+  border: 2px solid #0B1B2D;
+  box-shadow: 5px 5px 0 #0B1B2D;
+}
+
+.pt-safe {
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+}
+.pb-safe {
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+}
+.pl-safe {
+  padding-left: max(0.75rem, env(safe-area-inset-left));
+}
+.pr-safe {
+  padding-right: max(0.75rem, env(safe-area-inset-right));
+}
