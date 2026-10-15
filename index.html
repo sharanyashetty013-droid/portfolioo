@@ -9,12 +9,105 @@
     <meta property="og:description" content="Interactive 3D floating island portfolio of Sharanya L Shetty, CSE student specializing in backend and blockchain." />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
+    
+    <!-- Preconnect for Google Fonts -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+      /* Instant Zero-Delay Startup Styles */
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body, html { width: 100%; height: 100%; overflow: hidden; background-color: #E8F5F8; }
+      #initial-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at 50% 40%, #F4FBFC 0%, #D8EFF5 100%);
+        font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+        padding: 20px;
+      }
+      .loader-card {
+        background: #FFF8E7;
+        border: 2.5px solid #0B1B2D;
+        border-radius: 20px;
+        box-shadow: 4px 4px 0 #0B1B2D;
+        padding: 24px 32px;
+        text-align: center;
+        max-width: 320px;
+        width: 100%;
+        animation: floatLoader 3s ease-in-out infinite;
+      }
+      @keyframes floatLoader {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-6px); }
+      }
+      .boat-icon {
+        font-size: 38px;
+        line-height: 1;
+        margin-bottom: 12px;
+        display: inline-block;
+        animation: rockBoat 2s ease-in-out infinite alternate;
+      }
+      @keyframes rockBoat {
+        from { transform: rotate(-5deg); }
+        to { transform: rotate(5deg); }
+      }
+      .loader-title {
+        font-family: 'Fraunces', serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: #0B1B2D;
+        margin-bottom: 4px;
+        letter-spacing: -0.02em;
+      }
+      .loader-subtitle {
+        font-size: 12px;
+        font-weight: 700;
+        color: #0F766E;
+        margin-bottom: 16px;
+      }
+      .loader-bar-bg {
+        width: 100%;
+        height: 8px;
+        background: #E2E8F0;
+        border: 1.5px solid #0B1B2D;
+        border-radius: 999px;
+        overflow: hidden;
+        position: relative;
+      }
+      .loader-bar-fill {
+        height: 100%;
+        width: 40%;
+        background: #1AA6A6;
+        border-radius: 999px;
+        animation: loadProgress 1.6s ease-in-out infinite alternate;
+      }
+      @keyframes loadProgress {
+        0% { transform: translateX(-10%); width: 25%; }
+        100% { transform: translateX(200%); width: 50%; }
+      }
+    </style>
   </head>
   <body class="bg-sky-50 text-slate-800 antialiased overflow-hidden select-none font-sans">
-    <div id="root"></div>
+    <div id="root">
+      <div id="initial-loader">
+        <div class="loader-card">
+          <div class="boat-icon">⛵</div>
+          <h1 class="loader-title">Sharanya L Shetty</h1>
+          <p class="loader-subtitle">Setting sail to the 3D Archipelago...</p>
+          <div class="loader-bar-bg">
+            <div class="loader-bar-fill"></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

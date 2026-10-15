@@ -1,8 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
-import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { SectionId } from '../../types/portfolio';
 import { ISLAND_LAYOUT } from '../../constants/islandLayout';
 
@@ -23,8 +22,9 @@ export const CameraController: React.FC<CameraControllerProps> = ({
   reducedMotion = false,
   isAnyModalOpen = false,
 }) => {
-  const { camera, size } = useThree();
-  const controlsRef = useRef<OrbitControlsImpl>(null);
+  const { camera, gl, size } = useThree();
+  const controlsRef = useRef<OrbitControls | null>(null);
+  const initializedRef = useRef(false);
   const config = ISLAND_LAYOUT[activeSection];
 
   const targetCamPosRef = useRef(new THREE.Vector3(...config.cameraPos));
@@ -62,7 +62,40 @@ export const CameraController: React.FC<CameraControllerProps> = ({
       targetCamPosRef.current.copy(baseCam);
       targetLookAtRef.current.copy(baseTarget);
     }
-  }, [config, size.width, size.height]);
+
+    // Instantly snap on first layout to avoid laggy drift
+    if (!initializedRef.current) {
+      camera.position.copy(targetCamPosRef.current);
+      if (controlsRef.current) {
+        controlsRef.current.target.copy(targetLookAtRef.current);
+        controlsRef.current.update();
+      }
+      initializedRef.current = true;
+    }
+  }, [config, size.width, size.height, camera]);
+
+  // Setup OrbitControls directly on canvas domElement
+  useEffect(() => {
+    const controls = new OrbitControls(camera, gl.domElement);
+    controls.enablePan = false;
+    controls.enableZoom = true;
+    controls.enableRotate = true;
+    controls.minDistance = 12;
+    controls.maxDistance = 75;
+    controls.minPolarAngle = Math.PI / 6;
+    controls.maxPolarAngle = Math.PI / 2.15;
+    controls.dampingFactor = 0.05;
+    controls.rotateSpeed = 0.7;
+    controls.zoomSpeed = 0.8;
+    controls.target.copy(targetLookAtRef.current);
+    controls.update();
+    controlsRef.current = controls;
+
+    return () => {
+      controls.dispose();
+      controlsRef.current = null;
+    };
+  }, [camera, gl.domElement]);
 
   useFrame((_, delta) => {
     if (reducedMotion) {
@@ -110,19 +143,5 @@ export const CameraController: React.FC<CameraControllerProps> = ({
     }
   });
 
-  return (
-    <OrbitControls
-      ref={controlsRef}
-      enablePan={false}
-      enableZoom={true}
-      enableRotate={!isSailing && !isAnyModalOpen}
-      minDistance={12}
-      maxDistance={75}
-      minPolarAngle={Math.PI / 6}
-      maxPolarAngle={Math.PI / 2.15}
-      dampingFactor={0.05}
-      rotateSpeed={0.7}
-      zoomSpeed={0.8}
-    />
-  );
+  return null;
 };

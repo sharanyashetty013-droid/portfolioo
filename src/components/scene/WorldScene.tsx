@@ -1,5 +1,5 @@
-import React, { useState, Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
+import React, { useState, useRef, Suspense } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { SectionId, ProjectItem, HackathonItem, SkillGroup } from '../../types/portfolio';
 import { CameraController } from './CameraController';
@@ -27,6 +27,18 @@ interface WorldSceneProps {
   isAnyModalOpen?: boolean;
   reducedMotion?: boolean;
   onSailingStateChange?: (isSailing: boolean) => void;
+  onLoaded?: () => void;
+}
+
+function FirstFrameTrigger({ onReady }: { onReady?: () => void }) {
+  const readyRef = useRef(false);
+  useFrame(() => {
+    if (!readyRef.current && onReady) {
+      readyRef.current = true;
+      onReady();
+    }
+  });
+  return null;
 }
 
 export const WorldScene: React.FC<WorldSceneProps> = ({
@@ -40,6 +52,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
   isAnyModalOpen = false,
   reducedMotion = false,
   onSailingStateChange,
+  onLoaded,
 }) => {
   const [boatPos, setBoatPos] = useState<THREE.Vector3>(
     new THREE.Vector3(...ISLAND_LAYOUT.home.dockPosition)
@@ -81,6 +94,8 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
         }}
       >
         <Suspense fallback={null}>
+          <FirstFrameTrigger onReady={onLoaded} />
+
           {/* Dynamic Sky & Sunlight with Shadows */}
           <SkyAndAtmosphere reducedMotion={reducedMotion} />
 

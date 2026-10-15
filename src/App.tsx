@@ -41,8 +41,26 @@ export default function App() {
 
 
 
+  const [isSceneReady, setIsSceneReady] = useState(false);
+
   return (
     <div className="relative w-screen h-[100dvh] min-h-[100dvh] max-h-[100dvh] overflow-hidden bg-sky-50 font-sans text-slate-800 select-none">
+      {/* Startup Loading Veil (Smooth Fade Out when 3D scene compiles) */}
+      <div 
+        className={`pointer-events-none fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-b from-[#F4FBFC] to-[#D8EFF5] transition-opacity duration-700 ${
+          isSceneReady ? 'opacity-0' : 'opacity-100'
+        }`}
+      >
+        <div className="bg-[#FFF8E7] border-2 border-[#0B1B2D] shadow-[4px_4px_0_#0B1B2D] rounded-2xl p-6 text-center max-w-[320px] w-full animate-bounce">
+          <div className="text-4xl mb-2">⛵</div>
+          <h2 className="font-heading text-lg font-bold text-[#0B1B2D]">Sharanya L Shetty</h2>
+          <p className="text-xs font-bold text-[#0F766E] mt-1 mb-3">Setting sail to the 3D Archipelago...</p>
+          <div className="w-full h-2 bg-slate-200 border border-[#0B1B2D] rounded-full overflow-hidden">
+            <div className="h-full bg-[#1AA6A6] w-2/3 animate-pulse" />
+          </div>
+        </div>
+      </div>
+
       {/* Fixed Top Navigation Bar */}
       <Navbar onOpenResume={() => setIsResumeOpen(true)} />
 
@@ -59,6 +77,7 @@ export default function App() {
           isAnyModalOpen={isAnyModalOpen}
           reducedMotion={reducedMotion}
           onSailingStateChange={(sailing) => setIsSailing(sailing)}
+          onLoaded={() => setIsSceneReady(true)}
         />
 
         {/* Screen-Anchored Overlay HUD */}
