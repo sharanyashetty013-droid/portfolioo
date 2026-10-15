@@ -145,7 +145,7 @@ export const WaterSea: React.FC = () => {
       position={[0, -0.05, -135]}
       receiveShadow
     >
-      <planeGeometry args={[800, 800, 8, 8]} />
+      <planeGeometry args={[800, 800, 64, 64]} />
       <shaderMaterial
         ref={materialRef}
         vertexShader={waterVertexShader}

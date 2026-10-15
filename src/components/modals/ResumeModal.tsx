@@ -102,15 +102,23 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
             </div>
           </section>
 
-          {/* 3. Campus Involvement */}
+          {/* 3. Leadership & Campus Involvement */}
           <section>
             <h2 className="font-heading text-sm sm:text-[15px] font-bold text-[#0F766E] uppercase tracking-wider mb-2 border-b-2 border-[#0B1B2D]/15 pb-1">
-              CAMPUS INVOLVEMENT
+              LEADERSHIP & CAMPUS INVOLVEMENT
             </h2>
             <ul className="space-y-2 text-xs sm:text-sm leading-[1.65] text-[#334155] font-medium">
               <li className="flex items-start gap-2">
                 <span className="text-[#0B1B2D] font-bold">•</span>
-                <span>Active coordination of campus technical events, registrations, and data tracking workflows</span>
+                <span><strong>TIPTOE Club</strong> – Core Member; received recognition for contributions to club activities and events</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#0B1B2D] font-bold">•</span>
+                <span><strong>ACM Club</strong> – Core Member, Documentation Team</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-[#0B1B2D] font-bold">•</span>
+                <span>Supported registration and data tracking for club events using Google Forms and Sheets</span>
               </li>
             </ul>
           </section>

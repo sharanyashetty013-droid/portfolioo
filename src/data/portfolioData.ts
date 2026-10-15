@@ -29,7 +29,8 @@ export const portfolioData: PortfolioData = {
     },
   ],
   leadership: [
-    "Campus Technical Events   Active coordination of registrations and event data tracking workflows.",
+    "TIPTOE Club   Core Member; active coordination of campus activities and technical events.",
+    "ACM Student Chapter   Core Member, Documentation Team; supported registration workflows and event data tracking.",
   ],
   projects: [
     {
