@@ -1,6 +1,6 @@
 # Portfolio
 
-Personal portfolio website showcasing my technical projects, research experience,all skil,and engineering background in Computer Science.
+Personal portfolio website showcasing my technical projects, research experience,all skill,and engineering background in Computer Science.
 
 ---
 
