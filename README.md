@@ -4,7 +4,7 @@ Personal portfolio website showcasing my technical projects, research experience
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Tech Stack:
 
 * **Frontend:** Next.js, React, TypeScript, Tailwind CSS
 * **Languages:** C++, Python, JavaScript
