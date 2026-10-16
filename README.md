@@ -12,7 +12,7 @@ Personal portfolio website showcasing my technical projects, research experience
 
 ---
 
-## ⚡ Quick Start
+## ⚡ Quick Start:
 
 ```bash
 # Clone the repository
