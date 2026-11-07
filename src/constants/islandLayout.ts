@@ -1,4 +1,3 @@
-import * as THREE from 'three';
 import { SectionId } from '../types/portfolio';
 
 export interface IslandConfig {
@@ -148,10 +147,6 @@ export const ROUTE_WAYPOINTS: [number, number, number][] = [
   [-33, 0, -262],
 ];
 
-export function createVoyageCurve(): THREE.CatmullRomCurve3 {
-  const points = ROUTE_WAYPOINTS.map(([x, y, z]) => new THREE.Vector3(x, y, z));
-  return new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.5);
-}
 
 export const HOT_AIR_BALLOON_CONFIG = {
   center: ISLAND_LAYOUT.home.position,

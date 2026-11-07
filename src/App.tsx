@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { SectionId, ProjectItem, HackathonItem, SkillGroup } from './types/portfolio';
 import { Navbar } from './components/navigation/Navbar';
-import { WorldScene } from './components/scene/WorldScene';
+import { SceneLoader } from './components/ui/SceneLoader';
 import { OverlayHUD } from './components/ui/OverlayHUD';
 import { ProjectModal } from './components/modals/ProjectModal';
 import { HackathonModal } from './components/modals/HackathonModal';
@@ -9,6 +9,11 @@ import { SkillModal } from './components/modals/SkillModal';
 import { ResumeModal } from './components/modals/ResumeModal';
 import { ContactModal } from './components/modals/ContactModal';
 import { CHAPTER_ORDER } from './constants/islandLayout';
+
+// three.js + the whole scene load in a separate chunk so the HUD paints first
+const WorldScene = lazy(() =>
+  import('./components/scene/WorldScene').then((m) => ({ default: m.WorldScene }))
+);
 
 export default function App() {
   const [activeSection, setActiveSection] = useState<SectionId>('home');
@@ -19,6 +24,7 @@ export default function App() {
   const [isResumeOpen, setIsResumeOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
+  const [sceneReady, setSceneReady] = useState(false);
 
 
 
@@ -47,7 +53,9 @@ export default function App() {
       <Navbar onOpenResume={() => setIsResumeOpen(true)} />
 
       {/* Main 3D Voyage Scene */}
-      <div className="w-full h-full min-h-[100dvh] max-h-[100dvh]">
+      <div className="scene-backdrop relative w-full h-full min-h-[100dvh] max-h-[100dvh]">
+        <SceneLoader visible={!sceneReady} />
+        <Suspense fallback={null}>
         <WorldScene
           activeSection={activeSection}
           onNavigate={handleNavigate}
@@ -59,7 +67,9 @@ export default function App() {
           isAnyModalOpen={isAnyModalOpen}
           reducedMotion={reducedMotion}
           onSailingStateChange={(sailing) => setIsSailing(sailing)}
+          onReady={() => setSceneReady(true)}
         />
+        </Suspense>
 
         {/* Screen-Anchored Overlay HUD */}
         <OverlayHUD

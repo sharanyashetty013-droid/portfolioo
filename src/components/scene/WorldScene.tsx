@@ -1,5 +1,5 @@
-import React, { useState, Suspense } from 'react';
-import { Canvas } from '@react-three/fiber';
+import React, { useState, useEffect, Suspense } from 'react';
+import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { SectionId, ProjectItem, HackathonItem, SkillGroup } from '../../types/portfolio';
 import { CameraController } from './CameraController';
@@ -27,7 +27,33 @@ interface WorldSceneProps {
   isAnyModalOpen?: boolean;
   reducedMotion?: boolean;
   onSailingStateChange?: (isSailing: boolean) => void;
+  onReady?: () => void;
 }
+
+// Compiles every shader up front (async where the browser supports it) before the
+// render loop starts, so the first frame doesn't freeze the page.
+const SceneWarmup: React.FC<{ onDone: () => void }> = ({ onDone }) => {
+  const { gl, scene, camera } = useThree();
+  useEffect(() => {
+    let cancelled = false;
+    const finish = () => { if (!cancelled) onDone(); };
+    const warm = gl.compileAsync ? gl.compileAsync(scene, camera) : Promise.resolve(gl.compile(scene, camera));
+    warm.then(finish, finish);
+    return () => { cancelled = true; };
+  }, [gl, scene, camera]);
+  return null;
+};
+
+// Fires once after the first real frame has been drawn
+const FirstFrame: React.FC<{ onFrame: () => void }> = ({ onFrame }) => {
+  const done = React.useRef(false);
+  useFrame(() => {
+    if (done.current) return;
+    done.current = true;
+    requestAnimationFrame(onFrame);
+  });
+  return null;
+};
 
 export const WorldScene: React.FC<WorldSceneProps> = ({
   activeSection,
@@ -40,7 +66,10 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
   isAnyModalOpen = false,
   reducedMotion = false,
   onSailingStateChange,
+  onReady,
 }) => {
+  const [compiled, setCompiled] = useState(false);
+  const [visible, setVisible] = useState(false);
   const [boatPos, setBoatPos] = useState<THREE.Vector3>(
     new THREE.Vector3(...ISLAND_LAYOUT.home.dockPosition)
   );
@@ -66,6 +95,9 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
   return (
     <div className="w-full h-full relative cursor-grab active:cursor-grabbing">
       <Canvas
+        frameloop={compiled ? 'always' : 'never'}
+        onCreated={({ gl }) => gl.setClearColor('#CDEFEA')}
+        style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.8s ease' }}
         shadows
         dpr={[1, 1.5]}
         camera={{
@@ -160,6 +192,9 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
             reducedMotion={reducedMotion}
             isAnyModalOpen={isAnyModalOpen}
           />
+
+          <SceneWarmup onDone={() => setCompiled(true)} />
+          {compiled && <FirstFrame onFrame={() => { setVisible(true); onReady?.(); }} />}
         </Suspense>
       </Canvas>
 

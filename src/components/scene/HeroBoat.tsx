@@ -2,7 +2,7 @@ import React, { useRef, useMemo, useEffect } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { RowingBoat } from './common/StyleRefDecor';
-import { createVoyageCurve } from '../../constants/islandLayout';
+import { createVoyageCurve } from '../../constants/voyageCurve';
 
 interface HeroBoatProps {
   targetT: number;
