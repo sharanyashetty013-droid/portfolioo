@@ -7,6 +7,7 @@ import { CurvedPalm, WoodenBarrel, LowPolyBoulder, DriftingHoverRocks } from '..
 import { SkillGroup } from '../../../types/portfolio';
 import { portfolioData } from '../../../data/portfolioData';
 import { ISLAND_LAYOUT } from '../../../constants/islandLayout';
+import { FlowerBush, LampPost, StudyDesk } from '../common/IslandProps';
 
 interface SkillsIslandProps {
   isActive: boolean;
@@ -189,6 +190,15 @@ export const SkillsIsland: React.FC<SkillsIslandProps> = ({
         <LowPolyBoulder position={[0, 0, 4.0]} scale={0.85} />
         <LowPolyBoulder position={[-5.0, 0, 0]} scale={0.8} />
         <LowPolyBoulder position={[5.0, 0, 1.2]} scale={0.9} />
+
+        {/* lamps around the cobblestone ring + a study corner */}
+        {[0.785, 2.356, 3.927, 5.498].map((a) => (
+          <LampPost key={a} position={[Math.cos(a) * 4.3, 0.1, Math.sin(a) * 4.3]} />
+        ))}
+        <StudyDesk position={[-2.2, 0.15, 7.6]} rotation={0.3} />
+        <FlowerBush position={[2.4, 0, 8.4]} color="#F472B6" />
+        <FlowerBush position={[-7.6, 0, 3.4]} color="#FDE047" scale={0.9} />
+        <FlowerBush position={[7.8, 0, -3.0]} color="#C084FC" scale={0.9} />
       </group>
 
       {/* 4. Drifting Hover Rocks along cliff perimeter */}

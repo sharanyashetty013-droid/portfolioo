@@ -5,6 +5,7 @@ import { TropicalIslandBase } from '../common/TropicalIslandBase';
 import { IslandPier } from '../common/IslandPier';
 import { CurvedPalm, WoodenBarrel, WoodenCrate, LowPolyBoulder, DriftingHoverRocks } from '../common/StyleRefDecor';
 import { ISLAND_LAYOUT } from '../../../constants/islandLayout';
+import { FlowerBush, Bench, BottleMessage, LampPost } from '../common/IslandProps';
 
 interface ContactIslandProps {
   isActive: boolean;
@@ -102,9 +103,17 @@ export const ContactIsland: React.FC<ContactIslandProps> = ({
           {/* Rotating Beacon Light Beam */}
           <group ref={beaconRef} position={[0, 5.45, 0]}>
             <pointLight color="#FEF08A" intensity={2.8} distance={16} />
-            <mesh position={[0, 0, 3.2]} rotation={[Math.PI / 2, 0, 0]}>
-              <coneGeometry args={[1.4, 6.5, 8, 1, true]} />
-              <meshBasicMaterial color="#FEF08A" transparent opacity={0.25} side={THREE.DoubleSide} />
+            {/* beam: narrow at the lamp, widening outward, additive so it glows */}
+            <mesh position={[0, 0, 4.5]} rotation={[-Math.PI / 2, 0, 0]}>
+              <coneGeometry args={[1.6, 9, 12, 1, true]} />
+              <meshBasicMaterial
+                color="#FEF08A"
+                transparent
+                opacity={0.16}
+                side={THREE.DoubleSide}
+                blending={THREE.AdditiveBlending}
+                depthWrite={false}
+              />
             </mesh>
           </group>
 
@@ -154,7 +163,15 @@ export const ContactIsland: React.FC<ContactIslandProps> = ({
         <WoodenCrate position={[1.4, 0, 1.8]} scale={0.8} />
         <LowPolyBoulder position={[3.0, 0, 2.2]} scale={0.85} />
         <LowPolyBoulder position={[-2.8, 0, -2.8]} scale={0.9} />
+        <Bench position={[3.4, 0.05, 0.6]} rotation={-1.3} />
+        <LampPost position={[2.4, 0, 2.8]} />
+        <FlowerBush position={[-4.6, 0, -1.2]} color="#F472B6" />
+        <FlowerBush position={[1.2, 0, -4.4]} color="#FDE047" scale={0.9} />
+        <FlowerBush position={[-2.4, 0, 4.0]} color="#C084FC" scale={0.8} />
       </group>
+
+      {/* message in a bottle drifting off the shore */}
+      <BottleMessage position={[config.position[0] + 7, 0.15, config.position[2] + 10]} reducedMotion={reducedMotion} />
 
       {/* 4. Drifting Hover Rocks along cliff perimeter */}
       <DriftingHoverRocks

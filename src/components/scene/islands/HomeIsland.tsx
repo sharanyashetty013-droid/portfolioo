@@ -10,6 +10,7 @@ import {
   LowPolyBoulder
 } from '../common/StyleRefDecor';
 import { PondWaterfall } from '../common/PondWaterfall';
+import { Campfire, FlowerBush, LampPost } from '../common/IslandProps';
 import { ISLAND_LAYOUT } from '../../../constants/islandLayout';
 import { SectionId } from '../../../types/portfolio';
 
@@ -95,6 +96,13 @@ export const HomeIsland: React.FC<HomeIslandProps> = ({
         <LowPolyBoulder position={[2.8, 0, -2.4]} scale={0.8} />
         <LowPolyBoulder position={[3.2, 0, -1.8]} scale={0.5} />
         <LowPolyBoulder position={[-3.8, 0, -1.4]} scale={0.65} />
+
+        <Campfire position={[3.8, 0.12, 4.2]} reducedMotion={reducedMotion} />
+        <LampPost position={[-2.6, 0.2, 2.6]} />
+        <FlowerBush position={[-5.2, 0, -3.6]} color="#F472B6" />
+        <FlowerBush position={[6.4, 0, -1.6]} color="#FDE047" scale={0.9} />
+        <FlowerBush position={[-1.0, 0, -7.4]} color="#C084FC" scale={0.85} />
+        <FlowerBush position={[7.0, 0, 3.0]} color="#F97316" scale={0.8} />
       </group>
 
       {/* 8. Floating Drifting Rocks */}

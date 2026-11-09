@@ -33,17 +33,27 @@ export const TropicalIslandBase: React.FC<TropicalIslandBaseProps> = ({ config }
     }
 
     // 1. SAND TOP DISC
-    const rings = 4;
+    const rings = 6;
     const sandPositions: number[] = [];
     const sandNormals: number[] = [];
     const sandColors: number[] = [];
     const sandIndices: number[] = [];
     const baseSand = new THREE.Color(sandColor || '#F9E7B8');
     const darkSand = new THREE.Color('#F0D49A');
+    const grassA = new THREE.Color('#8FCF6E');
+    const grassB = new THREE.Color('#74BA5A');
+    // grassy meadow in the middle, sandy beach ring around the rim
+    const topColor = (ringFrac: number) => {
+      const grass = grassA.clone().lerp(grassB, rng());
+      const sand = baseSand.clone().lerp(darkSand, rng() * 0.5 + ringFrac * 0.25);
+      const g = THREE.MathUtils.smoothstep(ringFrac, 0.55, 0.78);
+      return grass.lerp(sand, g);
+    };
 
     sandPositions.push(0, height + 0.35, 0);
     sandNormals.push(0, 1, 0);
-    sandColors.push(baseSand.r, baseSand.g, baseSand.b);
+    const c0 = topColor(0);
+    sandColors.push(c0.r, c0.g, c0.b);
 
     for (let r = 1; r <= rings; r++) {
       const ringFrac = r / rings;
@@ -56,7 +66,7 @@ export const TropicalIslandBase: React.FC<TropicalIslandBaseProps> = ({ config }
         const y = height + (1.0 - ringFrac) * 0.35 + duneNoise;
         sandPositions.push(x, y, z);
         sandNormals.push(0, 1, 0);
-        const patchCol = baseSand.clone().lerp(darkSand, (rng() * 0.5) + (ringFrac * 0.25));
+        const patchCol = topColor(ringFrac);
         sandColors.push(patchCol.r, patchCol.g, patchCol.b);
       }
     }
