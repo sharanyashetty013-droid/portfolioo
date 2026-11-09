@@ -26,7 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, timeOfDay = 'day',
           {onCycleTime && (
             <button
               onClick={onCycleTime}
-              className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full btn-glass !rounded-full !text-[#EBD6A4]"
+              className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full btn-glass !rounded-full !text-[#E08A2E]"
               title={`${meta.label}: switch to ${meta.next}`}
               aria-label={`Time of day: ${meta.label}. Switch to ${meta.next}`}
             >

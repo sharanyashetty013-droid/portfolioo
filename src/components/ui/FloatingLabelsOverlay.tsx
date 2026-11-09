@@ -23,7 +23,7 @@ export const FloatingLabelsOverlay: React.FC<FloatingLabelsOverlayProps> = ({ la
                 y1={lbl.anchorY}
                 x2={lbl.targetX}
                 y2={lbl.targetY}
-                stroke="#EDE6D6"
+                stroke="#0F4C5C"
                 strokeWidth={1.2}
                 strokeDasharray="3,3"
                 opacity={0.8}
@@ -32,8 +32,8 @@ export const FloatingLabelsOverlay: React.FC<FloatingLabelsOverlayProps> = ({ la
                 cx={lbl.anchorX}
                 cy={lbl.anchorY}
                 r={3}
-                fill="#D6BA7C"
-                stroke="#0B1B2D"
+                fill="#F2765D"
+                stroke="#FFFFFF"
                 strokeWidth={1.5}
               />
             </g>
@@ -64,8 +64,8 @@ export const FloatingLabelsOverlay: React.FC<FloatingLabelsOverlayProps> = ({ la
               style={{ animationDelay: `${idx * 70}ms` }}
               className={`label-pop flex items-center gap-1.5 whitespace-nowrap rounded-lg transition-all duration-120 text-[11px] sm:text-xs font-bold px-2.5 py-1 font-sans ${
                 isHovered
-                  ? 'bg-[#0B1B2D] text-white border border-[#D6BA7C]/80 shadow-[0_10px_24px_-10px_rgba(3,12,22,0.9)] -translate-y-0.5 z-50'
-                  : 'bg-[#0C2234]/85 text-[#EDE6D6] border border-[#D6BA7C]/35 backdrop-blur-md shadow-[0_8px_20px_-10px_rgba(3,12,22,0.9)]'
+                  ? 'bg-white text-[#0F4C5C] border border-white shadow-[0_12px_24px_-12px_rgba(15,76,92,0.6)] -translate-y-0.5 z-50'
+                  : 'bg-[#EEFBF8]/85 text-[#0F4C5C] border border-white backdrop-blur-md shadow-[0_10px_22px_-12px_rgba(15,76,92,0.55)]'
               }`}
             >
               <span
@@ -76,7 +76,7 @@ export const FloatingLabelsOverlay: React.FC<FloatingLabelsOverlayProps> = ({ la
                 {isHovered ? lbl.name : lbl.shortName}
               </span>
               {isHovered && lbl.badge && (
-                <span className="text-[10px] text-[#D6BA7C] font-bold pl-1.5 border-l border-[#D6BA7C]/40">
+                <span className="text-[10px] text-[#F2765D] font-bold pl-1.5 border-l border-[#BDE8E2]">
                   {lbl.badge}
                 </span>
               )}
