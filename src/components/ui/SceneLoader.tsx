@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 
 /**
- * "Surfacing" intro, rendered live in raw WebGL (no libraries, paints instantly).
- * You start deep under the sea: light shafts from above, drifting marine snow,
- * rising bubbles and the anchor chain hanging from your boat at the surface.
- * The depth gauge counts up to the surface while the world loads; when it's
- * ready the waterline sweeps past and you break through into the islands.
+ * Water-drop intro, drawn live in raw WebGL (no libraries, so it shows instantly).
+ * Bright sky over the turquoise sea in the site's own colours. While the world
+ * loads, glassy drops fall from the sky and splash into the ocean (ripple rings,
+ * crown droplets, a little rebound jet). When it's ready one last drop falls and
+ * its ripple spreads across the whole screen, opening into the 3D ocean.
  */
 
 const VERT = `
@@ -17,40 +17,57 @@ const FRAG = `
 precision highp float;
 uniform vec2 uRes;
 uniform float uTime;
-uniform float uRise;   // 0 = deep, 1 = just below the surface
-uniform float uBreach; // 0..1 breaking through the surface
+uniform float uFinal;   // seconds since the final drop started, or -1
+uniform float uImpactY; // impact height in uv (0 bottom .. 1 top)
 
-float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+const float HORIZON = 0.4;
+const float PERIOD = 3.2;
+const float FORM = 0.55;   // drop swells at the top
+const float FALL = 0.85;   // then falls
+const float PI = 3.14159265;
 
-float noise(vec2 p) {
-  vec2 i = floor(p), f = fract(p);
-  vec2 u = f * f * (3.0 - 2.0 * f);
-  return mix(mix(hash(i), hash(i + vec2(1, 0)), u.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y);
+float hash(float n) { return fract(sin(n) * 43758.5453); }
+
+vec3 background(vec2 uv, vec2 p, float t) {
+  vec3 sky = mix(vec3(1.0, 0.957, 0.878), vec3(0.75, 0.90, 0.93), smoothstep(HORIZON, 0.75, uv.y));
+  sky = mix(sky, vec3(0.49, 0.78, 0.93), smoothstep(0.75, 1.15, uv.y));
+  sky += vec3(1.0, 0.9, 0.7) * exp(-length(p - vec2(0.55, 0.78)) * 5.0) * 0.25;
+  float d = clamp((HORIZON - uv.y) / HORIZON, 0.0, 1.0);
+  vec3 sea = mix(vec3(0.61, 0.91, 0.85), vec3(0.17, 0.66, 0.69), pow(d, 0.7));
+  float z = 1.0 / max(0.02, HORIZON - uv.y);
+  float w = sin(p.x * 6.0 * z * 0.12 + z * 2.2 + t * 1.1) * sin(p.x * 3.0 * z * 0.08 - z * 1.3 + t * 0.7);
+  sea += smoothstep(0.7, 1.0, w) * 0.2 * (1.0 - d * 0.5) * smoothstep(0.0, 0.08, HORIZON - uv.y);
+  sea = mix(sea, vec3(1.0, 0.96, 0.88), exp(-(HORIZON - uv.y) * 45.0) * 0.6);
+  return uv.y > HORIZON ? sky : sea;
 }
 
-float caustic(vec2 uv, float t) {
-  vec2 p = uv * 5.0;
-  float c = 0.0;
-  for (int i = 0; i < 3; i++) {
-    p += vec2(sin(p.y * 1.3 + t), cos(p.x * 1.1 - t * 0.8)) * 0.55;
-    c += 0.5 + 0.5 * sin(p.x + p.y);
-  }
-  return pow(c / 3.0, 4.0);
+// smooth teardrop: round belly (r1), fine tip (r2) at height h (iq's uneven capsule)
+float sdTear(vec2 p, float r1, float r2, float h) {
+  p.x = abs(p.x);
+  float b = (r1 - r2) / h;
+  float a = sqrt(1.0 - b * b);
+  float k = dot(p, vec2(-b, a));
+  if (k < 0.0) return length(p) - r1;
+  if (k > a * h) return length(p - vec2(0.0, h)) - r2;
+  return dot(p, vec2(a, b)) - r1;
 }
 
-// one rising bubble per column cell
-float bubbles(vec2 uv, float t, float scale, float speed) {
-  vec2 g = uv * vec2(scale, scale * 0.5);
-  float col = floor(g.x);
-  float r = hash(vec2(col, scale));
-  float y = fract(g.y * 0.5 - t * speed * (0.6 + r) - r * 7.0) * 2.0;
-  float x = fract(g.x) - 0.5 + sin(t * 2.0 + r * 30.0 + y * 4.0) * 0.12;
-  vec2 d = vec2(x, y - 1.0);
-  float rad = 0.05 + r * 0.08;
-  float l = length(d);
-  float ring = smoothstep(rad, rad - 0.02, l) - smoothstep(rad - 0.03, rad - 0.05, l) * 0.7;
-  float glint = smoothstep(0.03, 0.0, length(d - vec2(-rad * 0.35, rad * 0.35)));
-  return (ring * 0.6 + glint) * step(0.55, hash(vec2(col, 3.0 + scale)));
+// glass shading given a surface normal n
+vec3 glassN(vec3 behind, vec2 uv, vec2 p, float t, vec3 n, float alpha) {
+  vec3 refr = background(uv - n.xy * 0.09 + vec2(0.0, 0.04), p - n.xy * 0.09, t);
+  vec3 c = mix(refr, vec3(0.7, 0.96, 0.94), 0.22);
+  float fres = pow(1.0 - n.z, 2.0);
+  c = mix(c, vec3(0.08, 0.45, 0.5), fres * 0.55);
+  vec3 L = normalize(vec3(-0.5, 0.6, 0.65));
+  c += pow(max(dot(n, L), 0.0), 40.0) * 0.95;                       // crisp highlight
+  c += smoothstep(0.6, 1.0, dot(n, normalize(vec3(0.55, -0.4, 0.7)))) * 0.18; // soft bounce light
+  return mix(behind, c, alpha);
+}
+
+// glass shading for a round 2D blob with signed distance d and gradient g
+vec3 glass(vec3 behind, vec2 uv, vec2 p, float t, float d, vec2 g, float size, float alpha) {
+  float q = clamp(-d / size, 0.0, 1.0);
+  return glassN(behind, uv, p, t, normalize(vec3(g * (1.0 - q * q), sqrt(q) + 0.15)), alpha);
 }
 
 void main() {
@@ -58,79 +75,147 @@ void main() {
   float aspect = uRes.x / uRes.y;
   vec2 p = vec2((uv.x - 0.5) * aspect, uv.y);
   float t = uTime;
+  float aa = 1.6 / uRes.y;
 
-  // water column: darker the deeper we are, lighter toward the surface
-  float depthLight = mix(0.25, 1.0, uRise);
-  vec3 deep = vec3(0.01, 0.05, 0.10);
-  vec3 mid = vec3(0.02, 0.22, 0.32);
-  vec3 shallow = vec3(0.10, 0.55, 0.62);
-  vec3 col = mix(deep, mid, smoothstep(0.0, 0.7, uv.y));
-  col = mix(col, shallow, smoothstep(0.55, 1.0, uv.y) * depthLight);
-  col *= mix(0.55, 1.0, uRise);
+  bool fin = uFinal >= 0.0;
+  float cycle = fin ? 99.0 : floor(t / PERIOD);
+  float k = fin ? uFinal + FORM * 0.6 : t - cycle * PERIOD;
+  float xOff = fin ? 0.0 : (hash(cycle * 3.7 + 1.0) - 0.5) * 0.55 * min(aspect, 1.6);
+  vec2 impact = vec2(xOff, uImpactY);
+  float size = fin ? 1.25 : 1.0;
+  float r = 0.05 * size;
 
-  // sun shafts fanning down from above
-  vec2 src = vec2(0.15, 1.35);
-  vec2 dir = p - src;
-  float ang = atan(dir.x, -dir.y);
-  float shafts = pow(0.5 + 0.5 * sin(ang * 23.0 + t * 0.35), 6.0);
-  shafts += pow(0.5 + 0.5 * sin(ang * 37.0 - t * 0.27 + 1.3), 8.0) * 0.7;
-  shafts *= noise(vec2(ang * 9.0, t * 0.2)) * 1.2;
-  float fall = smoothstep(0.0, 1.0, uv.y) * smoothstep(1.6, 0.2, length(dir));
-  col += vec3(0.55, 0.85, 0.85) * shafts * fall * 0.35 * depthLight;
+  float s = k - FORM - FALL;   // seconds since impact
+  vec2 rel = p - impact;
+  float ellE = length(vec2(rel.x, rel.y * 3.2));
+  float ripSpeed = fin ? 0.6 : 0.26;
+  float decay = fin ? 0.45 : 1.0;
 
-  // surface seen from below: bright rippling ceiling
-  float wave = sin(p.x * 9.0 + t * 1.6) * 0.008 + sin(p.x * 23.0 - t * 2.3) * 0.004;
-  float surf = smoothstep(0.93 + wave, 1.0 + wave, uv.y);
-  float sparkle = caustic(vec2(p.x * 1.6, t * 0.15), t * 1.2);
-  col = mix(col, vec3(0.65, 0.95, 0.92) + sparkle * 0.6, surf * mix(0.35, 0.9, uRise));
+  // ripple displacement on the water
+  vec2 offset = vec2(0.0);
+  if (s > 0.0 && uv.y < HORIZON) {
+    float front = s * ripSpeed;
+    float ring = sin((ellE - front) * 55.0) * exp(-abs(ellE - front) * 10.0) * exp(-s * decay);
+    ring *= smoothstep(front + 0.03, front - 0.12, ellE);
+    offset += normalize(rel + 1e-4) * ring * 0.01;
+  }
+  vec3 col = background(uv + offset, p + offset, t);
 
-  // the boat's hull silhouetted at the surface, with its anchor chain
-  float hullY = 0.985 + wave * 0.5;
-  float hull = step(abs(p.x), 0.17 - (hullY - uv.y) * 2.4) * step(hullY - 0.055, uv.y) * step(uv.y, hullY);
-  col = mix(col, vec3(0.01, 0.06, 0.09), hull * 0.92);
-  float chainX = 0.07 + sin(uv.y * 3.0 + t * 0.6) * 0.008;
-  float linkY = fract(uv.y * 26.0 + uRise * 18.0); // links slide down as we rise
-  float link = smoothstep(0.012, 0.004, abs(abs(p.x - chainX) - 0.006 * (0.6 + 0.4 * sin(linkY * 6.283))));
-  float chainMask = step(uv.y, hullY - 0.04) * smoothstep(0.0, 0.5, uv.y);
-  col = mix(col, vec3(0.02, 0.08, 0.11), link * chainMask * 0.85);
-
-  // dancing caustic light near the top
-  col += caustic(p * 0.9 + vec2(0.0, t * 0.03), t) * 0.12 * smoothstep(0.3, 1.0, uv.y) * depthLight;
-
-  // marine snow drifting by
-  for (int i = 0; i < 3; i++) {
-    float fi = float(i);
-    vec2 sp = p * (14.0 + fi * 9.0) + vec2(t * 0.15 * (fi + 1.0), -t * (0.35 + fi * 0.2) - uRise * 8.0);
-    vec2 cell = floor(sp);
-    vec2 f = fract(sp) - 0.5;
-    float h = hash(cell + fi * 17.0);
-    float d = length(f - (vec2(hash(cell + 3.1), hash(cell + 7.7)) - 0.5) * 0.7);
-    col += vec3(0.7, 0.9, 0.9) * smoothstep(0.06, 0.0, d) * step(0.82, h) * (0.25 + 0.15 * fi) * depthLight;
+  // ripple rings: several soft, widening bands
+  if (s > 0.0 && uv.y < HORIZON) {
+    for (int i = 0; i < 4; i++) {
+      float fi = float(i);
+      float f = s * ripSpeed - fi * 0.05;
+      if (f > 0.0) {
+        float w = 0.004 + f * 0.012;
+        float band = exp(-pow((ellE - f) / w, 2.0));
+        col += band * 0.42 * exp(-s * decay * 1.1) * (1.0 - fi * 0.2);
+      }
+    }
   }
 
-  // bubbles rising past
-  col += vec3(0.75, 0.95, 0.95) * bubbles(p + vec2(0.3, 0.0), t, 7.0, 0.22) * 0.55;
-  col += vec3(0.75, 0.95, 0.95) * bubbles(p - vec2(0.9, 0.0), t * 1.2, 11.0, 0.3) * 0.35;
+  // ---- the drop ----
+  float yTop = 0.98;
+  if (s < 0.0) {
+    vec2 c; vec2 sc; float alpha = 1.0;
+    if (k < FORM) {
+      // swelling at the top, wobbling like it's about to let go
+      float f = k / FORM;
+      float grow = smoothstep(0.0, 1.0, f);
+      float wob = sin(f * PI * 3.0) * (1.0 - f) * 0.12;
+      c = vec2(impact.x, yTop - r * grow * 0.6);
+      sc = vec2(1.0 + wob, 1.0 - wob) * mix(0.25, 1.0, grow);
+      alpha = smoothstep(0.0, 0.25, f);
+    } else {
+      // falling: ease in, stretch with speed
+      float f = (k - FORM) / FALL;
+      float y = mix(yTop - r * 0.6, impact.y + r * 0.6, f * f);
+      float v = f;                      // speed grows linearly
+      c = vec2(impact.x, y);
+      sc = vec2(1.0 / (1.0 + v * 0.18), 1.0 + v * 0.38);
+    }
+    vec2 dp = (p - c) / sc;
+    float d = sdTear(dp, r, r * 0.04, r * 2.3) * min(sc.x, sc.y);
+    if (d < aa * 2.0) {
+      // smooth normal from the drop's own profile (no seam down the middle)
+      float hw = dp.y < 0.0 ? sqrt(max(1e-4, r * r - dp.y * dp.y)) : max(r * 0.05, r * (1.0 - clamp(dp.y / (r * 2.3), 0.0, 1.0)));
+      vec2 nxy = vec2(clamp(dp.x / hw, -1.0, 1.0), dp.y < 0.0 ? dp.y / r : 0.28 * dp.y / (r * 2.3));
+      vec3 n = normalize(vec3(nxy * 0.95, sqrt(max(0.02, 1.0 - dot(nxy, nxy)))));
+      float cover = smoothstep(aa, -aa, d) * alpha;
+      col = glassN(col, uv, p, t, n, cover);
+      // window-shaped glint on the upper-left of the belly, plus a soft bottom caustic
+      vec2 hl = (dp - vec2(-r * 0.38, r * 0.12)) / vec2(r * 0.16, r * 0.3);
+      col += smoothstep(1.0, 0.3, length(hl)) * 0.75 * cover;
+      vec2 bl = (dp - vec2(r * 0.15, -r * 0.62)) / vec2(r * 0.45, r * 0.18);
+      col += smoothstep(1.0, 0.0, length(bl)) * 0.25 * cover;
+    }
+    // its shadow on the water grows as it nears
+    if (k >= FORM && uv.y < HORIZON) {
+      float f = (k - FORM) / FALL;
+      float sh = exp(-pow(ellE / (r * (2.2 - f)), 2.0)) * f * f * 0.22;
+      col *= 1.0 - sh;
+    }
+  }
 
-  // vignette
-  col *= 1.0 - 0.55 * pow(length((uv - vec2(0.5, 0.55)) * vec2(1.0, 1.2)), 2.2);
+  // ---- impact: squash, crown, rebound jet ----
+  if (s >= 0.0 && s < 1.4) {
+    // the drop flattening into the surface
+    float sq = smoothstep(0.18, 0.0, s);
+    if (sq > 0.0) {
+      vec2 dp = rel / vec2(r * (1.0 + (1.0 - sq) * 1.6), r * 0.45 * sq + 1e-4);
+      float d = (length(dp) - 1.0) * r * 0.45 * sq;
+      vec2 g = normalize(rel / vec2(1.0, 0.2) + 1e-4);
+      col = glass(col, uv, p, t, d, g, r * 0.5, smoothstep(aa, -aa, d) * sq);
+    }
+    // crown of droplets thrown up and out
+    for (int i = 0; i < 9; i++) {
+      float fi = float(i);
+      float ang = (fi / 8.0 - 0.5) * 2.6 + (hash(fi + cycle) - 0.5) * 0.25;
+      float v = (0.2 + hash(fi * 1.7 + cycle) * 0.12) * size;
+      float ts = s - 0.05;
+      if (ts > 0.0) {
+        vec2 pos = vec2(sin(ang) * v * ts, (cos(ang) * 1.35 * v) * ts - 1.9 * ts * ts);
+        if (pos.y > -0.01) {
+          float sz = (0.008 + hash(fi * 2.3 + cycle) * 0.006) * size * (1.0 - smoothstep(0.5, 0.9, ts));
+          vec2 dp = rel - pos;
+          float d = length(dp) - sz;
+          col = glass(col, uv, p, t, d, normalize(dp + 1e-5), sz, smoothstep(aa, -aa, d));
+        }
+      }
+    }
+    // rebound jet with a bead that pinches off and falls back
+    float jt = s - 0.12;
+    if (jt > 0.0 && jt < 0.9) {
+      float h = sin(clamp(jt / 0.5, 0.0, 1.0) * PI) * 0.09 * size;
+      float wJet = 0.012 * size * (1.0 - smoothstep(0.3, 0.55, jt));
+      vec2 jp = rel - vec2(0.0, clamp(rel.y, 0.0, h));
+      float dj = length(jp) - wJet;
+      if (wJet > 0.0) col = glass(col, uv, p, t, dj, normalize(jp + 1e-5), wJet, smoothstep(aa, -aa, dj));
+      float by = jt < 0.4 ? h + 0.015 * size : (0.09 * size + 0.015) - 2.2 * pow(jt - 0.4, 2.0);
+      if (by > -0.005) {
+        float br = 0.013 * size;
+        vec2 bp = rel - vec2(0.0, by);
+        float db = length(bp) - br;
+        col = glass(col, uv, p, t, db, normalize(bp + 1e-5), br, smoothstep(aa, -aa, db) * step(0.18, jt));
+      }
+    }
+  }
 
-  // breaking the surface: the waterline sweeps down past the camera
-  float line = 1.0 - uBreach * 1.25 + sin(p.x * 7.0 + t * 3.0) * 0.025;
-  float on = step(0.001, uBreach);
-  float above = smoothstep(line - 0.01, line + 0.01, uv.y);
-  vec3 air = mix(vec3(1.0, 0.96, 0.88), vec3(0.75, 0.92, 0.95), uv.y);
-  col = mix(col, air, above * on);
-  col += smoothstep(0.03, 0.0, abs(uv.y - line)) * on * 0.8;
+  // bright foam edge on the final ripple as it opens the page
+  if (fin && s > 0.0) {
+    float e = length(vec2(rel.x, rel.y * (uv.y < HORIZON ? 3.2 : 1.0)));
+    col += exp(-pow((e - s * 0.6) / 0.01, 2.0)) * 0.55;
+  }
 
   gl_FragColor = vec4(col, 1.0);
 }
 `;
 
-function useUnderwater(
+const IMPACT_Y = 0.24; // keep in sync with the CSS mask centre (100% - 76%)
+
+function useWaterDrop(
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
-  riseRef: React.MutableRefObject<number>,
-  breachRef: React.MutableRefObject<number>,
+  finalStartRef: React.MutableRefObject<number>,
   running: boolean
 ) {
   const [supported, setSupported] = useState(true);
@@ -159,12 +244,11 @@ function useUnderwater(
     gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
     const uRes = gl.getUniformLocation(prog, 'uRes');
     const uTime = gl.getUniformLocation(prog, 'uTime');
-    const uRise = gl.getUniformLocation(prog, 'uRise');
-    const uBreach = gl.getUniformLocation(prog, 'uBreach');
+    const uFinal = gl.getUniformLocation(prog, 'uFinal');
+    const uImpactY = gl.getUniformLocation(prog, 'uImpactY');
 
-    // reduced resolution keeps the full-screen shader cheap on phones
     const resize = () => {
-      const scale = Math.min(1, window.devicePixelRatio || 1) * (window.innerWidth < 640 ? 0.6 : 0.75);
+      const scale = Math.min(2, window.devicePixelRatio || 1) * (window.innerWidth < 640 ? 0.9 : 1);
       canvas.width = Math.max(1, Math.floor(canvas.clientWidth * scale));
       canvas.height = Math.max(1, Math.floor(canvas.clientHeight * scale));
       gl.viewport(0, 0, canvas.width, canvas.height);
@@ -172,14 +256,13 @@ function useUnderwater(
     resize();
     window.addEventListener('resize', resize);
 
-    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     let raf = 0;
     const start = performance.now();
     const frame = (now: number) => {
       gl.uniform2f(uRes, canvas.width, canvas.height);
-      gl.uniform1f(uTime, reduced ? 3 : (now - start) / 1000);
-      gl.uniform1f(uRise, riseRef.current);
-      gl.uniform1f(uBreach, breachRef.current);
+      gl.uniform1f(uTime, (now - start) / 1000);
+      gl.uniform1f(uFinal, finalStartRef.current < 0 ? -1 : (now - finalStartRef.current) / 1000);
+      gl.uniform1f(uImpactY, IMPACT_Y);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       raf = requestAnimationFrame(frame);
     };
@@ -189,75 +272,50 @@ function useUnderwater(
       window.removeEventListener('resize', resize);
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
-  }, [canvasRef, riseRef, breachRef, running]);
+  }, [canvasRef, finalStartRef, running]);
   return supported;
 }
 
-const MAX_DEPTH = 200;
+const FALL_MS = 1180;  // FORM*0.4 + FALL in the shader: final drop's time to impact
+const OPEN_MS = 1300;  // ripple opening the page
 
 export const SceneLoader: React.FC<{ visible: boolean }> = ({ visible }) => {
+  const rootRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const riseRef = useRef(0);
-  const breachRef = useRef(0);
+  const finalStartRef = useRef(-1);
   const [mounted, setMounted] = useState(true);
-  const [depth, setDepth] = useState(MAX_DEPTH);
-  const [breaching, setBreaching] = useState(false);
-  const supported = useUnderwater(canvasRef, riseRef, breachRef, mounted);
+  const [final, setFinal] = useState(false);
+  const supported = useWaterDrop(canvasRef, finalStartRef, mounted);
 
-  // ascend while loading (eases toward ~12 m), then surface when the world is ready
   useEffect(() => {
+    if (visible) return;
+    // world is ready: drop the last drop, then let its ripple open the page
+    setFinal(true);
+    const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const t0 = performance.now();
+    finalStartRef.current = t0;
     let raf = 0;
-    let last = performance.now();
-    const tick = (now: number) => {
-      const dt = Math.min(0.1, (now - last) / 1000);
-      last = now;
-      const target = visible ? 0.94 : 1;
-      riseRef.current += (target - riseRef.current) * Math.min(1, (visible ? 0.9 : 4) * dt);
-      if (!visible) breachRef.current = Math.min(1, breachRef.current + dt / 1.1);
-      setDepth(Math.max(0, Math.round(MAX_DEPTH * (1 - riseRef.current) * (1 - breachRef.current))));
-      if (breachRef.current < 1) raf = requestAnimationFrame(tick);
+    const open = (now: number) => {
+      const s = (now - t0 - (reduced ? 0 : FALL_MS)) / OPEN_MS;
+      if (s > 0 && rootRef.current) {
+        const e = Math.min(1, s);
+        const eased = e * e * (3 - 2 * e);
+        const max = Math.hypot(window.innerWidth, window.innerHeight);
+        rootRef.current.style.setProperty('--r', `${eased * max}px`);
+      }
+      if (s < 1) raf = requestAnimationFrame(open);
+      else setMounted(false);
     };
-    raf = requestAnimationFrame(tick);
-    if (!visible) {
-      setBreaching(true);
-      const id = setTimeout(() => setMounted(false), 1900);
-      return () => { cancelAnimationFrame(raf); clearTimeout(id); };
-    }
+    raf = requestAnimationFrame(open);
     return () => cancelAnimationFrame(raf);
   }, [visible]);
 
   if (!mounted) return null;
 
   return (
-    <div className={`sf-loader ${breaching ? 'is-breaching' : ''}`} aria-hidden={!visible} role="status">
-      {supported ? <canvas ref={canvasRef} className="sf-canvas" /> : <div className="sf-canvas sf-fallback" />}
+    <div ref={rootRef} className={`wd-loader ${final ? 'is-final' : ''}`} aria-hidden={!visible} role="status">
+      {supported ? <canvas ref={canvasRef} className="wd-canvas" /> : <div className="wd-canvas wd-fallback" />}
 
-      <div className="sf-copy">
-        <p className="sf-kicker">a voyage through the work of</p>
-        <h2 className="sf-name">
-          <span>Sharanya</span> <span>L Shetty</span>
-        </h2>
-        <p className="sf-role">Backend &amp; Blockchain Engineer</p>
-      </div>
-
-      {/* depth gauge doubles as the progress indicator */}
-      <div className="sf-gauge">
-        <div className="sf-gauge-track">
-          <div
-            className="sf-gauge-fill"
-            style={{ height: `${100 - (depth / MAX_DEPTH) * 100}%`, '--w': `${100 - (depth / MAX_DEPTH) * 100}%` } as React.CSSProperties}
-          />
-          {[0, 50, 100, 150, 200].map((m) => (
-            <span key={m} className="sf-tick" style={{ top: `${(m / MAX_DEPTH) * 100}%` }}>
-              <i />{m}
-            </span>
-          ))}
-        </div>
-        <div className="sf-readout">
-          <span className="sf-readout-label">depth</span>
-          <span className="sf-readout-value">{depth === 0 ? 'SURFACE' : `${depth} m`}</span>
-        </div>
-      </div>
     </div>
   );
 };
