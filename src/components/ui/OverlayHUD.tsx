@@ -60,14 +60,13 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
             className={`pointer-events-auto transition-all duration-500 transform ${
               isSailing || !introDone ? 'opacity-0 -translate-x-8 pointer-events-none' : 'opacity-100 translate-x-0 card-3d-in'
             } 
-            /* Fixed on Mobile above nav bar with NO scrollbar, static on desktop */
             fixed left-3 right-3 bottom-[calc(56px+env(safe-area-inset-bottom,0px))] z-40
             sm:static sm:w-auto sm:mx-0 sm:mt-2
-            glass p-5 sm:p-7 overflow-visible`}
+            glass p-5 sm:p-7 [@media(max-height:500px)]:p-4 overflow-visible`}
           >
             {/* Name */}
             {introDone && !isSailing && (
-              <h1 className="hero-name text-[28px] sm:text-[40px] leading-[1.05]" aria-label={personal.name}>
+              <h1 className="hero-name text-[28px] sm:text-[40px] [@media(max-height:500px)]:text-[26px] leading-[1.05]" aria-label={personal.name}>
                 {'Sharanya'.split('').map((ch, i) => (
                   <span key={i} style={{ '--i': i } as React.CSSProperties} aria-hidden="true">{ch}</span>
                 ))}{' '}
@@ -83,7 +82,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
               2nd-year CSE · NMAMIT · CGPA 9.36
             </div>
 
-            <p className="text-[12.5px] sm:text-[15px] font-semibold text-[#24505A] leading-relaxed mt-2.5 sm:mt-3 max-w-[38ch]">
+            <p className="text-[12.5px] sm:text-[15px] font-semibold text-[#24505A] leading-relaxed mt-2.5 sm:mt-3 max-w-[38ch] [@media(max-height:500px)]:hidden">
               I build backend systems and smart contracts, and I spend a lot of weekends at hackathons.
             </p>
 
@@ -92,7 +91,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
               <span className="glass-chip">Blockchain &amp; Solidity</span>
             </div>
 
-            <div className="depth-3 mt-4 sm:mt-5 flex flex-wrap items-center gap-2.5">
+            <div className="depth-3 mt-4 sm:mt-5 [@media(max-height:500px)]:mt-3 flex flex-wrap items-center gap-2.5">
               <button
                 onClick={() => onNavigate('skills')}
                 className="btn-glow px-4 py-2 sm:px-5 sm:py-2.5 text-[13px] sm:text-[15px]"
@@ -131,7 +130,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
             }
             fixed left-3 right-3 bottom-[calc(56px+env(safe-area-inset-bottom,0px))] z-40
             sm:static sm:w-full
-            glass p-4 sm:p-5 overflow-visible`}
+            glass p-4 sm:p-5 [@media(max-height:500px)]:p-3 overflow-visible`}
           >
             <div className="flex items-center justify-between gap-2 border-b border-[#BDE8E2] pb-1.5 mb-1.5 sm:pb-2 sm:mb-2">
               <div className="flex items-center gap-2">
@@ -144,7 +143,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
                 Island {currentIndex + 1} of 5
               </span>
             </div>
-            <p className="text-[11.5px] sm:text-[13px] text-[#24505A] font-semibold leading-relaxed">
+            <p className="text-[11.5px] sm:text-[13px] text-[#24505A] font-semibold leading-relaxed [@media(max-height:500px)]:hidden">
               {currentConfig.storyLine}
             </p>
           </div>
