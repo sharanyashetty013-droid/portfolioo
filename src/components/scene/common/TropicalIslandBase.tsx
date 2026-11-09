@@ -63,7 +63,7 @@ export const TropicalIslandBase: React.FC<TropicalIslandBaseProps> = ({ config }
 
     for (let s = 0; s < segments; s++) {
       const next = (s + 1) % segments;
-      sandIndices.push(0, 1 + s, 1 + next);
+      sandIndices.push(0, 1 + next, 1 + s);
     }
 
     for (let r = 1; r < rings; r++) {
@@ -75,8 +75,8 @@ export const TropicalIslandBase: React.FC<TropicalIslandBaseProps> = ({ config }
         const b = nextRowStart + s;
         const c = nextRowStart + next;
         const d = rowStart + next;
-        sandIndices.push(a, b, d);
-        sandIndices.push(b, c, d);
+        sandIndices.push(a, d, b);
+        sandIndices.push(b, d, c);
       }
     }
 
@@ -132,8 +132,8 @@ export const TropicalIslandBase: React.FC<TropicalIslandBaseProps> = ({ config }
         const b = nextRowStart + s;
         const c = nextRowStart + next;
         const d = rowStart + next;
-        cliffIndices.push(a, b, d);
-        cliffIndices.push(b, c, d);
+        cliffIndices.push(a, d, b);
+        cliffIndices.push(b, d, c);
       }
     }
 
