@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileText, Github, Mail, Sun, Sunset, Moon } from 'lucide-react';
-import type { TimeOfDay } from '../scene/ambience';
+import type { TimeOfDay } from '../scene/timeOfDay';
 
 const TIME_META: Record<TimeOfDay, { icon: typeof Sun; label: string; next: string }> = {
   day: { icon: Sun, label: 'Daytime', next: 'sunset' },

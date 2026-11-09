@@ -10,7 +10,7 @@ import { SkillModal } from './components/modals/SkillModal';
 import { ResumeModal } from './components/modals/ResumeModal';
 import { ContactModal } from './components/modals/ContactModal';
 import { CHAPTER_ORDER } from './constants/islandLayout';
-import { defaultTimeOfDay, TIME_ORDER, TimeOfDay } from './components/scene/ambience';
+import { defaultTimeOfDay, TIME_ORDER, TimeOfDay } from './components/scene/timeOfDay';
 
 // three.js + the whole scene load in a separate chunk so the HUD paints first
 const WorldScene = lazy(() =>

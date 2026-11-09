@@ -1,15 +1,8 @@
 import * as THREE from 'three';
 
-export type TimeOfDay = 'day' | 'sunset' | 'night';
-export const TIME_ORDER: TimeOfDay[] = ['day', 'sunset', 'night'];
-
-/** Pick a starting mood from the visitor's local clock. */
-export function defaultTimeOfDay(date = new Date()): TimeOfDay {
-  const h = date.getHours();
-  if (h >= 19 || h < 6) return 'night';
-  if (h >= 17) return 'sunset';
-  return 'day';
-}
+import type { TimeOfDay } from './timeOfDay';
+export type { TimeOfDay } from './timeOfDay';
+export { TIME_ORDER, defaultTimeOfDay } from './timeOfDay';
 
 /**
  * Live, eased blend weights shared by everything in the scene that reacts to
