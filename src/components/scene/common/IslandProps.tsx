@@ -102,7 +102,7 @@ export const Campfire: React.FC<{ position: V3; reducedMotion?: boolean }> = ({ 
           {flat('#7C4A2D')}
         </mesh>
       ))}
-      <group ref={flames} position={[0, 0.22, 0]}>
+      <group ref={flames} position={[0, 0.22, 0]} userData={{ noMerge: true }}>
         <mesh position={[0, 0.2, 0]}>
           <coneGeometry args={[0.24, 0.6, 5]} />
           <meshStandardMaterial color="#F97316" emissive="#F97316" emissiveIntensity={1.6} flatShading />
@@ -164,7 +164,7 @@ export const Bunting: React.FC<{ from: V3; to: V3; flags?: number; sag?: number;
   });
 
   return (
-    <group>
+    <group userData={{ noMerge: true }}>
       <line>
         <primitive object={rope} attach="geometry" />
         <lineBasicMaterial color="#FFFDF7" />
@@ -211,7 +211,7 @@ export const FloatingTrophy: React.FC<{ position: V3; reducedMotion?: boolean }>
   });
   const gold = { color: '#F5B82E', emissive: '#B7791F', emissiveIntensity: 0.35, metalness: 0.6, roughness: 0.3 };
   return (
-    <group ref={ref} position={position}>
+    <group ref={ref} position={position} userData={{ noMerge: true }}>
       <mesh position={[0, 0, 0]} castShadow>
         <cylinderGeometry args={[0.45, 0.55, 0.25, 8]} />
         <meshStandardMaterial color="#1E293B" flatShading />
@@ -296,7 +296,7 @@ export const Crane: React.FC<{ position: V3; rotation?: number; reducedMotion?: 
   });
   const yellow = '#F5B82E';
   return (
-    <group position={position} rotation={[0, rotation, 0]}>
+    <group position={position} rotation={[0, rotation, 0]} userData={{ noMerge: true }}>
       <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
         <boxGeometry args={[1.4, 0.4, 1.4]} />
         {flat('#64748B')}
@@ -348,7 +348,7 @@ export const BottleMessage: React.FC<{ position: V3; reducedMotion?: boolean }> 
     ref.current.rotation.set(Math.sin(t * 1.3) * 0.25, t * 0.2, Math.PI / 2 + Math.sin(t * 1.7) * 0.15);
   });
   return (
-    <group ref={ref} position={position}>
+    <group ref={ref} position={position} userData={{ noMerge: true }}>
       <mesh castShadow>
         <cylinderGeometry args={[0.22, 0.22, 0.8, 8]} />
         <meshStandardMaterial color="#86EFAC" transparent opacity={0.7} roughness={0.1} />

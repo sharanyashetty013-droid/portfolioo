@@ -34,7 +34,7 @@ export const PondWaterfall: React.FC<{
   const fallHeight = islandHeight + 0.5;
 
   return (
-    <group>
+    <group userData={{ noMerge: true }}>
       {/* 1. Stone Basin Ring of flat-shaded boulders */}
       <group position={pondCenter}>
         {[
@@ -144,7 +144,7 @@ export const PondWaterfall: React.FC<{
               flatShading
             />
           </mesh>
-          <pointLight color="#9BE8D8" intensity={1.2} distance={5} />
+          
         </group>
       </group>
     </group>
