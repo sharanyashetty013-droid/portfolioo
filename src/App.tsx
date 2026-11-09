@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
-import confetti from 'canvas-confetti';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { SectionId, ProjectItem, HackathonItem, SkillGroup } from './types/portfolio';
 import { Navbar } from './components/navigation/Navbar';
 import { SceneLoader } from './components/ui/SceneLoader';
@@ -41,20 +40,6 @@ export default function App() {
     mediaQuery.addEventListener('change', listener);
     return () => mediaQuery.removeEventListener('change', listener);
   }, []);
-
-  // celebrate the first time you reach Hackathons Summit
-  const celebrated = useRef(false);
-  const wasSailing = useRef(false);
-  useEffect(() => {
-    if (wasSailing.current && !isSailing && activeSection === 'hackathons' && !celebrated.current && !reducedMotion) {
-      celebrated.current = true;
-      const colors = ['#1AA6A6', '#F5B82E', '#E4614C', '#8B5CF6', '#FFF8EB'];
-      confetti({ particleCount: 90, spread: 75, startVelocity: 42, origin: { x: 0.5, y: 0.45 }, colors, scalar: 0.9 });
-      setTimeout(() => confetti({ particleCount: 50, angle: 60, spread: 55, origin: { x: 0, y: 0.7 }, colors }), 180);
-      setTimeout(() => confetti({ particleCount: 50, angle: 120, spread: 55, origin: { x: 1, y: 0.7 }, colors }), 300);
-    }
-    wasSailing.current = isSailing;
-  }, [isSailing, activeSection, reducedMotion]);
 
   const handleNavigate = (section: SectionId) => {
     setActiveSection(section);

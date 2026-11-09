@@ -9,10 +9,15 @@ import { LowPolyPerson, PersonPose, PersonLook } from './life/LowPolyPerson';
 const CAPTAIN_LOOK: PersonLook = {
   skin: '#B07A55',
   hair: '#1A1412',
-  top: '#1AA6A6',
-  bottom: '#0B1B2D',
+  top: '#1AA6A6',      // kurta
+  kurta: '#1AA6A6',
+  bottom: '#F5E6D3',   // leggings
   braid: true,
-  scarf: '#F2765D',
+  longHair: true,
+  scarf: '#F2765D',    // dupatta
+  earrings: '#F5B82E',
+  flower: '#F472B6',
+  lips: '#B4534B',
 };
 
 interface HeroBoatProps {
@@ -156,7 +161,7 @@ export const HeroBoat: React.FC<HeroBoatProps> = ({
           flagColor="#1AA6A6"
           hasLantern={true}
         />
-        <group ref={captainRef} position={[0, 0.05, 1.05]} scale={1.3}>
+        <group ref={captainRef} position={[0, 0.05, 1.05]} scale={1.55}>
           <LowPolyPerson
             look={CAPTAIN_LOOK}
             pose={captainPose}

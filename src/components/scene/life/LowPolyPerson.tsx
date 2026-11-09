@@ -13,6 +13,11 @@ export interface PersonLook {
   bun?: boolean;     // hair bun on top
   cap?: string;      // cap colour (optional)
   scarf?: string;    // dupatta / scarf colour (optional)
+  longHair?: boolean; // hair falling past the shoulders + side locks
+  kurta?: string;     // flared kurta/dress hem colour
+  earrings?: string;
+  flower?: string;    // flower tucked in the hair
+  lips?: string;
 }
 
 interface LowPolyPersonProps {
@@ -144,6 +149,12 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
             <cylinderGeometry args={[0.17, 0.21, 0.46, 7]} />
             {mat(look.top, 0.75)}
           </mesh>
+          {look.kurta && (
+            <mesh position={[0, -0.1, 0]} castShadow>
+              <cylinderGeometry args={[0.21, 0.33, 0.42, 9]} />
+              {mat(look.kurta, 0.75)}
+            </mesh>
+          )}
           {look.scarf && (
             <mesh position={[0, 0.4, 0]} rotation={[0.25, 0, 0.5]} castShadow>
               <torusGeometry args={[0.18, 0.045, 5, 10]} />
@@ -195,10 +206,62 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
               {mat(look.hair, 0.9)}
             </mesh>
             {/* fringe */}
-            <mesh position={[0, 0.12, 0.1]} rotation={[0.5, 0, 0]} castShadow>
-              <boxGeometry args={[0.34, 0.08, 0.12]} />
-              {mat(look.hair, 0.9)}
-            </mesh>
+            {look.longHair ? (
+              <>
+                <mesh position={[-0.07, 0.13, 0.12]} rotation={[0.6, 0, 0.45]} castShadow>
+                  <boxGeometry args={[0.24, 0.06, 0.12]} />
+                  {mat(look.hair, 0.9)}
+                </mesh>
+                <mesh position={[0.1, 0.14, 0.11]} rotation={[0.6, 0, -0.25]} castShadow>
+                  <boxGeometry args={[0.16, 0.06, 0.1]} />
+                  {mat(look.hair, 0.9)}
+                </mesh>
+                {/* hair falling down the back */}
+                <mesh position={[0, -0.12, -0.11]} scale={[1, 1.2, 0.55]} castShadow>
+                  <cylinderGeometry args={[0.19, 0.15, 0.36, 8]} />
+                  {mat(look.hair, 0.9)}
+                </mesh>
+                {/* side locks framing the face */}
+                {[-0.17, 0.17].map((x) => (
+                  <mesh key={x} position={[x, -0.1, 0.03]} rotation={[0, 0, x > 0 ? -0.08 : 0.08]} castShadow>
+                    <boxGeometry args={[0.07, 0.34, 0.12]} />
+                    {mat(look.hair, 0.9)}
+                  </mesh>
+                ))}
+              </>
+            ) : (
+              <mesh position={[0, 0.12, 0.1]} rotation={[0.5, 0, 0]} castShadow>
+                <boxGeometry args={[0.34, 0.08, 0.12]} />
+                {mat(look.hair, 0.9)}
+              </mesh>
+            )}
+            {look.earrings &&
+              [-0.19, 0.19].map((x) => (
+                <mesh key={x} position={[x, -0.08, 0.02]}>
+                  <octahedronGeometry args={[0.03, 0]} />
+                  <meshStandardMaterial color={look.earrings} metalness={0.7} roughness={0.25} emissive={look.earrings} emissiveIntensity={0.3} />
+                </mesh>
+              ))}
+            {look.flower && (
+              <group position={[0.15, 0.14, -0.04]}>
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <mesh key={i} position={[Math.cos((i / 5) * Math.PI * 2) * 0.045, Math.sin((i / 5) * Math.PI * 2) * 0.045, 0.02]}>
+                    <sphereGeometry args={[0.035, 6, 6]} />
+                    <meshStandardMaterial color={look.flower} emissive={look.flower} emissiveIntensity={0.2} />
+                  </mesh>
+                ))}
+                <mesh position={[0, 0, 0.04]}>
+                  <sphereGeometry args={[0.025, 6, 6]} />
+                  <meshStandardMaterial color="#FDE047" />
+                </mesh>
+              </group>
+            )}
+            {look.lips && (
+              <mesh position={[0, -0.095, 0.172]}>
+                <boxGeometry args={[0.06, 0.018, 0.01]} />
+                <meshBasicMaterial color={look.lips} />
+              </mesh>
+            )}
             {look.bun && (
               <mesh position={[0, 0.22, -0.08]} castShadow>
                 <icosahedronGeometry args={[0.09, 0]} />
@@ -206,9 +269,9 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
               </mesh>
             )}
             {look.braid &&
-              [0, 1, 2, 3, 4].map((i) => (
-                <mesh key={i} position={[0, -0.08 - i * 0.1, -0.19 - i * 0.012]} castShadow>
-                  <icosahedronGeometry args={[0.06 - i * 0.006, 0]} />
+              (look.longHair ? [0, 1, 2, 3, 4, 5, 6, 7] : [0, 1, 2, 3, 4]).map((i) => (
+                <mesh key={i} position={[0, -0.12 - i * 0.1, -0.2 - i * 0.01]} castShadow>
+                  <icosahedronGeometry args={[Math.max(0.03, 0.065 - i * 0.005), 0]} />
                   {mat(look.hair, 0.9)}
                 </mesh>
               ))}

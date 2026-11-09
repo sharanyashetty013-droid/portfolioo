@@ -245,10 +245,10 @@ const JumpingFish: React.FC<{ cfg: IslandConfig; seed: number; reducedMotion?: b
 // ---------------------------------------------------------------------------
 const LOOKS: Record<string, PersonLook> = {
   fisher: { skin: '#C98E66', hair: '#2B211C', top: '#F2765D', bottom: '#334155', cap: '#1AA6A6' },
-  coder: { skin: '#A9714B', hair: '#1F1A17', top: '#0EA5E9', bottom: '#1E293B', bun: true },
+  coder: { skin: '#A9714B', hair: '#1F1A17', top: '#0EA5E9', bottom: '#1E293B', bun: true, longHair: true },
   builder: { skin: '#8D5A3B', hair: '#1F1A17', top: '#F59E0B', bottom: '#475569', cap: '#FDE047' },
   hacker1: { skin: '#B97A57', hair: '#1F1A17', top: '#8B5CF6', bottom: '#1E293B' },
-  hacker2: { skin: '#D6A07A', hair: '#3B2A20', top: '#10B981', bottom: '#334155', braid: true },
+  hacker2: { skin: '#D6A07A', hair: '#3B2A20', top: '#10B981', kurta: '#10B981', bottom: '#334155', braid: true, longHair: true, earrings: '#F5B82E' },
   keeper: { skin: '#C98E66', hair: '#E2E8F0', top: '#1E3A8A', bottom: '#334155', cap: '#0B1B2D' },
 };
 

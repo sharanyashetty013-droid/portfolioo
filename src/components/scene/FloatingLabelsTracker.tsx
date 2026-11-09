@@ -67,20 +67,18 @@ export const FloatingLabelsTracker: React.FC<FloatingLabelsTrackerProps> = ({
     if (activeSection === 'hackathons') {
       const isl = ISLAND_LAYOUT.hackathons;
       return portfolioData.hackathons.map((h) => {
-        let shortName = h.name.replace(' Hackathon', '').replace(' 2026', " '26");
-        if (h.id === 'mst-buildathon') shortName = 'MST Build';
-        if (h.id === 'infinity-hacks') shortName = 'Infinity';
-        if (h.id === 'ibm-z-datathon') shortName = 'IBM Z';
-        if (h.id === 'boss-battle') shortName = 'Boss Battle';
-        if (h.id === 'inceptio-hackathon') shortName = 'Inceptio';
-        if (h.id === 'sih-2026') shortName = "SIH '26";
+        const shortName = h.shortName ?? h.name.replace(' Hackathon', '');
 
         return {
           id: h.id,
           name: h.name,
           shortName,
           badge: h.badge,
-          dotColor: h.badge === 'Internal finals' ? '#3B82F6' : '#14B8A6',
+          dotColor:
+            h.badge === 'Runner-up' ? '#F5B82E'
+            : h.badge === '2nd Runner-up' ? '#CD7F32'
+            : h.badge === 'Internal finals' ? '#3B82F6'
+            : '#14B8A6',
           worldPos: new THREE.Vector3(
             isl.position[0] + h.slotPosition[0],
             isl.height + h.podiumHeight + 1.25,
