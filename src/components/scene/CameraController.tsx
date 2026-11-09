@@ -5,7 +5,7 @@ import { OrbitControls } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { SectionId } from '../../types/portfolio';
 import { ISLAND_LAYOUT } from '../../constants/islandLayout';
-import { introElapsed, HOLD, SWOOP, RUMBLE, STAGGER } from './introTimeline';
+import { introElapsed, MAP_HOLD, SWOOP, mapView } from './introTimeline';
 
 const clockTime = (st: { clock: THREE.Clock }) => st.clock.elapsedTime;
 
@@ -86,38 +86,36 @@ export const CameraController: React.FC<CameraControllerProps> = ({
     const persp0 = camera as THREE.PerspectiveCamera;
     const it = intro.current;
     if (!it.done) {
-      // phase 1 (HOLD): wide shot over the empty sea, rumbling while the islands rise
-      // phase 2 (SWOOP): sweep down to Home
+      // phase 1 (MAP_HOLD): straight down from the exact viewpoint the ink map was drawn from
+      // phase 2 (SWOOP): tilt and dive down to Home
       const P = introPts.current;
       const elapsed = introElapsed(clockTime(_state));
       if (isSailing || reducedMotion) it.t = 1;
-      else it.t = Math.max(0, (elapsed - HOLD) / SWOOP);
+      else it.t = Math.max(0, (elapsed - MAP_HOLD) / SWOOP);
       it.t = Math.min(1, it.t);
       const k = it.t < 0.5 ? 4 * it.t ** 3 : 1 - (-2 * it.t + 2) ** 3 / 2; // easeInOutCubic
+
+      const mv = mapView(size.width / Math.max(1, size.height));
+      P.start.set(mv.cx, mv.H, mv.cz);
+      P.lookFrom.set(mv.cx, 0, mv.cz);
+      P.bend.set(mv.cx - 40, mv.H * 0.4, mv.cz + 150);
       const end = targetCamPosRef.current;
       const a = 1 - k;
       P.pos.set(0, 0, 0)
         .addScaledVector(P.start, a * a)
         .addScaledVector(P.bend, 2 * a * k)
         .addScaledVector(end, k * k);
-      const lk = Math.min(1, k * 1.15);
+      const lk = Math.min(1, k * 1.1);
       P.look.copy(P.lookFrom).lerp(targetLookAtRef.current, lk * lk * (3 - 2 * lk));
 
-      // rumble: strongest just before the first island surfaces, pulsing as each one breaks through
-      if (elapsed < HOLD) {
-        const env = Math.min(1, elapsed / 0.4) * (1 - Math.max(0, (elapsed - (HOLD - 0.8)) / 0.8));
-        const pulse = 0.55 + 0.45 * Math.abs(Math.sin((elapsed - RUMBLE) * Math.PI / STAGGER));
-        const amp = 0.55 * env * pulse;
-        P.pos.x += Math.sin(elapsed * 41) * amp + Math.sin(elapsed * 23) * amp * 0.5;
-        P.pos.y += Math.sin(elapsed * 37 + 1.3) * amp * 0.6;
-        P.look.x += Math.sin(elapsed * 29 + 0.7) * amp * 0.4;
-      }
-
+      // screen-up starts as the chart's "north", turns to world up as we level out
+      const m = Math.min(1, k * 1.4);
+      camera.up.set(mv.up[0] * (1 - m), mv.up[1] * (1 - m) + m, mv.up[2] * (1 - m)).normalize();
       camera.position.copy(P.pos);
       camera.lookAt(P.look);
       currentLookAtRef.current.copy(P.look);
       if (persp0.isPerspectiveCamera) {
-        persp0.fov = 50 - 6 * k;
+        persp0.fov = mv.fov - (mv.fov - 44) * k;
         persp0.updateProjectionMatrix();
       }
       if (controlsRef.current) {
@@ -126,6 +124,7 @@ export const CameraController: React.FC<CameraControllerProps> = ({
       }
       if (it.t >= 1) {
         it.done = true;
+        camera.up.set(0, 1, 0);
         onIntroDone?.();
       }
       return;

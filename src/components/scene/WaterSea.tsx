@@ -3,8 +3,6 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { ISLAND_LAYOUT } from '../../constants/islandLayout';
 import { ambience, blendPalette, makePalette } from './ambience';
-import { riseRaw } from './introTimeline';
-import type { SectionId } from '../../types/portfolio';
 
 const waterVertexShader = `
   varying vec3 vWorldPosition;
@@ -152,7 +150,7 @@ export const WaterSea: React.FC = () => {
     uFoamColor: { value: new THREE.Color('#FFFFFF') },      // White foam
     uIslandPositions: { value: positions },
     uIslandRadii: { value: radii },
-    uRise: { value: [0, 0, 0, 0, 0] },
+    uRise: { value: [1, 1, 1, 1, 1] },
     uTint: { value: new THREE.Color('#FFFFFF') },
     uFogColor: { value: new THREE.Color('#FFF4E0') },
     uGlint: { value: new THREE.Color('#FFFAEB') },
@@ -162,9 +160,6 @@ export const WaterSea: React.FC = () => {
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
       materialRef.current.uniforms.uCameraPos.value.copy(state.camera.position);
-      const ids = Object.keys(ISLAND_LAYOUT) as SectionId[];
-      const rise = materialRef.current.uniforms.uRise.value as number[];
-      for (let i = 0; i < ids.length; i++) rise[i] = Math.max(0, riseRaw(ids[i], state.clock.elapsedTime) * 1.1 - 0.05);
       blendPalette(palette, ambience.sunset, ambience.night);
       materialRef.current.uniforms.uTint.value.copy(palette.waterTint);
       materialRef.current.uniforms.uFogColor.value.copy(palette.skyHorizon);
