@@ -2,6 +2,7 @@ import React, { useRef, useMemo, useEffect } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { RowingBoat } from './common/StyleRefDecor';
+import { StaticMerge } from './common/StaticMerge';
 import { createVoyageCurve } from '../../constants/voyageCurve';
 import { LowPolyPerson, PersonPose, PersonLook } from './life/LowPolyPerson';
 
@@ -38,6 +39,7 @@ export const HeroBoat: React.FC<HeroBoatProps> = ({
   const currentTRef = useRef(targetT);
   const prevAngleRef = useRef(0);
   const isMovingRef = useRef(false);
+  const velRef = useRef(0);
   const captainPose = useRef<PersonPose>('wave');
   const captainStand = useRef(1);
   const captainRef = useRef<THREE.Group>(null);
@@ -65,18 +67,27 @@ export const HeroBoat: React.FC<HeroBoatProps> = ({
     const time = state.clock.getElapsedTime();
 
     const diff = targetT - currentTRef.current;
-    const moving = Math.abs(diff) > 0.001;
-    isMovingRef.current = moving;
-    captainPose.current = moving ? 'row' : 'wave';
-    captainStand.current += ((moving ? 0 : 1) - captainStand.current) * Math.min(1, delta * 4);
 
     if (reducedMotion) {
       currentTRef.current = targetT;
-    } else if (moving) {
-      const speed = Math.sign(diff) * Math.min(Math.abs(diff), delta * 0.075);
-      currentTRef.current += speed;
+      velRef.current = 0;
+    } else {
+      // ease in from the dock, cruise, then ease into the next dock
+      const MAX = 0.1, MIN = 0.006;
+      const desired = Math.abs(diff) < 0.0004 ? 0 : Math.sign(diff) * Math.min(MAX, Math.max(MIN, Math.abs(diff) * 2.0));
+      velRef.current += (desired - velRef.current) * (1 - Math.exp(-2.2 * Math.min(delta, 0.1)));
+      const step = velRef.current * Math.min(delta, 0.1);
+      if (Math.abs(step) >= Math.abs(diff) || desired === 0) {
+        currentTRef.current = Math.abs(diff) < 0.0004 ? targetT : currentTRef.current + step;
+      } else {
+        currentTRef.current += step;
+      }
       currentTRef.current = Math.max(0, Math.min(1, currentTRef.current));
     }
+    const moving = Math.abs(targetT - currentTRef.current) > 0.0004;
+    isMovingRef.current = moving;
+    captainPose.current = moving ? 'row' : 'wave';
+    captainStand.current += ((moving ? 0 : 1) - captainStand.current) * Math.min(1, delta * 4);
 
     const tClamped = Math.max(0.0001, Math.min(0.9999, currentTRef.current));
     const pos = curve.getPointAt(tClamped);
@@ -87,7 +98,7 @@ export const HeroBoat: React.FC<HeroBoatProps> = ({
     while (deltaAngle < -Math.PI) deltaAngle += Math.PI * 2;
     while (deltaAngle > Math.PI) deltaAngle -= Math.PI * 2;
 
-    const currentAngle = prevAngleRef.current + deltaAngle * Math.min(1, delta * 9.0);
+    const currentAngle = prevAngleRef.current + deltaAngle * (1 - Math.exp(-5 * Math.min(delta, 0.1)));
     prevAngleRef.current = currentAngle;
 
     const turnTilt = moving ? -deltaAngle * 1.6 : 0;
@@ -149,6 +160,7 @@ export const HeroBoat: React.FC<HeroBoatProps> = ({
   return (
     <>
       <group ref={boatGroupRef}>
+        <StaticMerge>
         <RowingBoat
           position={[0, 0, 0]}
           rotation={[0, 0, 0]}
@@ -161,6 +173,7 @@ export const HeroBoat: React.FC<HeroBoatProps> = ({
           flagColor="#1AA6A6"
           hasLantern={true}
         />
+        </StaticMerge>
         <group ref={captainRef} position={[0, 0.05, 1.05]} scale={1.55}>
           <LowPolyPerson
             look={CAPTAIN_LOOK}

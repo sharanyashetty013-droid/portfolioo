@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { TropicalIslandBase } from '../common/TropicalIslandBase';
 import { IslandPier } from '../common/IslandPier';
+import { StaticMerge } from '../common/StaticMerge';
 import { CurvedPalm, WoodenBarrel, LowPolyBoulder, DriftingHoverRocks } from '../common/StyleRefDecor';
 import { HackathonItem } from '../../../types/portfolio';
 import { portfolioData } from '../../../data/portfolioData';
@@ -146,7 +147,7 @@ export const HackathonsIsland: React.FC<HackathonsIslandProps> = ({
   const { hackathons } = portfolioData;
 
   return (
-    <group>
+    <StaticMerge>
       {/* 1. Procedural Sand Disc Top & Tall Faceted Cliff into Water */}
       <TropicalIslandBase config={config} />
 
@@ -216,6 +217,6 @@ export const HackathonsIsland: React.FC<HackathonsIslandProps> = ({
         count={8}
         reducedMotion={reducedMotion}
       />
-    </group>
+    </StaticMerge>
   );
 };

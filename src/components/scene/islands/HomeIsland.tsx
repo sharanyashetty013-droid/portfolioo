@@ -1,6 +1,7 @@
 import React from 'react';
 import { TropicalIslandBase } from '../common/TropicalIslandBase';
 import { IslandPier } from '../common/IslandPier';
+import { StaticMerge } from '../common/StaticMerge';
 import { 
   CurvedPalm, 
   DriftingHoverRocks, 
@@ -28,7 +29,7 @@ export const HomeIsland: React.FC<HomeIslandProps> = ({
   const config = ISLAND_LAYOUT.home;
 
   return (
-    <group>
+    <StaticMerge>
       {/* 1. Procedural Sand Disc Top & Tall Faceted Cliff into Water */}
       <TropicalIslandBase config={config} />
 
@@ -112,6 +113,6 @@ export const HomeIsland: React.FC<HomeIslandProps> = ({
         count={8}
         reducedMotion={reducedMotion}
       />
-    </group>
+    </StaticMerge>
   );
 };

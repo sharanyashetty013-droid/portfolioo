@@ -6,10 +6,13 @@ import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { SectionId } from '../../types/portfolio';
 import { ISLAND_LAYOUT } from '../../constants/islandLayout';
 
+// exponential smoothing that behaves the same at 30, 60 or 120 fps
+const damp = (lambda: number, dt: number) => 1 - Math.exp(-lambda * Math.min(dt, 0.1));
+
 interface CameraControllerProps {
   activeSection: SectionId;
-  boatPos: THREE.Vector3;
-  boatForward: THREE.Vector3;
+  boatPosRef: React.MutableRefObject<THREE.Vector3>;
+  boatForwardRef: React.MutableRefObject<THREE.Vector3>;
   isSailing: boolean;
   reducedMotion?: boolean;
   isAnyModalOpen?: boolean;
@@ -17,8 +20,8 @@ interface CameraControllerProps {
 
 export const CameraController: React.FC<CameraControllerProps> = ({
   activeSection,
-  boatPos,
-  boatForward,
+  boatPosRef,
+  boatForwardRef,
   isSailing,
   reducedMotion = false,
   isAnyModalOpen = false,
@@ -70,7 +73,7 @@ export const CameraController: React.FC<CameraControllerProps> = ({
     if (!reducedMotion && persp.isPerspectiveCamera) {
       const targetFov = isSailing ? 52 : 44;
       if (Math.abs(persp.fov - targetFov) > 0.05) {
-        persp.fov += (targetFov - persp.fov) * Math.min(1, delta * 1.8);
+        persp.fov += (targetFov - persp.fov) * damp(1.6, delta);
         persp.updateProjectionMatrix();
       }
     }
@@ -93,6 +96,8 @@ export const CameraController: React.FC<CameraControllerProps> = ({
       const heightOffset = isNarrow ? 13.5 : 10.5;
       const lookAheadDist = 7.0;
 
+      const boatPos = boatPosRef.current;
+      const boatForward = boatForwardRef.current;
       const desiredPos = boatPos
         .clone()
         .sub(boatForward.clone().multiplyScalar(backDist))
@@ -103,12 +108,12 @@ export const CameraController: React.FC<CameraControllerProps> = ({
         .add(boatForward.clone().multiplyScalar(lookAheadDist))
         .add(new THREE.Vector3(0, 1.2, 0));
 
-      camera.position.lerp(desiredPos, Math.min(1, delta * 3.5));
-      currentLookAtRef.current.lerp(desiredLookAt, Math.min(1, delta * 4.5));
+      camera.position.lerp(desiredPos, damp(2.6, delta));
+      currentLookAtRef.current.lerp(desiredLookAt, damp(3.2, delta));
       camera.lookAt(currentLookAtRef.current);
     } else {
       // 2. DOCKED MODE: ease to island framing and enable gentle OrbitControls
-      const lerpSpeed = Math.min(1, delta * 2.8);
+      const lerpSpeed = damp(2.2, delta);
       if (controlsRef.current) {
         controlsRef.current.enabled = !isAnyModalOpen;
         controlsRef.current.target.lerp(targetLookAtRef.current, lerpSpeed);

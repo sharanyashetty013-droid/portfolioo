@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { TropicalIslandBase } from '../common/TropicalIslandBase';
 import { IslandPier } from '../common/IslandPier';
+import { StaticMerge } from '../common/StaticMerge';
 import { CurvedPalm, WoodenBarrel, WoodenCrate, LowPolyBoulder, DriftingHoverRocks } from '../common/StyleRefDecor';
 import { LowPolyChimneySmoke } from '../common/LowPolyDecor';
 import { ProjectItem } from '../../../types/portfolio';
@@ -109,11 +110,6 @@ const ProjectCabin: React.FC<{
           roughness={0.2}
         />
       </mesh>
-
-      {/* Glow Point Light on hover */}
-      {hovered && (
-        <pointLight position={[0, 2.2, 0]} color={project.buildingColor} intensity={2.2} distance={5} />
-      )}
     </group>
   );
 };
@@ -128,7 +124,7 @@ export const ProjectsIsland: React.FC<ProjectsIslandProps> = ({
   const { projects } = portfolioData;
 
   return (
-    <group>
+    <StaticMerge>
       {/* 1. Procedural Sand Disc Top & Tall Faceted Cliff into Water */}
       <TropicalIslandBase config={config} />
 
@@ -148,7 +144,6 @@ export const ProjectsIsland: React.FC<ProjectsIslandProps> = ({
           <cylinderGeometry args={[0.32, 0.48, 0.8, 6]} />
           <meshStandardMaterial color="#A8957F" roughness={0.7} flatShading />
         </mesh>
-        <pointLight position={[0, 1.0, 0]} color="#FEF3C7" intensity={1.4} distance={6} />
 
         {/* 6 Real Shipped Project Cabins */}
         {projects.map((project) => (
@@ -195,6 +190,6 @@ export const ProjectsIsland: React.FC<ProjectsIslandProps> = ({
         count={9}
         reducedMotion={reducedMotion}
       />
-    </group>
+    </StaticMerge>
   );
 };

@@ -2,6 +2,7 @@ import React, { useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { ambience, blendPalette, makePalette, TimeOfDay } from './ambience';
+import { createGlowMaterial, glowGeometry, seeded } from './effects/glowPoints';
 
 const skyVertexShader = `
   varying vec3 vWorldPosition;
@@ -82,33 +83,84 @@ const LowPolyCloud: React.FC<CloudProps> = ({ initialPosition, speed, scale = 1,
   );
 };
 
-// Stars on the upper sky dome, faded in at night
+// Stars: soft round points of varied size and tint, each twinkling on its own
+const STAR_TINTS = ['#FFFFFF', '#FFF4DC', '#DCE8FF', '#FFE7C2', '#E6F0FF'].map((c) => new THREE.Color(c));
 const Stars: React.FC = () => {
   const ref = useRef<THREE.Points>(null);
+  const material = useMemo(() => createGlowMaterial({ attenuate: false, mode: 0 }), []);
   const geo = useMemo(() => {
-    const pts: number[] = [];
-    let seed = 7;
-    const rnd = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
-    for (let i = 0; i < 700; i++) {
+    const rnd = seeded(7);
+    const pos: number[] = [];
+    const per: { size: number; phase: number; speed: number; color: THREE.Color }[] = [];
+    for (let i = 0; i < 900; i++) {
       const u = rnd() * Math.PI * 2;
-      const v = 0.08 + rnd() * 0.92; // above the horizon only
+      const v = 0.06 + Math.pow(rnd(), 0.7) * 0.94; // denser toward the zenith, none below horizon
       const r = 480;
       const y = v * r;
       const ring = Math.sqrt(r * r - y * y);
-      pts.push(Math.cos(u) * ring, y, Math.sin(u) * ring);
+      pos.push(Math.cos(u) * ring, y, Math.sin(u) * ring);
+      const big = rnd() > 0.93;
+      per.push({
+        size: big ? 5 + rnd() * 3 : 1.6 + rnd() * 2.4,
+        phase: rnd() * Math.PI * 2,
+        speed: 0.6 + rnd() * 2.2,
+        color: STAR_TINTS[Math.floor(rnd() * STAR_TINTS.length)],
+      });
     }
-    return new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+    return glowGeometry(pos, per);
   }, []);
   useFrame((state) => {
     if (!ref.current) return;
-    const m = ref.current.material as THREE.PointsMaterial;
-    m.opacity = ambience.night * (0.85 + Math.sin(state.clock.elapsedTime * 2) * 0.1);
     ref.current.visible = ambience.night > 0.02;
+    material.uniforms.uTime.value = state.clock.elapsedTime;
+    material.uniforms.uOpacity.value = ambience.night;
+  });
+  return <points ref={ref} geometry={geo} material={material} position={[0, 0, -135]} frustumCulled={false} />;
+};
+
+// Occasional shooting star streaking across the night sky
+const ShootingStar: React.FC<{ reducedMotion?: boolean }> = ({ reducedMotion }) => {
+  const ref = useRef<THREE.Mesh>(null);
+  const tex = useMemo(() => {
+    const c = document.createElement('canvas');
+    c.width = 128; c.height = 8;
+    const ctx = c.getContext('2d')!;
+    const g = ctx.createLinearGradient(0, 0, 128, 0);
+    g.addColorStop(0, 'rgba(255,255,255,0)');
+    g.addColorStop(0.85, 'rgba(220,235,255,0.7)');
+    g.addColorStop(1, 'rgba(255,255,255,1)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 2, 128, 4);
+    return new THREE.CanvasTexture(c);
+  }, []);
+  const state = useRef({ start: -100, from: new THREE.Vector3(), dir: new THREE.Vector3() });
+  useFrame(({ clock, camera }) => {
+    const m = ref.current;
+    if (!m) return;
+    const t = clock.elapsedTime;
+    const s = state.current;
+    const PERIOD = 9;
+    if (reducedMotion || ambience.night < 0.6) { m.visible = false; return; }
+    if (t - s.start > PERIOD) {
+      s.start = t + Math.random() * 4;
+      const side = Math.random() > 0.5 ? 1 : -1;
+      s.from.set(camera.position.x + side * (60 + Math.random() * 120), 110 + Math.random() * 60, camera.position.z - 260);
+      s.dir.set(-side * (1 + Math.random() * 0.4), -0.45, 0).normalize();
+    }
+    const k = (t - s.start) / 1.1; // 1.1s flight
+    m.visible = k > 0 && k < 1;
+    if (!m.visible) return;
+    m.position.copy(s.from).addScaledVector(s.dir, k * 140);
+    m.rotation.set(0, 0, Math.atan2(s.dir.y, s.dir.x));
+    (m.material as THREE.MeshBasicMaterial).opacity = Math.sin(k * Math.PI) * ambience.night;
+    m.lookAt(camera.position);
+    m.rotateZ(Math.atan2(s.dir.y, s.dir.x));
   });
   return (
-    <points ref={ref} geometry={geo} position={[0, 0, -135]}>
-      <pointsMaterial color="#FFFFFF" size={2.2} sizeAttenuation={false} transparent opacity={0} depthWrite={false} fog={false} />
-    </points>
+    <mesh ref={ref} visible={false}>
+      <planeGeometry args={[34, 1.1]} />
+      <meshBasicMaterial map={tex} transparent depthWrite={false} blending={THREE.AdditiveBlending} fog={false} />
+    </mesh>
   );
 };
 
@@ -248,6 +300,7 @@ export const SkyAndAtmosphere: React.FC<{ reducedMotion?: boolean; timeOfDay?: T
       ))}
 
       <Stars />
+      <ShootingStar reducedMotion={reducedMotion} />
       <mesh ref={sunDiscRef} visible={false}>
         <circleGeometry args={[26, 32]} />
         <meshBasicMaterial color="#FFB25E" transparent opacity={0} fog={false} depthWrite={false} />

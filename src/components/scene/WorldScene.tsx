@@ -1,5 +1,6 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
+import { PerformanceMonitor } from '@react-three/drei';
 import * as THREE from 'three';
 import { SectionId, ProjectItem, HackathonItem, SkillGroup } from '../../types/portfolio';
 import { CameraController } from './CameraController';
@@ -75,36 +76,35 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
 }) => {
   const [compiled, setCompiled] = useState(false);
   const [visible, setVisible] = useState(false);
-  const [boatPos, setBoatPos] = useState<THREE.Vector3>(
-    new THREE.Vector3(...ISLAND_LAYOUT.home.dockPosition)
-  );
-  const [boatForward, setBoatForward] = useState<THREE.Vector3>(
-    new THREE.Vector3(0, 0, 1)
-  );
+  // Boat pose lives in refs: it changes every frame, and pushing it through
+  // React state used to re-render the entire scene 60x a second while sailing.
+  const boatPosRef = useRef(new THREE.Vector3(...ISLAND_LAYOUT.home.dockPosition));
+  const boatForwardRef = useRef(new THREE.Vector3(0, 0, 1));
   const [isSailing, setIsSailing] = useState(false);
+  const sailingRef = useRef(false);
   const [projectedLabels, setProjectedLabels] = useState<ProjectedLabel[]>([]);
+  const [dpr, setDpr] = useState(1.5);
 
   const targetT = ISLAND_LAYOUT[activeSection].routeT;
 
-  const handleBoatUpdate = (pos: THREE.Vector3, forward: THREE.Vector3, moving: boolean) => {
-    setBoatPos(pos);
-    setBoatForward(forward);
-    if (moving !== isSailing) {
+  const handleBoatUpdate = useCallback((pos: THREE.Vector3, forward: THREE.Vector3, moving: boolean) => {
+    boatPosRef.current.copy(pos);
+    boatForwardRef.current.copy(forward);
+    if (moving !== sailingRef.current) {
+      sailingRef.current = moving;
       setIsSailing(moving);
-      if (onSailingStateChange) {
-        onSailingStateChange(moving);
-      }
+      onSailingStateChange?.(moving);
     }
-  };
+  }, [onSailingStateChange]);
 
   return (
     <div className="w-full h-full relative cursor-grab active:cursor-grabbing">
       <Canvas
         frameloop={compiled ? 'always' : 'never'}
-        onCreated={({ gl }) => gl.setClearColor('#CDEFEA')}
+        onCreated={({ gl }) => { gl.setClearColor('#CDEFEA'); }}
         style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.8s ease' }}
         shadows
-        dpr={[1, 1.5]}
+        dpr={dpr}
         camera={{
           position: ISLAND_LAYOUT.home.cameraPos,
           fov: 44,
@@ -117,6 +117,8 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
           alpha: false,
         }}
       >
+        {/* drop resolution on struggling devices, raise it back when there's headroom */}
+        <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(Math.min(1.75, window.devicePixelRatio || 1))} flipflops={3} onFallback={() => setDpr(1)} />
         <Suspense fallback={null}>
           {/* Dynamic Sky & Sunlight with Shadows */}
           <SkyAndAtmosphere reducedMotion={reducedMotion} timeOfDay={timeOfDay} />
@@ -195,8 +197,8 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
           {/* Dynamic Camera Chase & Island Framing */}
           <CameraController
             activeSection={activeSection}
-            boatPos={boatPos}
-            boatForward={boatForward}
+            boatPosRef={boatPosRef}
+            boatForwardRef={boatForwardRef}
             isSailing={isSailing}
             reducedMotion={reducedMotion}
             isAnyModalOpen={isAnyModalOpen}

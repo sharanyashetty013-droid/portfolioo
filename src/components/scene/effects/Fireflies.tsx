@@ -3,85 +3,59 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { ISLAND_LAYOUT } from '../../../constants/islandLayout';
 import { ambience } from '../ambience';
+import { createGlowMaterial, glowGeometry, seeded } from './glowPoints';
 
-const PER_ISLAND = 28;
+const PER_ISLAND = 18;
+const TINTS = ['#F4FF8A', '#FFE88A', '#D9FF7A'].map((c) => new THREE.Color(c));
 
-// soft round glow sprite, generated once
-function makeGlowTexture() {
-  const size = 64;
-  const canvas = document.createElement('canvas');
-  canvas.width = canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
-  const g = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-  g.addColorStop(0, 'rgba(255,255,255,1)');
-  g.addColorStop(0.25, 'rgba(255,255,220,0.8)');
-  g.addColorStop(1, 'rgba(255,255,200,0)');
-  ctx.fillStyle = g;
-  ctx.fillRect(0, 0, size, size);
-  return new THREE.CanvasTexture(canvas);
-}
-
-/** Drifting fireflies above every island; they fade in at sunset and glow at night. */
+/**
+ * Fireflies hovering low over each island. Each one blinks on and off on its own
+ * rhythm and drifts in a small lazy loop. Fade in at sunset, full glow at night.
+ */
 export const Fireflies: React.FC<{ reducedMotion?: boolean }> = ({ reducedMotion }) => {
   const ref = useRef<THREE.Points>(null);
-  const texture = useMemo(makeGlowTexture, []);
+  const material = useMemo(() => createGlowMaterial({ attenuate: true, mode: 1 }), []);
 
-  const { geo, seeds } = useMemo(() => {
-    const islands = Object.values(ISLAND_LAYOUT);
-    const count = islands.length * PER_ISLAND;
-    const pos = new Float32Array(count * 3);
-    const seeds: { cx: number; cz: number; r: number; a: number; y: number; sp: number; ph: number }[] = [];
-    let s = 11;
-    const rnd = () => ((s = (s * 16807) % 2147483647) - 1) / 2147483646;
-    islands.forEach((isl) => {
+  const { geo, flies } = useMemo(() => {
+    const rnd = seeded(11);
+    const flies: { cx: number; cz: number; r: number; a: number; y: number; sp: number; ph: number }[] = [];
+    const per: { size: number; phase: number; speed: number; color: THREE.Color }[] = [];
+    Object.values(ISLAND_LAYOUT).forEach((isl) => {
       for (let i = 0; i < PER_ISLAND; i++) {
-        seeds.push({
+        flies.push({
           cx: isl.position[0],
           cz: isl.position[2],
-          r: 1.5 + rnd() * (isl.radius - 2),
+          r: 2 + rnd() * (isl.radius - 3.5),
           a: rnd() * Math.PI * 2,
-          y: isl.height + 0.6 + rnd() * 3.2,
-          sp: (0.08 + rnd() * 0.18) * (rnd() > 0.5 ? 1 : -1),
+          y: isl.height + 0.5 + rnd() * 1.8,
+          sp: (0.05 + rnd() * 0.1) * (rnd() > 0.5 ? 1 : -1),
           ph: rnd() * 10,
         });
+        per.push({ size: 7 + rnd() * 5, phase: rnd() * Math.PI * 2, speed: 1.2 + rnd() * 1.8, color: TINTS[i % TINTS.length] });
       }
     });
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    return { geo, seeds };
+    return { geo: glowGeometry(new Array(flies.length * 3).fill(0), per), flies };
   }, []);
 
   useFrame((state) => {
     if (!ref.current) return;
-    const strength = Math.min(1, ambience.night + ambience.sunset * 0.35);
+    const strength = Math.min(1, ambience.night + ambience.sunset * 0.3);
     ref.current.visible = strength > 0.02;
     if (!ref.current.visible) return;
-    const m = ref.current.material as THREE.PointsMaterial;
     const t = reducedMotion ? 0 : state.clock.elapsedTime;
-    m.opacity = strength * (0.75 + Math.sin(t * 3.1) * 0.15);
+    material.uniforms.uTime.value = t;
+    material.uniforms.uOpacity.value = strength;
     const arr = geo.attributes.position.array as Float32Array;
-    seeds.forEach((f, i) => {
+    for (let i = 0; i < flies.length; i++) {
+      const f = flies[i];
       const a = f.a + t * f.sp;
-      const wob = Math.sin(t * 1.3 + f.ph) * 0.6;
-      arr[i * 3] = f.cx + Math.cos(a) * (f.r + wob);
-      arr[i * 3 + 1] = f.y + Math.sin(t * 0.9 + f.ph) * 0.5;
-      arr[i * 3 + 2] = f.cz + Math.sin(a) * (f.r + wob);
-    });
+      const r = f.r + Math.sin(t * 0.7 + f.ph) * 0.8;
+      arr[i * 3] = f.cx + Math.cos(a) * r;
+      arr[i * 3 + 1] = f.y + Math.sin(t * 1.1 + f.ph) * 0.35;
+      arr[i * 3 + 2] = f.cz + Math.sin(a) * r;
+    }
     geo.attributes.position.needsUpdate = true;
   });
 
-  return (
-    <points ref={ref} geometry={geo} frustumCulled={false}>
-      <pointsMaterial
-        map={texture}
-        color="#E9FF8A"
-        size={0.7}
-        sizeAttenuation
-        transparent
-        opacity={0}
-        depthWrite={false}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
-  );
+  return <points ref={ref} geometry={geo} material={material} frustumCulled={false} />;
 };

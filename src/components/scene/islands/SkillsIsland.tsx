@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { TropicalIslandBase } from '../common/TropicalIslandBase';
 import { IslandPier } from '../common/IslandPier';
+import { StaticMerge } from '../common/StaticMerge';
 import { CurvedPalm, WoodenBarrel, LowPolyBoulder, DriftingHoverRocks } from '../common/StyleRefDecor';
 import { SkillGroup } from '../../../types/portfolio';
 import { portfolioData } from '../../../data/portfolioData';
@@ -55,7 +56,7 @@ const LowPolyWindmill: React.FC<{ position: [number, number, number]; reducedMot
       </mesh>
 
       {/* Rotating Sails */}
-      <group ref={sailsRef} position={[0, 4.0, 1.42]}>
+      <group ref={sailsRef} position={[0, 4.0, 1.42]} userData={{ noMerge: true }}>
         {[0, 1, 2, 3].map((i) => (
           <group key={i} rotation={[0, 0, (i * Math.PI) / 2]}>
             <mesh position={[0, 1.4, 0]}>
@@ -124,18 +125,12 @@ const SkillGroupCrystal: React.FC<{
           <meshStandardMaterial
             color={group.color}
             emissive={group.color}
-            emissiveIntensity={hovered ? 0.95 : 0.45}
+            emissiveIntensity={hovered ? 1.1 : 0.6}
             roughness={0.2}
             metalness={0.3}
             flatShading
           />
         </mesh>
-        <pointLight
-          position={[0, 0, 0]}
-          color={group.color}
-          intensity={hovered ? 2.5 : 1.0}
-          distance={5}
-        />
       </group>
     </group>
   );
@@ -151,7 +146,7 @@ export const SkillsIsland: React.FC<SkillsIslandProps> = ({
   const { skillGroups } = portfolioData;
 
   return (
-    <group>
+    <StaticMerge>
       {/* 1. Procedural Sand Disc Top & Tall Faceted Cliff into Water */}
       <TropicalIslandBase config={config} />
 
@@ -208,6 +203,6 @@ export const SkillsIsland: React.FC<SkillsIslandProps> = ({
         count={8}
         reducedMotion={reducedMotion}
       />
-    </group>
+    </StaticMerge>
   );
 };

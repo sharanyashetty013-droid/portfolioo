@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { TropicalIslandBase } from '../common/TropicalIslandBase';
 import { IslandPier } from '../common/IslandPier';
+import { StaticMerge } from '../common/StaticMerge';
 import { CurvedPalm, WoodenBarrel, WoodenCrate, LowPolyBoulder, DriftingHoverRocks } from '../common/StyleRefDecor';
 import { ISLAND_LAYOUT } from '../../../constants/islandLayout';
 import { ambience } from '../ambience';
@@ -36,7 +37,7 @@ export const ContactIsland: React.FC<ContactIslandProps> = ({
   });
 
   return (
-    <group>
+    <StaticMerge>
       {/* 1. Procedural Sand Disc Top & Tall Faceted Cliff into Water */}
       <TropicalIslandBase config={config} />
 
@@ -187,6 +188,6 @@ export const ContactIsland: React.FC<ContactIslandProps> = ({
         count={7}
         reducedMotion={reducedMotion}
       />
-    </group>
+    </StaticMerge>
   );
 };
