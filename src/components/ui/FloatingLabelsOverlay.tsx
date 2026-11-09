@@ -42,7 +42,7 @@ export const FloatingLabelsOverlay: React.FC<FloatingLabelsOverlayProps> = ({ la
       </svg>
 
       {/* Floating Labels in handcrafted sticker aesthetic */}
-      {labels.map((lbl) => {
+      {labels.map((lbl, idx) => {
         if (!lbl.visible) return null;
         const isHovered = hoveredId === lbl.id;
 
@@ -61,7 +61,8 @@ export const FloatingLabelsOverlay: React.FC<FloatingLabelsOverlayProps> = ({ la
             onMouseLeave={() => setHoveredId(null)}
           >
             <div
-              className={`flex items-center gap-1.5 whitespace-nowrap rounded-lg transition-all duration-120 text-[11px] sm:text-xs font-bold px-2.5 py-1 font-sans ${
+              style={{ animationDelay: `${idx * 70}ms` }}
+              className={`label-pop flex items-center gap-1.5 whitespace-nowrap rounded-lg transition-all duration-120 text-[11px] sm:text-xs font-bold px-2.5 py-1 font-sans ${
                 isHovered
                   ? 'bg-white text-[#0B1B2D] border-2 border-[#0B1B2D] shadow-[1px_1px_0_#0B1B2D] translate-x-[1.5px] translate-y-[1.5px] z-50'
                   : 'bg-[#FFF8E7] text-[#0B1B2D] border-2 border-[#0B1B2D] shadow-[3px_3px_0_#0B1B2D]'

@@ -7,6 +7,7 @@ import {
   ChevronRight, 
   Navigation
 } from 'lucide-react';
+import { Tilt3D } from './Tilt3D';
 
 interface OverlayHUDProps {
   activeSection: SectionId;
@@ -51,6 +52,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
       <div className="flex-1 flex flex-col justify-center sm:justify-start">
         {/* HOME Island Personal Profile Card - Strictly NO scrollbar, completely visible */}
         {activeSection === 'home' && (
+          <Tilt3D className="sm:w-auto sm:max-w-[60%] lg:max-w-md lg:mt-6">
           <div
             id="hero-card"
             className={`pointer-events-auto transition-all duration-500 transform ${
@@ -58,12 +60,11 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
             } 
             /* Fixed on Mobile above nav bar with NO scrollbar, static on desktop */
             fixed left-3 right-3 bottom-[calc(56px+env(safe-area-inset-bottom,0px))] z-40
-            sm:static sm:w-auto sm:max-w-[60%] sm:mx-0 sm:mt-2
-            lg:max-w-md lg:mt-6
+            sm:static sm:w-auto sm:mx-0 sm:mt-2
             bg-[#FFF8E7] border-2 border-[#0B1B2D] shadow-[4px_4px_0_#0B1B2D] sm:shadow-[5px_5px_0_#0B1B2D] rounded-2xl p-2.5 sm:p-5 overflow-visible`}
           >
             {/* Name */}
-            <h1 className="font-heading text-lg sm:text-3xl font-bold text-[#0B1B2D] tracking-tight leading-tight">
+            <h1 className="depth-2 font-heading text-lg sm:text-3xl font-bold text-[#0B1B2D] tracking-tight leading-tight">
               {personal.name}
             </h1>
 
@@ -73,7 +74,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
             </div>
 
             {/* Specialization Badges */}
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1 sm:mt-2">
+            <div className="depth-1 flex flex-wrap items-center gap-1.5 sm:gap-2 mt-1 sm:mt-2">
               <span className="inline-block px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-xs font-bold text-[#0B1B2D] bg-white border border-[#0B1B2D] rounded-md shadow-[1.5px_1.5px_0_#0B1B2D] transform -rotate-1">
                 Backend Systems
               </span>
@@ -90,7 +91,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
             </p>
 
             {/* Handcrafted Chunky Action Buttons */}
-            <div className="mt-2 sm:mt-4 flex flex-wrap items-center gap-2 sm:gap-2.5">
+            <div className="depth-3 mt-2 sm:mt-4 flex flex-wrap items-center gap-2 sm:gap-2.5">
               <button
                 onClick={() => onNavigate('skills')}
                 className="btn-chunky-teal px-3 py-1 sm:px-4 sm:py-2 text-[11px] sm:text-sm rounded-xl"
@@ -105,6 +106,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
               </button>
             </div>
           </div>
+          </Tilt3D>
         )}
       </div>
 
@@ -120,14 +122,14 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
       <div className="w-full flex flex-col items-center gap-2 shrink-0">
         {/* Caption Box: Shown on chapters 2 through 5 - NO scrollbar, compact */}
         {activeSection !== 'home' && (
+          <Tilt3D key={activeSection} max={6} className="sm:w-full sm:max-w-[80%] lg:max-w-xl">
           <div
             id="chapter-box"
             className={`pointer-events-auto transition-all duration-500 transform ${
-              isSailing ? 'opacity-0 translate-y-6 pointer-events-none' : 'opacity-100 translate-y-0'
+              isSailing ? 'opacity-0 translate-y-6 pointer-events-none' : 'opacity-100 translate-y-0 card-3d-in'
             }
             fixed left-3 right-3 bottom-[calc(56px+env(safe-area-inset-bottom,0px))] z-40
-            sm:static sm:w-full sm:max-w-[80%]
-            lg:max-w-xl
+            sm:static sm:w-full
             bg-[#FFF8E7] border-2 border-[#0B1B2D] shadow-[4px_4px_0_#0B1B2D] rounded-2xl p-2.5 sm:p-4 overflow-visible`}
           >
             <div className="flex items-center justify-between gap-2 border-b border-amber-200/60 pb-1 mb-1 sm:pb-2 sm:mb-2">
@@ -145,6 +147,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
               {currentConfig.storyLine}
             </p>
           </div>
+          </Tilt3D>
         )}
 
         {/* ========================================================================= */}

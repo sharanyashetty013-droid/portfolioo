@@ -65,6 +65,16 @@ export const CameraController: React.FC<CameraControllerProps> = ({
   }, [config, size.width, size.height]);
 
   useFrame((_, delta) => {
+    // widen the lens while sailing for a sense of speed, settle back when docked
+    const persp = camera as THREE.PerspectiveCamera;
+    if (!reducedMotion && persp.isPerspectiveCamera) {
+      const targetFov = isSailing ? 52 : 44;
+      if (Math.abs(persp.fov - targetFov) > 0.05) {
+        persp.fov += (targetFov - persp.fov) * Math.min(1, delta * 1.8);
+        persp.updateProjectionMatrix();
+      }
+    }
+
     if (reducedMotion) {
       if (!isSailing && controlsRef.current) {
         controlsRef.current.target.copy(targetLookAtRef.current);
