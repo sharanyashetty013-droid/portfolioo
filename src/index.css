@@ -101,38 +101,90 @@ h1, h2, h3, h4, h5, h6 {
   background: linear-gradient(180deg, #FFF3E0 0%, #CDEFEA 38%, #6FD3CA 62%, #2BA9B0 100%);
 }
 
-/* ---- Voyage loader ---- */
-.voyage-card {
-  background: #FFF8EB;
-  border: 2.5px solid #0B1B2D;
-  border-radius: 18px;
-  box-shadow: 5px 5px 0 #0B1B2D;
-  padding: 14px 18px 12px;
+/* ---- 3D intro loader ---- */
+.l3-stage {
+  --R: 150px;
+  position: relative;
+  width: calc(var(--R) * 2 + 120px);
+  height: 300px;
+  perspective: 900px;
+  transform-style: preserve-3d;
 }
-.voyage-label { font-family: 'Caveat', cursive; font-size: 13px; fill: #0B1B2D; font-weight: 700; }
-.voyage-wake {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: voyage-wake linear infinite;
+@media (max-width: 640px) { .l3-stage { --R: 112px; height: 250px; } }
+.l3-orbit {
+  position: absolute; left: 50%; top: 56%;
+  width: 0; height: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(68deg) rotateZ(0deg);
+  animation: l3-spin 14s linear infinite;
 }
-@keyframes voyage-wake { to { stroke-dashoffset: 0; } }
-.voyage-island {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: voyage-pop ease-out infinite;
+@keyframes l3-spin { to { transform: rotateX(68deg) rotateZ(360deg); } }
+.l3-ring {
+  position: absolute;
+  width: calc(var(--R) * 2); height: calc(var(--R) * 2);
+  left: calc(var(--R) * -1); top: calc(var(--R) * -1);
+  border-radius: 50%;
+  border: 3px dashed rgba(11, 27, 45, 0.45);
+  background: radial-gradient(circle, rgba(255,255,255,0.35), rgba(26,166,166,0.18) 60%, rgba(26,166,166,0) 72%);
+  box-shadow: 0 0 0 10px rgba(255,255,255,0.12);
 }
-@keyframes voyage-pop {
-  0% { transform: scale(1); }
-  6% { transform: scale(1.35) translateY(-2px); }
-  14%, 100% { transform: scale(1); }
+.l3-node {
+  position: absolute; left: 0; top: 0;
+  transform-style: preserve-3d;
+  transform: rotateZ(calc(var(--i) * 72deg)) translateX(var(--R));
 }
-.voyage-compass { animation: voyage-compass 6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
-@keyframes voyage-compass { 0%,100% { transform: rotate(-12deg); } 50% { transform: rotate(14deg); } }
-.voyage-log { animation: voyage-log 1.8s ease both; }
-@keyframes voyage-log { from { opacity: 0; transform: translateY(4px); } 15%,85% { opacity: 1; transform: none; } to { opacity: 0; } }
+.l3-counter { transform-style: preserve-3d; animation: l3-counter 14s linear infinite; }
+@keyframes l3-counter { to { transform: rotateZ(-360deg); } }
+.l3-chip {
+  width: max-content;
+  transform-style: preserve-3d;
+  /* undo the node angle and the orbit tilt so the island stands up facing you */
+  transform: rotateZ(calc(var(--i) * -72deg)) rotateX(-68deg) translate(-50%, -100%);
+  transform-origin: 0 0;
+}
+.l3-chip-face {
+  display: flex; flex-direction: column; align-items: center;
+  animation: l3-bob 2.4s ease-in-out infinite;
+  animation-delay: calc(var(--i) * -0.5s);
+  filter: drop-shadow(0 6px 4px rgba(11, 27, 45, 0.25));
+}
+@keyframes l3-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+.l3-chip-label {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-top: 2px; padding: 1px 8px;
+  background: #FFF8EB; border: 2px solid #0B1B2D; border-radius: 999px;
+  box-shadow: 2px 2px 0 #0B1B2D;
+  font: 700 15px/1.1 'Caveat', cursive; color: #0B1B2D; white-space: nowrap;
+}
+.l3-chip-label i { width: 7px; height: 7px; border-radius: 50%; border: 1px solid #0B1B2D; display: inline-block; }
+
+.l3-coin {
+  position: absolute; left: 50%; top: 40%;
+  width: 92px; height: 92px; margin: -46px 0 0 -46px;
+  transform-style: preserve-3d;
+  animation: l3-coin 3.2s cubic-bezier(.45,.05,.55,.95) infinite;
+}
+@keyframes l3-coin {
+  0% { transform: translateY(0) rotateY(0deg); }
+  50% { transform: translateY(-10px) rotateY(180deg); }
+  100% { transform: translateY(0) rotateY(360deg); }
+}
+.l3-coin-layer {
+  position: absolute; inset: 0; border-radius: 50%;
+  background: #F5B82E; border: 3px solid #0B1B2D;
+  box-shadow: inset 0 0 0 6px #FDE68A;
+}
+.l3-coin-face { position: absolute; inset: 0; width: 100%; height: 100%; backface-visibility: hidden; }
+.l3-caption {
+  margin-top: 4px; font-size: 26px; line-height: 1; color: #0B1B2D;
+  animation: l3-caption 1.7s ease both;
+}
+@keyframes l3-caption { from { opacity: 0; transform: translateY(6px); } 15%, 85% { opacity: 1; transform: none; } to { opacity: 0; } }
+.l3-dots b { display: inline-block; animation: l3-dot 1s ease-in-out infinite; }
+.l3-dots b:nth-child(2) { animation-delay: .15s; } .l3-dots b:nth-child(3) { animation-delay: .3s; }
+@keyframes l3-dot { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 @media (prefers-reduced-motion: reduce) {
-  .voyage-wake, .voyage-island, .voyage-compass, .voyage-log { animation: none; }
-  .voyage-wake { stroke-dashoffset: 0; }
+  .l3-orbit, .l3-counter, .l3-chip-face, .l3-coin, .l3-caption, .l3-dots b { animation: none; }
 }
 
 @keyframes time-icon-pop { from { transform: rotate(-90deg) scale(0.4); opacity: 0; } to { transform: none; opacity: 1; } }

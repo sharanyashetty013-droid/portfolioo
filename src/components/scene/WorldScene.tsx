@@ -33,6 +33,7 @@ interface WorldSceneProps {
   onSailingStateChange?: (isSailing: boolean) => void;
   onReady?: () => void;
   timeOfDay?: TimeOfDay;
+  onIntroDone?: () => void;
 }
 
 // Compiles every shader up front (async where the browser supports it) before the
@@ -73,6 +74,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
   onSailingStateChange,
   onReady,
   timeOfDay = 'day',
+  onIntroDone,
 }) => {
   const [compiled, setCompiled] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -109,7 +111,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
           position: ISLAND_LAYOUT.home.cameraPos,
           fov: 44,
           near: 0.5,
-          far: 900,
+          far: 3200,
         }}
         gl={{
           antialias: true,
@@ -202,6 +204,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
             isSailing={isSailing}
             reducedMotion={reducedMotion}
             isAnyModalOpen={isAnyModalOpen}
+            onIntroDone={onIntroDone}
           />
 
           <SceneWarmup onDone={() => setCompiled(true)} />

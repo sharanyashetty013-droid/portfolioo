@@ -277,7 +277,7 @@ export const SkyAndAtmosphere: React.FC<{ reducedMotion?: boolean; timeOfDay?: T
 
       {/* Sky Sphere */}
       <mesh position={[0, 0, -135]}>
-        <sphereGeometry args={[550, 32, 24]} />
+        <sphereGeometry args={[1500, 32, 24]} />
         <shaderMaterial
           ref={skyMatRef}
           vertexShader={skyVertexShader}
