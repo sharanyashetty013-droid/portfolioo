@@ -26,7 +26,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, timeOfDay = 'day',
           {onCycleTime && (
             <button
               onClick={onCycleTime}
-              className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full btn-glass !rounded-full text-[#B45309]"
+              className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full btn-glass !rounded-full !text-[#EBD6A4]"
               title={`${meta.label}: switch to ${meta.next}`}
               aria-label={`Time of day: ${meta.label}. Switch to ${meta.next}`}
             >
@@ -39,7 +39,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, timeOfDay = 'day',
             href="https://github.com/sharanyashetty013-droid"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full btn-glass !rounded-full text-[#0B1B2D]"
+            className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full btn-glass !rounded-full"
             title="GitHub: @sharanyashetty013-droid"
           >
             <Github className="w-3.5 h-3.5" />
@@ -48,7 +48,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, timeOfDay = 'day',
           {/* Email Quick Link */}
           <a
             href="mailto:sharanyashetty013@gmail.com"
-            className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full btn-glass !rounded-full text-[#0B1B2D]"
+            className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full btn-glass !rounded-full"
             title="Email: sharanyashetty013@gmail.com"
           >
             <Mail className="w-3.5 h-3.5" />

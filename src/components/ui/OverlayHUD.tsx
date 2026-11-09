@@ -63,52 +63,69 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
             /* Fixed on Mobile above nav bar with NO scrollbar, static on desktop */
             fixed left-3 right-3 bottom-[calc(56px+env(safe-area-inset-bottom,0px))] z-40
             sm:static sm:w-auto sm:mx-0 sm:mt-2
-            glass p-3 sm:p-6 overflow-visible`}
+            glass p-4 sm:p-7 overflow-visible`}
           >
-            {/* glossy orbs floating off the corners */}
-            <span className="glass-orb depth-3 hidden sm:block w-12 h-12 -top-5 -right-5" aria-hidden="true" />
-            <span className="glass-orb violet depth-2 hidden sm:block w-7 h-7 -bottom-3 right-16" aria-hidden="true" />
-            <span className="glass-orb coral depth-1 hidden sm:block w-5 h-5 top-1/2 -left-2.5" aria-hidden="true" />
+            {/* faint compass rose turning in the corner */}
+            <svg viewBox="0 0 100 100" className="compass-watermark w-24 h-24 sm:w-36 sm:h-36 right-3 top-8 sm:right-5 sm:top-10" aria-hidden="true">
+              <g fill="none" stroke="currentColor" strokeWidth="1">
+                <circle cx="50" cy="50" r="46" /><circle cx="50" cy="50" r="38" strokeDasharray="1 3" /><circle cx="50" cy="50" r="12" />
+                <path d="M50 2 L56 50 L50 98 L44 50 Z" /><path d="M2 50 L50 44 L98 50 L50 56 Z" />
+                <path d="M16 16 L52 48 L84 84 L48 52 Z" opacity="0.6" /><path d="M84 16 L52 52 L16 84 L48 48 Z" opacity="0.6" />
+              </g>
+            </svg>
 
-            {/* Name: letters flip up one by one */}
+            {/* log header */}
+            <div className="flex items-center justify-between gap-3">
+              <span className="log-label">Captain&apos;s log · 01</span>
+              <span className="log-coords hidden sm:inline">13.21°N 74.99°E</span>
+            </div>
+
+            {/* Name */}
             {introDone && !isSailing && (
-              <h1 className="hero-name depth-2 font-heading text-[22px] sm:text-[40px] font-bold tracking-tight leading-[1.05]" aria-label={personal.name}>
-                {personal.name.split('').map((ch, i) => (
+              <h1 className="hero-name text-[28px] sm:text-[46px] leading-[1.02] mt-2 sm:mt-3" aria-label={personal.name}>
+                {'Sharanya'.split('').map((ch, i) => (
                   <span key={i} style={{ '--i': i } as React.CSSProperties} aria-hidden="true">{ch}</span>
-                ))}
+                ))}{' '}
+                <em>
+                  {'L Shetty'.split('').map((ch, i) => (
+                    <span key={i} style={{ '--i': i + 9 } as React.CSSProperties} aria-hidden="true">{ch}</span>
+                  ))}
+                </em>
               </h1>
             )}
 
+            <div className="log-rule mt-3 sm:mt-4" />
+
             {/* Subtitle */}
-            <div className="flex items-center gap-2 text-[11px] sm:text-sm font-bold text-[#334155] mt-1 sm:mt-2 tracking-tight">
+            <div className="flex items-center gap-2 text-[11px] sm:text-[13px] font-semibold text-[#C9C2B3] mt-3 tracking-tight">
               <span className="live-dot shrink-0" aria-hidden="true" />
-              2nd-year CSE student at NMAMIT · CGPA 9.36
+              2nd-year CSE · NMAMIT · CGPA 9.36
             </div>
 
-            {/* Specialization Badges */}
-            <div className="depth-1 flex flex-wrap items-center gap-1.5 sm:gap-2 mt-2 sm:mt-3">
-              <span className="glass-chip"><i style={{ background: '#F59E0B', color: '#F59E0B' }} />Backend Systems</span>
-              <span className="glass-chip"><i style={{ background: '#06B6D4', color: '#06B6D4' }} />Blockchain & Solidity</span>
-            </div>
-
-            {/* Human First-Person Intro */}
-            <p className="text-[11px] sm:text-[15px] font-semibold text-[#1E293B] leading-relaxed mt-2 sm:mt-3 max-w-[34ch]">
+            {/* Intro */}
+            <p className="text-[12px] sm:text-[15px] text-[#EDE6D6] leading-relaxed mt-2 sm:mt-3 max-w-[36ch]">
               I build backend systems and smart contracts, and I spend a lot of weekends at hackathons.
             </p>
 
-            {/* Glossy action buttons */}
-            <div className="depth-3 mt-2.5 sm:mt-5 flex flex-wrap items-center gap-2 sm:gap-3">
+            {/* Focus areas */}
+            <div className="depth-1 flex flex-wrap items-center gap-1.5 sm:gap-2 mt-3 sm:mt-4">
+              <span className="glass-chip"><i style={{ background: '#D6BA7C' }} />Backend systems</span>
+              <span className="glass-chip"><i style={{ background: '#5EEAD4' }} />Blockchain · Solidity</span>
+            </div>
+
+            {/* Actions */}
+            <div className="depth-3 mt-4 sm:mt-6 flex flex-wrap items-center gap-2 sm:gap-3">
               <button
                 onClick={() => onNavigate('skills')}
-                className="btn-glow px-3.5 py-1.5 sm:px-5 sm:py-2.5 text-[12px] sm:text-[15px]"
+                className="btn-glow px-4 py-2 sm:px-5 sm:py-2.5 text-[12px] sm:text-[14px]"
               >
-                See my work →
+                Set sail →
               </button>
               <button
                 onClick={onOpenContact}
-                className="btn-glass px-3.5 py-1.5 sm:px-5 sm:py-2.5 text-[12px] sm:text-[15px]"
+                className="btn-glass px-4 py-2 sm:px-5 sm:py-2.5 text-[12px] sm:text-[14px]"
               >
-                Say hi 👋
+                Send a signal
               </button>
             </div>
           </div>
@@ -118,8 +135,8 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
 
       {/* Center Sailing Notification */}
       {isSailing && (
-        <div className="relative self-center glass glass-pill text-[#0B1B2D] px-5 py-2 sm:py-2.5 flex items-center gap-2 text-xs sm:text-sm font-extrabold my-2">
-          <Navigation className="w-4 h-4 text-[#1AA6A6]" />
+        <div className="relative self-center glass glass-pill text-[#EDE6D6] px-5 py-2 sm:py-2.5 flex items-center gap-2 text-xs sm:text-sm font-extrabold my-2">
+          <Navigation className="w-4 h-4 text-[#D6BA7C]" />
           <span>Sailing to {currentConfig.name}...</span>
         </div>
       )}
@@ -136,12 +153,12 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
             }
             fixed left-3 right-3 bottom-[calc(56px+env(safe-area-inset-bottom,0px))] z-40
             sm:static sm:w-full
-            glass p-3 sm:p-5 overflow-visible`}
+            glass p-4 sm:p-5 overflow-visible`}
           >
-            <div className="flex items-center justify-between gap-2 border-b border-white/70 pb-1.5 mb-1.5 sm:pb-2 sm:mb-2">
+            <div className="flex items-center justify-between gap-2 border-b border-[#D6BA7C]/25 pb-1.5 mb-1.5 sm:pb-2 sm:mb-2">
               <div className="flex items-center gap-2">
                 <span className="live-dot" style={{ background: '#1AA6A6' }} />
-                <h2 className="font-heading text-xs sm:text-base font-bold text-[#0B1B2D]">
+                <h2 className="font-heading text-[15px] sm:text-lg font-normal text-white">
                   {currentConfig.chapterTitle}
                 </h2>
               </div>
@@ -149,7 +166,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
                 Island {currentIndex + 1} of 5
               </span>
             </div>
-            <p className="text-[11.5px] sm:text-[13px] text-[#1E293B] font-semibold leading-relaxed">
+            <p className="text-[11.5px] sm:text-[13px] text-[#D9D2C3] font-medium leading-relaxed">
               {currentConfig.storyLine}
             </p>
           </div>
@@ -168,7 +185,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
           fixed left-1/2 -translate-x-1/2 bottom-[calc(10px+env(safe-area-inset-bottom,0px))] z-50
           w-auto max-w-[calc(100vw-16px)] sm:max-w-none
           glass glass-pill
-          px-1.5 py-1 sm:px-3 sm:py-1.5 text-[#0B1B2D] 
+          px-1.5 py-1 sm:px-3 sm:py-1.5 text-[#EDE6D6] 
           flex items-center justify-between sm:justify-center gap-0.5 sm:gap-1.5 select-none"
         >
           {/* Previous Button */}
@@ -177,7 +194,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
             disabled={!prevChapter}
             className={`inline-flex items-center justify-center gap-0.5 px-1.5 sm:px-2 py-1 text-[11px] sm:text-xs font-bold rounded-full transition-colors shrink-0 ${
               prevChapter
-                ? 'text-[#0B1B2D] hover:bg-white/60 cursor-pointer active:scale-95'
+                ? 'text-[#EDE6D6] hover:bg-white/10 cursor-pointer active:scale-95'
                 : 'text-slate-300 cursor-not-allowed opacity-40'
             }`}
             title="Sail to previous chapter"
@@ -207,16 +224,16 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
                   onClick={() => onNavigate(chId)}
                   className={`group relative flex items-center justify-center gap-1 px-1.5 sm:px-2.5 py-1 rounded-full text-[10.5px] sm:text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     isActive
-                      ? 'text-white bg-gradient-to-br from-[#22C1B8] to-[#0E7C86] shadow-[0_6px_16px_-6px_rgba(26,166,166,0.95),inset_0_1px_0_rgba(255,255,255,0.5)]'
+                      ? 'text-[#0B1B2D] bg-gradient-to-b from-[#EBD6A4] to-[#CFAF6A] shadow-[0_6px_14px_-6px_rgba(207,175,106,0.9),inset_0_1px_0_rgba(255,255,255,0.6)]'
                       : isPassed
-                      ? 'text-[#0B1B2D] hover:bg-white/60'
-                      : 'text-slate-600 hover:bg-white/60'
+                      ? 'text-[#EDE6D6] hover:bg-white/10'
+                      : 'text-slate-400 hover:bg-white/10'
                   }`}
                   title={`Sail to ${labelFull}`}
                 >
                   <span
                     className={`w-1.5 h-1.5 rounded-full transition-all shrink-0 ${
-                      isActive ? 'bg-white scale-110' : isPassed ? 'bg-[#1AA6A6]' : 'bg-slate-400'
+                      isActive ? 'bg-[#0B1B2D] scale-110' : isPassed ? 'bg-[#D6BA7C]' : 'bg-slate-500'
                     }`}
                   />
                   <span className="hidden sm:inline">{labelFull}</span>
@@ -232,7 +249,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
             disabled={!nextChapter}
             className={`inline-flex items-center justify-center gap-0.5 px-1.5 sm:px-2 py-1 text-[11px] sm:text-xs font-bold rounded-full transition-colors shrink-0 ${
               nextChapter
-                ? 'text-[#0B1B2D] hover:bg-white/60 cursor-pointer active:scale-95'
+                ? 'text-[#EDE6D6] hover:bg-white/10 cursor-pointer active:scale-95'
                 : 'text-slate-300 cursor-not-allowed opacity-40'
             }`}
             title="Sail to next chapter"

@@ -23,8 +23,8 @@ export const FloatingLabelsOverlay: React.FC<FloatingLabelsOverlayProps> = ({ la
                 y1={lbl.anchorY}
                 x2={lbl.targetX}
                 y2={lbl.targetY}
-                stroke="#0B1B2D"
-                strokeWidth={1.5}
+                stroke="#EDE6D6"
+                strokeWidth={1.2}
                 strokeDasharray="3,3"
                 opacity={0.8}
               />
@@ -32,7 +32,7 @@ export const FloatingLabelsOverlay: React.FC<FloatingLabelsOverlayProps> = ({ la
                 cx={lbl.anchorX}
                 cy={lbl.anchorY}
                 r={3}
-                fill="#1AA6A6"
+                fill="#D6BA7C"
                 stroke="#0B1B2D"
                 strokeWidth={1.5}
               />
@@ -64,19 +64,19 @@ export const FloatingLabelsOverlay: React.FC<FloatingLabelsOverlayProps> = ({ la
               style={{ animationDelay: `${idx * 70}ms` }}
               className={`label-pop flex items-center gap-1.5 whitespace-nowrap rounded-lg transition-all duration-120 text-[11px] sm:text-xs font-bold px-2.5 py-1 font-sans ${
                 isHovered
-                  ? 'bg-white text-[#0B1B2D] border-2 border-[#0B1B2D] shadow-[1px_1px_0_#0B1B2D] translate-x-[1.5px] translate-y-[1.5px] z-50'
-                  : 'bg-[#FFF8E7] text-[#0B1B2D] border-2 border-[#0B1B2D] shadow-[3px_3px_0_#0B1B2D]'
+                  ? 'bg-[#0B1B2D] text-white border border-[#D6BA7C]/80 shadow-[0_10px_24px_-10px_rgba(3,12,22,0.9)] -translate-y-0.5 z-50'
+                  : 'bg-[#0C2234]/85 text-[#EDE6D6] border border-[#D6BA7C]/35 backdrop-blur-md shadow-[0_8px_20px_-10px_rgba(3,12,22,0.9)]'
               }`}
             >
               <span
-                className="w-2.5 h-2.5 rounded-full shrink-0 border border-[#0B1B2D]"
+                className="w-2 h-2 rounded-full shrink-0"
                 style={{ backgroundColor: lbl.dotColor }}
               />
               <span className="tracking-tight font-bold">
                 {isHovered ? lbl.name : lbl.shortName}
               </span>
               {isHovered && lbl.badge && (
-                <span className="text-[10px] text-[#0F766E] font-bold pl-1.5 border-l-2 border-[#0B1B2D]">
+                <span className="text-[10px] text-[#D6BA7C] font-bold pl-1.5 border-l border-[#D6BA7C]/40">
                   {lbl.badge}
                 </span>
               )}
