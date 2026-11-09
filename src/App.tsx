@@ -30,7 +30,7 @@ export default function App() {
   // never leave the name card hidden: give up on the intro if the scene can't load
   // (15s) or if the fly-in somehow doesn't report back (8s after the scene is up)
   useEffect(() => {
-    const id = setTimeout(() => setIntroDone(true), sceneReady ? 8000 : 15000);
+    const id = setTimeout(() => setIntroDone(true), sceneReady ? 14000 : 15000);
     return () => clearTimeout(id);
   }, [sceneReady]);
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>(() => defaultTimeOfDay());

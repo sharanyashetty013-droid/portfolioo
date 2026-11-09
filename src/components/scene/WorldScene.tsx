@@ -18,6 +18,8 @@ import { FloatingLabelsOverlay } from '../ui/FloatingLabelsOverlay';
 import { ISLAND_LAYOUT } from '../../constants/islandLayout';
 import { IslandLife } from './life/IslandLife';
 import { Fireflies } from './effects/Fireflies';
+import { RisingIsland } from './effects/RisingIsland';
+import { intro } from './introTimeline';
 import { TimeOfDay } from './ambience';
 
 interface WorldSceneProps {
@@ -53,9 +55,10 @@ const SceneWarmup: React.FC<{ onDone: () => void }> = ({ onDone }) => {
 // Fires once after the first real frame has been drawn
 const FirstFrame: React.FC<{ onFrame: () => void }> = ({ onFrame }) => {
   const done = React.useRef(false);
-  useFrame(() => {
+  useFrame((state) => {
     if (done.current) return;
     done.current = true;
+    intro.start = state.clock.elapsedTime;
     requestAnimationFrame(onFrame);
   });
   return null;
@@ -133,6 +136,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
 
           {/* Five Realized Islands of the Archipelago */}
           {/* Chapter 1: Home */}
+          <RisingIsland id="home" reducedMotion={reducedMotion}>
           <HomeIsland 
             isActive={activeSection === 'home'}
             isAnyModalOpen={isAnyModalOpen}
@@ -140,38 +144,47 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
             onOpenResume={onOpenResume}
             reducedMotion={reducedMotion} 
           />
+          </RisingIsland>
 
           {/* Chapter 2: Skills */}
+          <RisingIsland id="skills" reducedMotion={reducedMotion}>
           <SkillsIsland
             isActive={activeSection === 'skills'}
             isAnyModalOpen={isAnyModalOpen}
             onSelectSkillGroup={onSelectSkillGroup}
             reducedMotion={reducedMotion}
           />
+          </RisingIsland>
 
           {/* Chapter 3: Projects */}
+          <RisingIsland id="projects" reducedMotion={reducedMotion}>
           <ProjectsIsland
             isActive={activeSection === 'projects'}
             isAnyModalOpen={isAnyModalOpen}
             onSelectProject={onSelectProject}
             reducedMotion={reducedMotion}
           />
+          </RisingIsland>
 
           {/* Chapter 4: Hackathons */}
+          <RisingIsland id="hackathons" reducedMotion={reducedMotion}>
           <HackathonsIsland
             isActive={activeSection === 'hackathons'}
             isAnyModalOpen={isAnyModalOpen}
             onSelectHackathon={onSelectHackathon}
             reducedMotion={reducedMotion}
           />
+          </RisingIsland>
 
           {/* Chapter 5: Contact */}
+          <RisingIsland id="contact" reducedMotion={reducedMotion}>
           <ContactIsland
             isActive={activeSection === 'contact'}
             isAnyModalOpen={isAnyModalOpen}
             onOpenContact={onOpenContact}
             reducedMotion={reducedMotion}
           />
+          </RisingIsland>
 
           {/* Islanders, gulls, crabs, jumping fish */}
           <IslandLife reducedMotion={reducedMotion} />

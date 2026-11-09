@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { LowPolyPerson, PersonLook, PersonPose } from './LowPolyPerson';
 import { ISLAND_LAYOUT, IslandConfig } from '../../../constants/islandLayout';
+import { riseRaw } from '../introTimeline';
 
 // Height of the sand dune at a given distance from the island centre
 // (matches TropicalIslandBase: +0.35 at the centre, 0 at the rim).
@@ -13,8 +14,8 @@ const duneY = (cfg: IslandConfig, r: number) =>
 const NearCamera: React.FC<{ cfg: IslandConfig; range?: number; children: React.ReactNode }> = ({ cfg, range = 85, children }) => {
   const ref = useRef<THREE.Group>(null);
   const centre = useMemo(() => new THREE.Vector3(cfg.position[0], cfg.height, cfg.position[2]), [cfg]);
-  useFrame(({ camera }) => {
-    if (ref.current) ref.current.visible = camera.position.distanceTo(centre) < range;
+  useFrame(({ camera, clock }) => {
+    if (ref.current) ref.current.visible = camera.position.distanceTo(centre) < range && riseRaw(cfg.id, clock.elapsedTime) >= 1;
   });
   return <group ref={ref}>{children}</group>;
 };
