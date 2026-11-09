@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { ISLAND_LAYOUT } from '../../constants/islandLayout';
 import { ambience, blendPalette, makePalette } from './ambience';
+import { riseRaw } from './introTimeline';
+import type { SectionId } from '../../types/portfolio';
 
 const waterVertexShader = `
   varying vec3 vWorldPosition;
@@ -30,6 +32,7 @@ const waterFragmentShader = `
   uniform vec3 uGlint;
   uniform vec2 uIslandPositions[5];
   uniform float uIslandRadii[5];
+  uniform float uRise[5];
   varying vec3 vWorldPosition;
   varying vec3 vNormal;
   varying vec2 vUv;
@@ -60,12 +63,21 @@ const waterFragmentShader = `
     // Island proximity & shore shallow turquoise ring
     float minShoreDist = 999.0;
     float shoreWeight = 0.0;
+    float churn = 0.0;
     for (int i = 0; i < 5; i++) {
       float d = length(pos - uIslandPositions[i]);
-      float r = uIslandRadii[i];
+      float rise = clamp(uRise[i], 0.0, 1.0);
+      float r = uIslandRadii[i] * mix(0.2, 1.0, rise);
+      // white churning water while the island shoulders up through the surface
+      float burst = sin(clamp(uRise[i], 0.0, 1.0) * 3.14159) * step(0.001, uRise[i]) * (uRise[i] < 1.0 ? 1.0 : 0.0);
+      float churnBand = smoothstep(r + 3.0 + burst * 10.0, r, d) * smoothstep(r - 3.0, r, d);
+      float boil = 0.5 + 0.5 * sin(pos.x * 1.7 + uTime * 6.0) * cos(pos.y * 1.9 - uTime * 5.0);
+      churn = max(churn, churnBand * burst * (0.55 + 0.45 * boil));
+      if (rise < 0.02) continue;
       if (d < r + 14.0) {
         float proximity = clamp(1.0 - (d - r) / 14.0, 0.0, 1.0);
         proximity = smoothstep(0.0, 1.0, proximity);
+        proximity *= rise;
         if (proximity > shoreWeight) {
           shoreWeight = proximity;
         }
@@ -102,7 +114,7 @@ const waterFragmentShader = `
       float fNoise = sin(pos.x * 3.2 + t * 3.0) * cos(pos.y * 3.2 - t * 2.0);
       foamRing = fBand * (0.7 + 0.3 * fNoise);
     }
-    waterColor = mix(waterColor, uFoamColor, clamp(foamRing * 0.95, 0.0, 1.0));
+    waterColor = mix(waterColor, uFoamColor, clamp(foamRing * 0.95 + churn * 1.15, 0.0, 1.0));
 
     // Subtle transparency near shores
     waterColor *= uTint;
@@ -140,6 +152,7 @@ export const WaterSea: React.FC = () => {
     uFoamColor: { value: new THREE.Color('#FFFFFF') },      // White foam
     uIslandPositions: { value: positions },
     uIslandRadii: { value: radii },
+    uRise: { value: [0, 0, 0, 0, 0] },
     uTint: { value: new THREE.Color('#FFFFFF') },
     uFogColor: { value: new THREE.Color('#FFF4E0') },
     uGlint: { value: new THREE.Color('#FFFAEB') },
@@ -149,6 +162,9 @@ export const WaterSea: React.FC = () => {
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
       materialRef.current.uniforms.uCameraPos.value.copy(state.camera.position);
+      const ids = Object.keys(ISLAND_LAYOUT) as SectionId[];
+      const rise = materialRef.current.uniforms.uRise.value as number[];
+      for (let i = 0; i < ids.length; i++) rise[i] = Math.max(0, riseRaw(ids[i], state.clock.elapsedTime) * 1.1 - 0.05);
       blendPalette(palette, ambience.sunset, ambience.night);
       materialRef.current.uniforms.uTint.value.copy(palette.waterTint);
       materialRef.current.uniforms.uFogColor.value.copy(palette.skyHorizon);
