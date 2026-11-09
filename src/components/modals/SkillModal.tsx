@@ -16,7 +16,7 @@ export const SkillModal: React.FC<SkillModalProps> = ({ skillGroup, onClose }) =
       onClick={onClose}
     >
       <div 
-        className="bg-[#FFF8E7] rounded-2xl max-w-md w-full border-2 border-[#0B1B2D] shadow-[6px_6px_0_#0B1B2D] p-5 sm:p-6 relative max-h-[90dvh] overflow-y-auto"
+        className="modal-3d-in bg-[#FFF8E7] rounded-2xl max-w-md w-full border-2 border-[#0B1B2D] shadow-[6px_6px_0_#0B1B2D] p-5 sm:p-6 relative max-h-[90dvh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button

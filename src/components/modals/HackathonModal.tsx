@@ -16,7 +16,7 @@ export const HackathonModal: React.FC<HackathonModalProps> = ({ hackathon, onClo
       onClick={onClose}
     >
       <div 
-        className="bg-[#FFF8E7] rounded-2xl max-w-lg w-full max-h-[90dvh] overflow-y-auto border-2 border-[#0B1B2D] shadow-[6px_6px_0_#0B1B2D] p-5 sm:p-8 relative"
+        className="modal-3d-in bg-[#FFF8E7] rounded-2xl max-w-lg w-full max-h-[90dvh] overflow-y-auto border-2 border-[#0B1B2D] shadow-[6px_6px_0_#0B1B2D] p-5 sm:p-8 relative"
         onClick={(e) => e.stopPropagation()}
       >
         <button

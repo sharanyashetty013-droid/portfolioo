@@ -137,3 +137,52 @@ h1, h2, h3, h4, h5, h6 {
 
 @keyframes time-icon-pop { from { transform: rotate(-90deg) scale(0.4); opacity: 0; } to { transform: none; opacity: 1; } }
 .time-icon-pop { animation: time-icon-pop 0.35s cubic-bezier(.34,1.56,.64,1) both; }
+
+/* ---- 3D UI ---- */
+.tilt-3d { position: relative; transition: transform 0.45s cubic-bezier(.2,.8,.2,1); }
+.tilt-3d.is-tilting {
+  transform-style: preserve-3d;
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.12s ease-out;
+}
+.tilt-3d.is-settling { transition: transform 0.45s cubic-bezier(.2,.8,.2,1); }
+.tilt-3d.is-tilting > :first-child { transform-style: preserve-3d; }
+.tilt-glare {
+  pointer-events: none;
+  position: absolute; inset: 0; border-radius: 1rem;
+  background: radial-gradient(circle at var(--gx, 50%) var(--gy, 50%), rgba(255,255,255,0.55), rgba(255,255,255,0) 55%);
+  mix-blend-mode: soft-light;
+  opacity: 0; transition: opacity 0.3s;
+}
+.tilt-3d.is-tilting:not(.is-settling) .tilt-glare { opacity: 1; }
+/* content layers float at different depths while tilting */
+.depth-1, .depth-2, .depth-3 { transition: transform 0.3s ease; }
+.tilt-3d.is-tilting .depth-1 { transform: translateZ(14px); }
+.tilt-3d.is-tilting .depth-2 { transform: translateZ(26px); }
+.tilt-3d.is-tilting .depth-3 { transform: translateZ(40px); }
+
+/* cards flip up into place when you arrive at an island */
+@keyframes card-3d-in {
+  from { transform: perspective(900px) rotateX(-70deg) translateY(30px); opacity: 0; }
+  60% { transform: perspective(900px) rotateX(8deg); opacity: 1; }
+  to { transform: perspective(900px) rotateX(0deg); opacity: 1; }
+}
+.card-3d-in { animation: card-3d-in 0.7s cubic-bezier(.2,.8,.2,1) both; transform-origin: 50% 100%; }
+
+/* modals swing in like a door */
+@keyframes modal-3d-in {
+  from { transform: perspective(1100px) rotateX(22deg) rotateY(-10deg) translateY(40px) scale(0.9); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.modal-3d-in { animation: modal-3d-in 0.45s cubic-bezier(.2,.9,.25,1.15) both; }
+
+/* island labels pop in one after another */
+@keyframes label-pop {
+  from { transform: translateY(10px) scale(0.6) rotateX(60deg); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.label-pop { animation: label-pop 0.45s cubic-bezier(.34,1.56,.64,1) both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .card-3d-in, .modal-3d-in, .label-pop { animation: none; }
+}

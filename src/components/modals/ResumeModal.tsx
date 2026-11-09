@@ -15,7 +15,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
       onClick={onClose}
     >
       <div 
-        className="bg-[#FFF8E7] rounded-2xl max-w-2xl w-full max-h-[92dvh] flex flex-col border-2 border-[#0B1B2D] shadow-[8px_8px_0_#0B1B2D] overflow-hidden relative"
+        className="modal-3d-in bg-[#FFF8E7] rounded-2xl max-w-2xl w-full max-h-[92dvh] flex flex-col border-2 border-[#0B1B2D] shadow-[8px_8px_0_#0B1B2D] overflow-hidden relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Header Bar */}
