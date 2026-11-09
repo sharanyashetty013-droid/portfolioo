@@ -26,6 +26,13 @@ export default function App() {
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
+  const [introDone, setIntroDone] = useState(false);
+  // never leave the name card hidden: give up on the intro if the scene can't load
+  // (15s) or if the fly-in somehow doesn't report back (8s after the scene is up)
+  useEffect(() => {
+    const id = setTimeout(() => setIntroDone(true), sceneReady ? 8000 : 15000);
+    return () => clearTimeout(id);
+  }, [sceneReady]);
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>(() => defaultTimeOfDay());
   const cycleTimeOfDay = () =>
     setTimeOfDay((t) => TIME_ORDER[(TIME_ORDER.indexOf(t) + 1) % TIME_ORDER.length]);
@@ -73,6 +80,7 @@ export default function App() {
           onSailingStateChange={(sailing) => setIsSailing(sailing)}
           onReady={() => setSceneReady(true)}
           timeOfDay={timeOfDay}
+          onIntroDone={() => setIntroDone(true)}
         />
         </Suspense>
 
@@ -83,6 +91,7 @@ export default function App() {
           onOpenContact={() => setIsContactOpen(true)}
           onOpenResume={() => setIsResumeOpen(true)}
           isSailing={isSailing}
+          introDone={introDone}
         />
       </div>
 

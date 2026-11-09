@@ -26,6 +26,7 @@ const waterFragmentShader = `
   uniform vec3 uShallowColor;
   uniform vec3 uFoamColor;
   uniform vec3 uTint;
+  uniform vec3 uFogColor;
   uniform vec3 uGlint;
   uniform vec2 uIslandPositions[5];
   uniform float uIslandRadii[5];
@@ -105,6 +106,10 @@ const waterFragmentShader = `
 
     // Subtle transparency near shores
     waterColor *= uTint;
+    // melt into the horizon with distance (ShaderMaterial doesn't get scene fog)
+    float dist = length(uCameraPos - vWorldPosition);
+    float fogF = 1.0 - exp(-pow(dist * 0.0016, 2.0));
+    waterColor = mix(waterColor, uFogColor, clamp(fogF, 0.0, 1.0));
     float alpha = mix(0.96, 0.88, shoreWeight * 0.4);
     gl_FragColor = vec4(waterColor, alpha);
     #include <colorspace_fragment>
@@ -136,6 +141,7 @@ export const WaterSea: React.FC = () => {
     uIslandPositions: { value: positions },
     uIslandRadii: { value: radii },
     uTint: { value: new THREE.Color('#FFFFFF') },
+    uFogColor: { value: new THREE.Color('#FFF4E0') },
     uGlint: { value: new THREE.Color('#FFFAEB') },
   }), [positions, radii]);
 
@@ -145,6 +151,7 @@ export const WaterSea: React.FC = () => {
       materialRef.current.uniforms.uCameraPos.value.copy(state.camera.position);
       blendPalette(palette, ambience.sunset, ambience.night);
       materialRef.current.uniforms.uTint.value.copy(palette.waterTint);
+      materialRef.current.uniforms.uFogColor.value.copy(palette.skyHorizon);
       materialRef.current.uniforms.uGlint.value.copy(palette.glint);
       materialRef.current.uniforms.uSunDirection.value.copy(palette.sunPos).normalize();
     }
@@ -156,7 +163,7 @@ export const WaterSea: React.FC = () => {
       position={[0, -0.05, -135]}
       receiveShadow
     >
-      <planeGeometry args={[800, 800, 64, 64]} />
+      <planeGeometry args={[3200, 3200, 96, 96]} />
       <shaderMaterial
         ref={materialRef}
         vertexShader={waterVertexShader}

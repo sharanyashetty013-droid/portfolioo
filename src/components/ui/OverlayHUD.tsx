@@ -15,6 +15,7 @@ interface OverlayHUDProps {
   onOpenContact: () => void;
   onOpenResume?: () => void;
   isSailing?: boolean;
+  introDone?: boolean;
 }
 
 export const OverlayHUD: React.FC<OverlayHUDProps> = ({
@@ -22,6 +23,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
   onNavigate,
   onOpenContact,
   isSailing = false,
+  introDone = true,
 }) => {
   const { personal } = portfolioData;
   const currentConfig = ISLAND_LAYOUT[activeSection];
@@ -56,7 +58,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
           <div
             id="hero-card"
             className={`pointer-events-auto transition-all duration-500 transform ${
-              isSailing ? 'opacity-0 -translate-x-8 pointer-events-none' : 'opacity-100 translate-x-0'
+              isSailing || !introDone ? 'opacity-0 -translate-x-8 pointer-events-none' : 'opacity-100 translate-x-0 card-3d-in'
             } 
             /* Fixed on Mobile above nav bar with NO scrollbar, static on desktop */
             fixed left-3 right-3 bottom-[calc(56px+env(safe-area-inset-bottom,0px))] z-40

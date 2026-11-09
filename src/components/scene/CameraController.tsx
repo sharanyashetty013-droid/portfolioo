@@ -16,6 +16,7 @@ interface CameraControllerProps {
   isSailing: boolean;
   reducedMotion?: boolean;
   isAnyModalOpen?: boolean;
+  onIntroDone?: () => void;
 }
 
 export const CameraController: React.FC<CameraControllerProps> = ({
@@ -25,6 +26,7 @@ export const CameraController: React.FC<CameraControllerProps> = ({
   isSailing,
   reducedMotion = false,
   isAnyModalOpen = false,
+  onIntroDone,
 }) => {
   const { camera, size } = useThree();
   const controlsRef = useRef<OrbitControlsImpl>(null);
@@ -33,6 +35,16 @@ export const CameraController: React.FC<CameraControllerProps> = ({
   const targetCamPosRef = useRef(new THREE.Vector3(...config.cameraPos));
   const targetLookAtRef = useRef(new THREE.Vector3(...config.targetPos));
   const currentLookAtRef = useRef(new THREE.Vector3(...config.targetPos));
+
+  // Opening shot: start high above the whole archipelago and swoop down to Home
+  const intro = useRef({ t: reducedMotion ? 1 : 0, done: false });
+  const introPts = useRef({
+    start: new THREE.Vector3(55, 125, 95),
+    bend: new THREE.Vector3(-70, 36, 72),
+    lookFrom: new THREE.Vector3(15, 0, -120), // middle of the island chain
+    pos: new THREE.Vector3(),
+    look: new THREE.Vector3(),
+  });
 
   // Compute responsive camera framing based on screen aspect ratio
   useEffect(() => {
@@ -68,6 +80,40 @@ export const CameraController: React.FC<CameraControllerProps> = ({
   }, [config, size.width, size.height]);
 
   useFrame((_, delta) => {
+    const persp0 = camera as THREE.PerspectiveCamera;
+    const it = intro.current;
+    if (!it.done) {
+      if (isSailing) it.t = 1; // visitor jumped ahead: hand over immediately
+      it.t = Math.min(1, it.t + Math.min(delta, 0.05) / 3.6);
+      const k = it.t < 0.5 ? 4 * it.t ** 3 : 1 - (-2 * it.t + 2) ** 3 / 2; // easeInOutCubic
+      const P = introPts.current;
+      const end = targetCamPosRef.current;
+      // quadratic bezier start -> bend -> final framing
+      const a = 1 - k;
+      P.pos.set(0, 0, 0)
+        .addScaledVector(P.start, a * a)
+        .addScaledVector(P.bend, 2 * a * k)
+        .addScaledVector(end, k * k);
+      const lk = Math.min(1, k * 1.15);
+      P.look.copy(P.lookFrom).lerp(targetLookAtRef.current, lk * lk * (3 - 2 * lk));
+      camera.position.copy(P.pos);
+      camera.lookAt(P.look);
+      currentLookAtRef.current.copy(P.look);
+      if (persp0.isPerspectiveCamera) {
+        persp0.fov = 60 - 16 * k;
+        persp0.updateProjectionMatrix();
+      }
+      if (controlsRef.current) {
+        controlsRef.current.enabled = false;
+        controlsRef.current.target.copy(P.look);
+      }
+      if (it.t >= 1) {
+        it.done = true;
+        onIntroDone?.();
+      }
+      return;
+    }
+
     // widen the lens while sailing for a sense of speed, settle back when docked
     const persp = camera as THREE.PerspectiveCamera;
     if (!reducedMotion && persp.isPerspectiveCamera) {
