@@ -197,7 +197,7 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
             {[-0.1, 0.1].map((x) => (
               <mesh key={x} position={[x, -0.05, 0.15]}>
                 <sphereGeometry args={[0.025, 6, 6]} />
-                <meshBasicMaterial color="#F2A28C" transparent opacity={0.6} />
+                <meshBasicMaterial color="#F4A3A0" transparent opacity={0.45} />
               </mesh>
             ))}
             {/* hair cap */}
