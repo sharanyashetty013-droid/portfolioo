@@ -2,6 +2,7 @@ import React, { useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { ISLAND_LAYOUT } from '../../constants/islandLayout';
+import { ambience, blendPalette, makePalette } from './ambience';
 
 const waterVertexShader = `
   varying vec3 vWorldPosition;
@@ -24,6 +25,8 @@ const waterFragmentShader = `
   uniform vec3 uTealColor;
   uniform vec3 uShallowColor;
   uniform vec3 uFoamColor;
+  uniform vec3 uTint;
+  uniform vec3 uGlint;
   uniform vec2 uIslandPositions[5];
   uniform float uIslandRadii[5];
   varying vec3 vWorldPosition;
@@ -89,7 +92,7 @@ const waterFragmentShader = `
     // Specular sun glints
     vec3 halfVec = normalize(lightDir + viewDir);
     float spec = pow(max(dot(n, halfVec), 0.0), 32.0);
-    waterColor += vec3(1.0, 0.98, 0.92) * spec * 0.75;
+    waterColor += uGlint * spec * 0.75;
 
     // Contact foam ring at cliff base waterline
     float foamRing = 0.0;
@@ -101,6 +104,7 @@ const waterFragmentShader = `
     waterColor = mix(waterColor, uFoamColor, clamp(foamRing * 0.95, 0.0, 1.0));
 
     // Subtle transparency near shores
+    waterColor *= uTint;
     float alpha = mix(0.96, 0.88, shoreWeight * 0.4);
     gl_FragColor = vec4(waterColor, alpha);
     #include <colorspace_fragment>
@@ -109,6 +113,7 @@ const waterFragmentShader = `
 
 export const WaterSea: React.FC = () => {
   const materialRef = useRef<THREE.ShaderMaterial>(null);
+  const palette = useMemo(() => makePalette(), []);
 
   const { positions, radii } = useMemo(() => {
     const islands = Object.values(ISLAND_LAYOUT);
@@ -130,12 +135,18 @@ export const WaterSea: React.FC = () => {
     uFoamColor: { value: new THREE.Color('#FFFFFF') },      // White foam
     uIslandPositions: { value: positions },
     uIslandRadii: { value: radii },
+    uTint: { value: new THREE.Color('#FFFFFF') },
+    uGlint: { value: new THREE.Color('#FFFAEB') },
   }), [positions, radii]);
 
   useFrame((state) => {
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
       materialRef.current.uniforms.uCameraPos.value.copy(state.camera.position);
+      blendPalette(palette, ambience.sunset, ambience.night);
+      materialRef.current.uniforms.uTint.value.copy(palette.waterTint);
+      materialRef.current.uniforms.uGlint.value.copy(palette.glint);
+      materialRef.current.uniforms.uSunDirection.value.copy(palette.sunPos).normalize();
     }
   });
 

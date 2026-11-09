@@ -5,6 +5,7 @@ import { TropicalIslandBase } from '../common/TropicalIslandBase';
 import { IslandPier } from '../common/IslandPier';
 import { CurvedPalm, WoodenBarrel, WoodenCrate, LowPolyBoulder, DriftingHoverRocks } from '../common/StyleRefDecor';
 import { ISLAND_LAYOUT } from '../../../constants/islandLayout';
+import { ambience } from '../ambience';
 import { FlowerBush, Bench, BottleMessage, LampPost } from '../common/IslandProps';
 
 interface ContactIslandProps {
@@ -21,11 +22,16 @@ export const ContactIsland: React.FC<ContactIslandProps> = ({
 }) => {
   const config = ISLAND_LAYOUT.contact;
   const beaconRef = useRef<THREE.Group>(null);
+  const beamMatRef = useRef<THREE.MeshBasicMaterial>(null);
   const [hovered, setHovered] = useState(false);
 
   useFrame((_, delta) => {
     if (beaconRef.current && !reducedMotion) {
       beaconRef.current.rotation.y += delta * 1.6;
+    }
+    // beam is subtle by day, a proper searchlight after dark
+    if (beamMatRef.current) {
+      beamMatRef.current.opacity = 0.14 + ambience.sunset * 0.08 + ambience.night * 0.3;
     }
   });
 
@@ -107,6 +113,7 @@ export const ContactIsland: React.FC<ContactIslandProps> = ({
             <mesh position={[0, 0, 4.5]} rotation={[-Math.PI / 2, 0, 0]}>
               <coneGeometry args={[1.6, 9, 12, 1, true]} />
               <meshBasicMaterial
+                ref={beamMatRef}
                 color="#FEF08A"
                 transparent
                 opacity={0.16}

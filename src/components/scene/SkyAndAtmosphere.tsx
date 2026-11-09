@@ -1,6 +1,7 @@
 import React, { useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
+import { ambience, blendPalette, makePalette, TimeOfDay } from './ambience';
 
 const skyVertexShader = `
   varying vec3 vWorldPosition;
@@ -39,9 +40,10 @@ interface CloudProps {
   initialPosition: [number, number, number];
   speed: number;
   scale?: number;
+  material: THREE.Material;
 }
 
-const LowPolyCloud: React.FC<CloudProps> = ({ initialPosition, speed, scale = 1 }) => {
+const LowPolyCloud: React.FC<CloudProps> = ({ initialPosition, speed, scale = 1, material }) => {
   const groupRef = useRef<THREE.Group>(null);
   const startX = initialPosition[0];
 
@@ -58,37 +60,126 @@ const LowPolyCloud: React.FC<CloudProps> = ({ initialPosition, speed, scale = 1 
       {/* Cluster of chunky low-poly icosahedron cloud puffs */}
       <mesh position={[0, 0, 0]}>
         <icosahedronGeometry args={[4.2, 1]} />
-        <meshStandardMaterial color="#FFFFFF" roughness={0.9} flatShading />
+        <primitive object={material} attach="material" />
       </mesh>
       <mesh position={[3.2, -0.6, 0.4]}>
         <icosahedronGeometry args={[3.2, 1]} />
-        <meshStandardMaterial color="#FAF9F5" roughness={0.9} flatShading />
+        <primitive object={material} attach="material" />
       </mesh>
       <mesh position={[-3.0, -0.5, -0.3]}>
         <icosahedronGeometry args={[3.0, 1]} />
-        <meshStandardMaterial color="#FAF9F5" roughness={0.9} flatShading />
+        <primitive object={material} attach="material" />
       </mesh>
       <mesh position={[1.2, 1.5, -0.5]}>
         <icosahedronGeometry args={[2.8, 1]} />
-        <meshStandardMaterial color="#FFFFFF" roughness={0.9} flatShading />
+        <primitive object={material} attach="material" />
       </mesh>
       <mesh position={[-1.4, 1.2, 0.6]}>
         <icosahedronGeometry args={[2.6, 1]} />
-        <meshStandardMaterial color="#FFFFFF" roughness={0.9} flatShading />
+        <primitive object={material} attach="material" />
       </mesh>
     </group>
   );
 };
 
-export const SkyAndAtmosphere: React.FC<{ reducedMotion?: boolean }> = ({ reducedMotion = false }) => {
+// Stars on the upper sky dome, faded in at night
+const Stars: React.FC = () => {
+  const ref = useRef<THREE.Points>(null);
+  const geo = useMemo(() => {
+    const pts: number[] = [];
+    let seed = 7;
+    const rnd = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+    for (let i = 0; i < 700; i++) {
+      const u = rnd() * Math.PI * 2;
+      const v = 0.08 + rnd() * 0.92; // above the horizon only
+      const r = 480;
+      const y = v * r;
+      const ring = Math.sqrt(r * r - y * y);
+      pts.push(Math.cos(u) * ring, y, Math.sin(u) * ring);
+    }
+    return new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+  }, []);
+  useFrame((state) => {
+    if (!ref.current) return;
+    const m = ref.current.material as THREE.PointsMaterial;
+    m.opacity = ambience.night * (0.85 + Math.sin(state.clock.elapsedTime * 2) * 0.1);
+    ref.current.visible = ambience.night > 0.02;
+  });
+  return (
+    <points ref={ref} geometry={geo} position={[0, 0, -135]}>
+      <pointsMaterial color="#FFFFFF" size={2.2} sizeAttenuation={false} transparent opacity={0} depthWrite={false} fog={false} />
+    </points>
+  );
+};
+
+export const SkyAndAtmosphere: React.FC<{ reducedMotion?: boolean; timeOfDay?: TimeOfDay }> = ({
+  reducedMotion = false,
+  timeOfDay = 'day',
+}) => {
   const skyMatRef = useRef<THREE.ShaderMaterial>(null);
+  const ambientRef = useRef<THREE.AmbientLight>(null);
+  const hemiRef = useRef<THREE.HemisphereLight>(null);
+  const sunRef = useRef<THREE.DirectionalLight>(null);
+  const fogRef = useRef<THREE.FogExp2>(null);
+  const sunDiscRef = useRef<THREE.Mesh>(null);
+  const moonRef = useRef<THREE.Mesh>(null);
+  const palette = useMemo(() => makePalette(), []);
+  const cloudMaterial = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: '#FFFFFF', roughness: 0.9, flatShading: true }),
+    []
+  );
+
+  useFrame((state, delta) => {
+    // ease toward the selected mood
+    const k = reducedMotion ? 1 : Math.min(1, delta * 1.4);
+    ambience.sunset += ((timeOfDay === 'sunset' ? 1 : 0) - ambience.sunset) * k;
+    ambience.night += ((timeOfDay === 'night' ? 1 : 0) - ambience.night) * k;
+    blendPalette(palette, ambience.sunset, ambience.night);
+
+    if (skyMatRef.current) {
+      const u = skyMatRef.current.uniforms;
+      u.uTopColor.value.copy(palette.skyTop);
+      u.uMidColor.value.copy(palette.skyMid);
+      u.uHorizonColor.value.copy(palette.skyHorizon);
+    }
+    if (ambientRef.current) {
+      ambientRef.current.color.copy(palette.ambient);
+      ambientRef.current.intensity = palette.ambientI;
+    }
+    if (hemiRef.current) {
+      hemiRef.current.color.copy(palette.hemiSky);
+      hemiRef.current.groundColor.copy(palette.hemiGround);
+      hemiRef.current.intensity = palette.hemiI;
+    }
+    if (sunRef.current) {
+      sunRef.current.color.copy(palette.sun);
+      sunRef.current.intensity = palette.sunI;
+      sunRef.current.position.copy(palette.sunPos);
+    }
+    if (fogRef.current) fogRef.current.color.copy(palette.fog);
+    cloudMaterial.color.copy(palette.cloud);
+
+    // big low sun at sunset, moon at night (placed relative to the camera so they feel infinitely far)
+    const cam = state.camera.position;
+    if (sunDiscRef.current) {
+      sunDiscRef.current.position.set(cam.x + 260, 38, cam.z - 300);
+      sunDiscRef.current.lookAt(cam);
+      (sunDiscRef.current.material as THREE.MeshBasicMaterial).opacity = ambience.sunset;
+      sunDiscRef.current.visible = ambience.sunset > 0.02;
+    }
+    if (moonRef.current) {
+      moonRef.current.position.set(cam.x - 180, 150, cam.z - 320);
+      moonRef.current.lookAt(cam);
+      (moonRef.current.material as THREE.MeshBasicMaterial).opacity = ambience.night;
+      moonRef.current.visible = ambience.night > 0.02;
+    }
+  });
 
   const uniforms = useMemo(() => ({
-    uTopColor: { value: new THREE.Color('#7CC8EE') },     // Bright warm sky top
-    uMidColor: { value: new THREE.Color('#BFE6EE') },     // Soft pastel sky mid
-    uHorizonColor: { value: new THREE.Color('#FFF4E0') }, // Warm golden cream horizon
+    uTopColor: { value: new THREE.Color('#7CC8EE') },
+    uMidColor: { value: new THREE.Color('#BFE6EE') },
+    uHorizonColor: { value: new THREE.Color('#FFF4E0') },
   }), []);
-
   // Preset cloud positions spanning the voyage archipelago
   const clouds = useMemo(() => [
     { pos: [-60, 45, 40] as [number, number, number], speed: 0.6, scale: 1.4 },
@@ -103,8 +194,9 @@ export const SkyAndAtmosphere: React.FC<{ reducedMotion?: boolean }> = ({ reduce
   return (
     <>
       {/* Warm Sunny Lighting */}
-      <ambientLight intensity={0.9} color="#FFFFFF" />
-      <hemisphereLight 
+      <ambientLight ref={ambientRef} intensity={0.9} color="#FFFFFF" />
+      <hemisphereLight
+        ref={hemiRef}
         color="#FFF6E4"      // Warm sunny sky light
         groundColor="#BFEDE3" // Light teal ground bounce
         intensity={0.8} 
@@ -112,6 +204,7 @@ export const SkyAndAtmosphere: React.FC<{ reducedMotion?: boolean }> = ({ reduce
       
       {/* Key Directional Sun Light with soft shadows */}
       <directionalLight
+        ref={sunRef}
         position={[45, 60, 35]}
         intensity={2.1}
         color="#FFF3DC"
@@ -128,7 +221,7 @@ export const SkyAndAtmosphere: React.FC<{ reducedMotion?: boolean }> = ({ reduce
       />
 
       {/* Atmospheric Fog */}
-      <fogExp2 attach="fog" args={['#FFF3E0', 0.0012]} />
+      <fogExp2 ref={fogRef} attach="fog" args={['#FFF3E0', 0.0012]} />
 
       {/* Sky Sphere */}
       <mesh position={[0, 0, -135]}>
@@ -150,8 +243,19 @@ export const SkyAndAtmosphere: React.FC<{ reducedMotion?: boolean }> = ({ reduce
           initialPosition={c.pos}
           speed={c.speed}
           scale={c.scale}
+          material={cloudMaterial}
         />
       ))}
+
+      <Stars />
+      <mesh ref={sunDiscRef} visible={false}>
+        <circleGeometry args={[26, 32]} />
+        <meshBasicMaterial color="#FFB25E" transparent opacity={0} fog={false} depthWrite={false} />
+      </mesh>
+      <mesh ref={moonRef} visible={false}>
+        <circleGeometry args={[14, 32]} />
+        <meshBasicMaterial color="#F4F1E1" transparent opacity={0} fog={false} depthWrite={false} />
+      </mesh>
     </>
   );
 };

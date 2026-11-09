@@ -9,6 +9,7 @@ import { SkillModal } from './components/modals/SkillModal';
 import { ResumeModal } from './components/modals/ResumeModal';
 import { ContactModal } from './components/modals/ContactModal';
 import { CHAPTER_ORDER } from './constants/islandLayout';
+import { defaultTimeOfDay, TIME_ORDER, TimeOfDay } from './components/scene/ambience';
 
 // three.js + the whole scene load in a separate chunk so the HUD paints first
 const WorldScene = lazy(() =>
@@ -25,6 +26,9 @@ export default function App() {
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
+  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>(() => defaultTimeOfDay());
+  const cycleTimeOfDay = () =>
+    setTimeOfDay((t) => TIME_ORDER[(TIME_ORDER.indexOf(t) + 1) % TIME_ORDER.length]);
 
 
 
@@ -50,7 +54,7 @@ export default function App() {
   return (
     <div className="relative w-screen h-[100dvh] min-h-[100dvh] max-h-[100dvh] overflow-hidden bg-sky-50 font-sans text-slate-800 select-none">
       {/* Fixed Top Navigation Bar */}
-      <Navbar onOpenResume={() => setIsResumeOpen(true)} />
+      <Navbar onOpenResume={() => setIsResumeOpen(true)} timeOfDay={timeOfDay} onCycleTime={cycleTimeOfDay} />
 
       {/* Main 3D Voyage Scene */}
       <div className="scene-backdrop relative w-full h-full min-h-[100dvh] max-h-[100dvh]">
@@ -68,6 +72,7 @@ export default function App() {
           reducedMotion={reducedMotion}
           onSailingStateChange={(sailing) => setIsSailing(sailing)}
           onReady={() => setSceneReady(true)}
+          timeOfDay={timeOfDay}
         />
         </Suspense>
 

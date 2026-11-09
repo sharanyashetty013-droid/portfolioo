@@ -16,6 +16,8 @@ import { FloatingLabelsTracker, ProjectedLabel } from './FloatingLabelsTracker';
 import { FloatingLabelsOverlay } from '../ui/FloatingLabelsOverlay';
 import { ISLAND_LAYOUT } from '../../constants/islandLayout';
 import { IslandLife } from './life/IslandLife';
+import { Fireflies } from './effects/Fireflies';
+import { TimeOfDay } from './ambience';
 
 interface WorldSceneProps {
   activeSection: SectionId;
@@ -29,6 +31,7 @@ interface WorldSceneProps {
   reducedMotion?: boolean;
   onSailingStateChange?: (isSailing: boolean) => void;
   onReady?: () => void;
+  timeOfDay?: TimeOfDay;
 }
 
 // Compiles every shader up front (async where the browser supports it) before the
@@ -68,6 +71,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
   reducedMotion = false,
   onSailingStateChange,
   onReady,
+  timeOfDay = 'day',
 }) => {
   const [compiled, setCompiled] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -115,7 +119,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
       >
         <Suspense fallback={null}>
           {/* Dynamic Sky & Sunlight with Shadows */}
-          <SkyAndAtmosphere reducedMotion={reducedMotion} />
+          <SkyAndAtmosphere reducedMotion={reducedMotion} timeOfDay={timeOfDay} />
 
           {/* Rippling Sea with Custom Shader */}
           <WaterSea />
@@ -167,6 +171,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
 
           {/* Islanders, gulls, crabs, jumping fish */}
           <IslandLife reducedMotion={reducedMotion} />
+          <Fireflies reducedMotion={reducedMotion} />
 
           {/* 3D Tracker inside Canvas */}
           <FloatingLabelsTracker

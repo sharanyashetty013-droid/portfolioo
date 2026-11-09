@@ -1,16 +1,39 @@
 import React from 'react';
-import { FileText, Github, Mail } from 'lucide-react';
+import { FileText, Github, Mail, Sun, Sunset, Moon } from 'lucide-react';
+import type { TimeOfDay } from '../scene/ambience';
+
+const TIME_META: Record<TimeOfDay, { icon: typeof Sun; label: string; next: string }> = {
+  day: { icon: Sun, label: 'Daytime', next: 'sunset' },
+  sunset: { icon: Sunset, label: 'Sunset', next: 'night' },
+  night: { icon: Moon, label: 'Night', next: 'day' },
+};
 
 interface NavbarProps {
   onOpenResume: () => void;
+  timeOfDay?: TimeOfDay;
+  onCycleTime?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenResume }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, timeOfDay = 'day', onCycleTime }) => {
+  const meta = TIME_META[timeOfDay];
+  const TimeIcon = meta.icon;
   return (
     <header id="top-navbar" className="fixed top-0 left-0 right-0 z-40 pointer-events-none p-2.5 sm:p-5 pt-safe pr-safe pl-safe">
       <div className="max-w-7xl mx-auto flex items-center justify-end">
         {/* Top-Right Handcrafted Actions in solid cream with dark navy border & shadow */}
         <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2.5 bg-[#FFF8E7] border-2 border-[#0B1B2D] shadow-[4px_4px_0_#0B1B2D] rounded-full px-2 py-1 sm:px-3 sm:py-1.5">
+          {/* Time of day toggle: day -> sunset -> night */}
+          {onCycleTime && (
+            <button
+              onClick={onCycleTime}
+              className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#FDE68A] border-2 border-[#0B1B2D] shadow-[2px_2px_0_#0B1B2D] text-[#0B1B2D] hover:bg-amber-200 transition-all hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1px_1px_0_#0B1B2D] cursor-pointer"
+              title={`${meta.label}: switch to ${meta.next}`}
+              aria-label={`Time of day: ${meta.label}. Switch to ${meta.next}`}
+            >
+              <TimeIcon key={timeOfDay} className="w-3.5 h-3.5 time-icon-pop" />
+            </button>
+          )}
+
           {/* GitHub Quick Link */}
           <a
             href="https://github.com/sharanyashetty013-droid"
