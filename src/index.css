@@ -134,3 +134,6 @@ h1, h2, h3, h4, h5, h6 {
   .voyage-wake, .voyage-island, .voyage-compass, .voyage-log { animation: none; }
   .voyage-wake { stroke-dashoffset: 0; }
 }
+
+@keyframes time-icon-pop { from { transform: rotate(-90deg) scale(0.4); opacity: 0; } to { transform: none; opacity: 1; } }
+.time-icon-pop { animation: time-icon-pop 0.35s cubic-bezier(.34,1.56,.64,1) both; }
