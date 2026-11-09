@@ -8,6 +8,7 @@ import { LowPolyChimneySmoke } from '../common/LowPolyDecor';
 import { ProjectItem } from '../../../types/portfolio';
 import { portfolioData } from '../../../data/portfolioData';
 import { ISLAND_LAYOUT } from '../../../constants/islandLayout';
+import { Crane, FlowerBush, LampPost } from '../common/IslandProps';
 
 interface ProjectsIslandProps {
   isActive: boolean;
@@ -174,6 +175,17 @@ export const ProjectsIsland: React.FC<ProjectsIslandProps> = ({
         {/* Decorative Flat-shaded Boulders */}
         <LowPolyBoulder position={[5.2, 0, -4.2]} scale={0.8} />
         <LowPolyBoulder position={[-5.2, 0, 4.2]} scale={0.85} />
+
+        {/* "still building" crane + plaza lamps */}
+        <Crane position={[-9.6, 0, -4.4]} rotation={0.6} reducedMotion={reducedMotion} />
+        <WoodenCrate position={[-8.0, 0, -6.6]} scale={0.9} />
+        <WoodenCrate position={[-8.6, 0.0, -7.4]} scale={0.75} />
+        {[0, 1.571, 3.142, 4.712].map((a) => (
+          <LampPost key={a} position={[Math.cos(a + 0.785) * 4.1, 0.08, Math.sin(a + 0.785) * 4.1]} />
+        ))}
+        <FlowerBush position={[9.6, 0, -3.0]} color="#F472B6" />
+        <FlowerBush position={[2.0, 0, 10.0]} color="#FDE047" />
+        <FlowerBush position={[-3.0, 0, -9.6]} color="#C084FC" />
       </group>
 
       {/* 4. Drifting Hover Rocks along cliff perimeter */}

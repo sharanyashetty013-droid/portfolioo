@@ -7,6 +7,7 @@ import { CurvedPalm, WoodenBarrel, LowPolyBoulder, DriftingHoverRocks } from '..
 import { HackathonItem } from '../../../types/portfolio';
 import { portfolioData } from '../../../data/portfolioData';
 import { ISLAND_LAYOUT } from '../../../constants/islandLayout';
+import { Bunting, FloatingTrophy, FlowerBush } from '../common/IslandProps';
 
 interface HackathonsIslandProps {
   isActive: boolean;
@@ -176,6 +177,14 @@ export const HackathonsIsland: React.FC<HackathonsIslandProps> = ({
         <LowPolyBoulder position={[0, 0, 3.0]} scale={0.9} />
         <LowPolyBoulder position={[-2.0, 0, 1.5]} scale={0.7} />
         <LowPolyBoulder position={[2.2, 0, 1.8]} scale={0.75} />
+
+        {/* trophy hovering over the summit + festival bunting */}
+        <FloatingTrophy position={[0, 7.7, -2.5]} reducedMotion={reducedMotion} />
+        <Bunting from={[-6.8, 3.8, 0.5]} to={[-5.0, 3.8, -4.5]} reducedMotion={reducedMotion} />
+        <Bunting from={[-5.0, 3.8, -4.5]} to={[5.0, 3.8, -4.5]} flags={14} sag={1.1} reducedMotion={reducedMotion} />
+        <Bunting from={[5.0, 3.8, -4.5]} to={[6.8, 3.8, 0.5]} reducedMotion={reducedMotion} />
+        <FlowerBush position={[-8.6, 0, -3.0]} color="#F472B6" />
+        <FlowerBush position={[8.6, 0, -3.0]} color="#FDE047" />
       </group>
 
       {/* 4. Drifting Hover Rocks along cliff perimeter */}
