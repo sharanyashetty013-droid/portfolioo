@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import * as THREE from 'three';
-import { createVoyageCurve } from '../../constants/islandLayout';
+import { createVoyageCurve } from '../../constants/voyageCurve';
 
 interface RoutePathLineProps {
   currentT: number;

@@ -95,3 +95,17 @@ h1, h2, h3, h4, h5, h6 {
 .pr-safe {
   padding-right: max(0.75rem, env(safe-area-inset-right));
 }
+
+/* Backdrop behind the 3D canvas — matches the sky/sea so the load gap looks intentional */
+.scene-backdrop {
+  background: linear-gradient(180deg, #FFF3E0 0%, #CDEFEA 38%, #6FD3CA 62%, #2BA9B0 100%);
+}
+
+@keyframes scene-loader-bob {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-6px) rotate(4deg); }
+}
+.scene-loader-boat { animation: scene-loader-bob 1.6s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .scene-loader-boat { animation: none; }
+}
