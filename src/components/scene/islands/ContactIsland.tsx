@@ -2,7 +2,8 @@ import React, { useRef, useState } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { TropicalIslandBase } from '../common/TropicalIslandBase';
-import { WoodenPier, CurvedPalm, WoodenBarrel, WoodenCrate, LowPolyBoulder, DriftingHoverRocks } from '../common/StyleRefDecor';
+import { IslandPier } from '../common/IslandPier';
+import { CurvedPalm, WoodenBarrel, WoodenCrate, LowPolyBoulder, DriftingHoverRocks } from '../common/StyleRefDecor';
 import { ISLAND_LAYOUT } from '../../../constants/islandLayout';
 
 interface ContactIslandProps {
@@ -33,14 +34,7 @@ export const ContactIsland: React.FC<ContactIslandProps> = ({
       <TropicalIslandBase config={config} />
 
       {/* 2. Wooden Pier Stilt Dock meeting the boat waypoint */}
-      <WoodenPier
-        position={[
-          config.pierPosition[0] - config.position[0],
-          0,
-          config.pierPosition[2] - config.position[2],
-        ]}
-        rotation={[0, 0.45, 0]}
-      />
+      <IslandPier config={config} />
 
       {/* 3. Island Surface Props */}
       <group position={[config.position[0], config.height, config.position[2]]}>

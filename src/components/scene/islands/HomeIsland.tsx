@@ -1,7 +1,7 @@
 import React from 'react';
 import { TropicalIslandBase } from '../common/TropicalIslandBase';
+import { IslandPier } from '../common/IslandPier';
 import { 
-  WoodenPier, 
   CurvedPalm, 
   DriftingHoverRocks, 
   BluePlankCabin, 
@@ -34,17 +34,14 @@ export const HomeIsland: React.FC<HomeIslandProps> = ({
       {/* 2. Blue Plank Cabin with Corrugated Tin Lean-to & Signboard */}
       <group position={[config.position[0], config.height, config.position[2]]}>
         <BluePlankCabin
-          position={[0.2, config.height, -1.2]}
+          position={[0.2, 0.3, -1.2]}
           rotation={[0, 0.35, 0]}
           signText="Sharanya L Shetty"
         />
       </group>
 
       {/* 3. Wooden Pier on Stilts with Stairs down to Water Level */}
-      <WoodenPier
-        position={[-6.8, 0, 4.2]}
-        rotation={[0, 0.52, 0]}
-      />
+      <IslandPier config={config} />
 
       {/* 4. Rowing Boat Tethered by the Pier */}
       <RowingBoat
@@ -58,11 +55,14 @@ export const HomeIsland: React.FC<HomeIslandProps> = ({
       />
 
       {/* 5. Scenic Pond with Waterfall */}
-      <PondWaterfall
-        islandHeight={config.height}
-        islandRadius={config.radius}
-        reducedMotion={reducedMotion}
-      />
+      {/* lifted so the pond sits on the dune instead of under it */}
+      <group position={[0, 0.22, 0]}>
+        <PondWaterfall
+          islandHeight={config.height}
+          islandRadius={config.radius}
+          reducedMotion={reducedMotion}
+        />
+      </group>
 
       {/* 6. Curved Tropical Palm Trees */}
       <CurvedPalm
