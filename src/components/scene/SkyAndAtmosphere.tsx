@@ -234,13 +234,13 @@ export const SkyAndAtmosphere: React.FC<{ reducedMotion?: boolean; timeOfDay?: T
   }), []);
   // Preset cloud positions spanning the voyage archipelago
   const clouds = useMemo(() => [
-    { pos: [-60, 45, 40] as [number, number, number], speed: 0.6, scale: 1.4 },
-    { pos: [80, 52, -10] as [number, number, number], speed: 0.45, scale: 1.6 },
-    { pos: [-40, 48, -70] as [number, number, number], speed: 0.55, scale: 1.5 },
-    { pos: [110, 50, -130] as [number, number, number], speed: 0.5, scale: 1.8 },
-    { pos: [-80, 54, -180] as [number, number, number], speed: 0.65, scale: 1.6 },
-    { pos: [50, 46, -240] as [number, number, number], speed: 0.4, scale: 1.5 },
-    { pos: [-30, 55, -290] as [number, number, number], speed: 0.5, scale: 1.7 },
+    { pos: [-60, 67, 40] as [number, number, number], speed: 0.6, scale: 1.4 },
+    { pos: [80, 74, -10] as [number, number, number], speed: 0.45, scale: 1.6 },
+    { pos: [-40, 70, -70] as [number, number, number], speed: 0.55, scale: 1.5 },
+    { pos: [110, 72, -130] as [number, number, number], speed: 0.5, scale: 1.8 },
+    { pos: [-80, 76, -180] as [number, number, number], speed: 0.65, scale: 1.6 },
+    { pos: [50, 68, -240] as [number, number, number], speed: 0.4, scale: 1.5 },
+    { pos: [-30, 77, -290] as [number, number, number], speed: 0.5, scale: 1.7 },
   ], []);
 
   return (
