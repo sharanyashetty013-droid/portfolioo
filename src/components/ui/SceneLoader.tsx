@@ -224,16 +224,11 @@ export const SceneLoader: React.FC<{ visible: boolean }> = ({ visible }) => {
   const finalStartRef = useRef(-1);
   const [mounted, setMounted] = useState(true);
   const [final, setFinal] = useState(false);
-  const [progress, setProgress] = useState(0);
   const supported = useWaterDrop(canvasRef, finalStartRef, mounted);
 
   useEffect(() => {
-    if (visible) {
-      const id = setInterval(() => setProgress((p) => p + (92 - p) * 0.07), 120);
-      return () => clearInterval(id);
-    }
+    if (visible) return;
     // world is ready: drop the last drop, then let its ripple open the page
-    setProgress(100);
     setFinal(true);
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
     const t0 = performance.now();
@@ -260,24 +255,6 @@ export const SceneLoader: React.FC<{ visible: boolean }> = ({ visible }) => {
     <div ref={rootRef} className={`wd-loader ${final ? 'is-final' : ''}`} aria-hidden={!visible} role="status">
       {supported ? <canvas ref={canvasRef} className="wd-canvas" /> : <div className="wd-canvas wd-fallback" />}
 
-      <div className="wd-copy">
-        <h2 className="wd-name">
-          {'Sharanya'.split('').map((ch, i) => (
-            <span key={i} style={{ '--i': i } as React.CSSProperties}>{ch}</span>
-          ))}{' '}
-          <em>
-            {'L Shetty'.split('').map((ch, i) => (
-              <span key={i} style={{ '--i': i + 9, whiteSpace: 'pre' } as React.CSSProperties}>{ch}</span>
-            ))}
-          </em>
-        </h2>
-        <p className="wd-sub">Backend &amp; blockchain developer</p>
-      </div>
-
-      <div className="wd-status">
-        <span>{progress >= 99 ? 'Diving in' : 'Filling the ocean'}</span>
-        <span className="wd-status-bar"><i style={{ width: `${progress}%` }} /></span>
-      </div>
     </div>
   );
 };
