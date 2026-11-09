@@ -8,7 +8,7 @@ import { LowPolyPerson, PersonPose, PersonLook } from './life/LowPolyPerson';
 
 // Sharanya's avatar: rows while sailing, stands up and waves once docked
 const CAPTAIN_LOOK: PersonLook = {
-  skin: '#B07A55',
+  skin: '#F2D3BC',
   hair: '#1A1412',
   top: '#1AA6A6',      // kurta
   kurta: '#1AA6A6',
@@ -18,7 +18,7 @@ const CAPTAIN_LOOK: PersonLook = {
   scarf: '#F2765D',    // dupatta
   earrings: '#F5B82E',
   flower: '#F472B6',
-  lips: '#B4534B',
+  lips: '#D9776E',
 };
 
 interface HeroBoatProps {
