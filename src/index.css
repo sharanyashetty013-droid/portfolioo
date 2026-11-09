@@ -101,11 +101,36 @@ h1, h2, h3, h4, h5, h6 {
   background: linear-gradient(180deg, #FFF3E0 0%, #CDEFEA 38%, #6FD3CA 62%, #2BA9B0 100%);
 }
 
-@keyframes scene-loader-bob {
-  0%, 100% { transform: translateY(0) rotate(-4deg); }
-  50% { transform: translateY(-6px) rotate(4deg); }
+/* ---- Voyage loader ---- */
+.voyage-card {
+  background: #FFF8EB;
+  border: 2.5px solid #0B1B2D;
+  border-radius: 18px;
+  box-shadow: 5px 5px 0 #0B1B2D;
+  padding: 14px 18px 12px;
 }
-.scene-loader-boat { animation: scene-loader-bob 1.6s ease-in-out infinite; }
+.voyage-label { font-family: 'Caveat', cursive; font-size: 13px; fill: #0B1B2D; font-weight: 700; }
+.voyage-wake {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: voyage-wake linear infinite;
+}
+@keyframes voyage-wake { to { stroke-dashoffset: 0; } }
+.voyage-island {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: voyage-pop ease-out infinite;
+}
+@keyframes voyage-pop {
+  0% { transform: scale(1); }
+  6% { transform: scale(1.35) translateY(-2px); }
+  14%, 100% { transform: scale(1); }
+}
+.voyage-compass { animation: voyage-compass 6s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes voyage-compass { 0%,100% { transform: rotate(-12deg); } 50% { transform: rotate(14deg); } }
+.voyage-log { animation: voyage-log 1.8s ease both; }
+@keyframes voyage-log { from { opacity: 0; transform: translateY(4px); } 15%,85% { opacity: 1; transform: none; } to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .scene-loader-boat { animation: none; }
+  .voyage-wake, .voyage-island, .voyage-compass, .voyage-log { animation: none; }
+  .voyage-wake { stroke-dashoffset: 0; }
 }
