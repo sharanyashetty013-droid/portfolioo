@@ -16,6 +16,15 @@ interface HackathonsIslandProps {
   reducedMotion?: boolean;
 }
 
+// podium styling by result: silver for runner-up, bronze for 2nd runner-up
+type Tier = { stone: string; metal: string; gem: string; glow: string; ribbon: string | null };
+const TIERS: Record<string, Tier> = {
+  'Runner-up': { stone: '#E2E8F0', metal: '#D7DEE8', gem: '#C0C9D6', glow: '#F1F5F9', ribbon: '#1AA6A6' },
+  '2nd Runner-up': { stone: '#EADBC8', metal: '#CD7F32', gem: '#D98B45', glow: '#F2B27A', ribbon: '#E4614C' },
+  'Internal finals': { stone: '#CBD5E1', metal: '#3B82F6', gem: '#3B82F6', glow: '#60A5FA', ribbon: null },
+  default: { stone: '#E2E8F0', metal: '#94A3B8', gem: '#94A3B8', glow: '#CBD5E1', ribbon: null },
+};
+
 const HackathonPodium: React.FC<{
   hackathon: HackathonItem;
   isActive: boolean;
@@ -35,11 +44,13 @@ const HackathonPodium: React.FC<{
   });
 
   const stepHeight = hackathon.podiumHeight;
-  const isInternalFinals = hackathon.badge === 'Internal finals';
+  const tier = TIERS[hackathon.badge] ?? TIERS.default;
+  const isPlaced = hackathon.badge === 'Runner-up' || hackathon.badge === '2nd Runner-up';
 
   return (
     <group
       position={hackathon.slotPosition}
+      rotation={[0, Math.atan2(hackathon.slotPosition[0], hackathon.slotPosition[2]), 0]}
       onClick={(e) => {
         e.stopPropagation();
         onSelect(hackathon);
@@ -60,7 +71,7 @@ const HackathonPodium: React.FC<{
       <mesh position={[0, stepHeight / 2, 0]} receiveShadow castShadow>
         <cylinderGeometry args={[0.9, 1.05, stepHeight, 8]} />
         <meshStandardMaterial
-          color={isInternalFinals ? '#CBD5E1' : '#E2E8F0'}
+          color={tier.stone}
           roughness={0.7}
           flatShading
         />
@@ -70,12 +81,29 @@ const HackathonPodium: React.FC<{
       <mesh position={[0, stepHeight, 0]}>
         <cylinderGeometry args={[0.92, 0.92, 0.05, 8]} />
         <meshStandardMaterial
-          color={isInternalFinals ? '#3B82F6' : '#94A3B8'}
+          color={tier.metal}
           metalness={0.5}
           roughness={0.4}
           flatShading
         />
       </mesh>
+
+      {tier.ribbon && (
+        <group position={[0, stepHeight * 0.62, 0.98]}>
+          <mesh position={[-0.12, 0.12, 0]} rotation={[0, 0, 0.35]}>
+            <boxGeometry args={[0.16, 0.42, 0.03]} />
+            <meshStandardMaterial color={tier.ribbon} flatShading />
+          </mesh>
+          <mesh position={[0.12, 0.12, 0]} rotation={[0, 0, -0.35]}>
+            <boxGeometry args={[0.16, 0.42, 0.03]} />
+            <meshStandardMaterial color={tier.ribbon} flatShading />
+          </mesh>
+          <mesh position={[0, -0.12, 0.03]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.2, 0.2, 0.05, 12]} />
+            <meshStandardMaterial color={tier.metal} metalness={0.7} roughness={0.25} emissive={tier.glow} emissiveIntensity={0.2} />
+          </mesh>
+        </group>
+      )}
 
       {/* Stylized Low-Poly Trophy on top */}
       <group ref={trophyRef} position={[0, stepHeight + 0.15, 0]}>
@@ -86,29 +114,23 @@ const HackathonPodium: React.FC<{
         <mesh position={[0, 0.42, 0]} castShadow>
           <cylinderGeometry args={[0.09, 0.11, 0.32, 6]} />
           <meshStandardMaterial
-            color={isInternalFinals ? '#60A5FA' : '#94A3B8'}
+            color={tier.metal}
             metalness={0.6}
             roughness={0.3}
             flatShading
           />
         </mesh>
         <mesh position={[0, 0.8, 0]} castShadow>
-          <octahedronGeometry args={[0.34, 0]} />
+          <octahedronGeometry args={[isPlaced ? 0.42 : 0.34, 0]} />
           <meshStandardMaterial
-            color={isInternalFinals ? '#3B82F6' : '#94A3B8'}
+            color={tier.gem}
+            emissive={tier.glow}
+            emissiveIntensity={hovered ? 0.8 : isPlaced ? 0.3 : 0.08}
             metalness={0.65}
             roughness={0.3}
             flatShading
           />
         </mesh>
-        {hovered && (
-          <pointLight
-            position={[0, 1.0, 0]}
-            color={isInternalFinals ? '#60A5FA' : '#94A3B8'}
-            intensity={1.8}
-            distance={4}
-          />
-        )}
       </group>
     </group>
   );
@@ -154,7 +176,7 @@ export const HackathonsIsland: React.FC<HackathonsIslandProps> = ({
           </mesh>
         </group>
 
-        {/* 6 Real Hackathon Podiums */}
+        {/* Hackathon podiums: placements up front, the rest around the summit */}
         {hackathons.map((h) => (
           <HackathonPodium
             key={h.id}
@@ -183,8 +205,8 @@ export const HackathonsIsland: React.FC<HackathonsIslandProps> = ({
         <Bunting from={[-6.8, 3.8, 0.5]} to={[-5.0, 3.8, -4.5]} reducedMotion={reducedMotion} />
         <Bunting from={[-5.0, 3.8, -4.5]} to={[5.0, 3.8, -4.5]} flags={14} sag={1.1} reducedMotion={reducedMotion} />
         <Bunting from={[5.0, 3.8, -4.5]} to={[6.8, 3.8, 0.5]} reducedMotion={reducedMotion} />
-        <FlowerBush position={[-8.6, 0, -3.0]} color="#F472B6" />
-        <FlowerBush position={[8.6, 0, -3.0]} color="#FDE047" />
+        <FlowerBush position={[-9.8, 0, -0.6]} color="#F472B6" />
+        <FlowerBush position={[9.8, 0, -0.6]} color="#FDE047" />
       </group>
 
       {/* 4. Drifting Hover Rocks along cliff perimeter */}

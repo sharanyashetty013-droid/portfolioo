@@ -13,11 +13,12 @@ export interface ProjectItem {
   slotPosition: [number, number, number];
 }
 
-export type HackathonBadge = 'Internal finals' | 'Pitched' | 'Participant';
+export type HackathonBadge = 'Runner-up' | '2nd Runner-up' | 'Internal finals' | 'Pitched' | 'Participant';
 
 export interface HackathonItem {
   id: string;
   name: string;
+  shortName?: string; // label on the island
   role?: string;
   result: string;
   badge: HackathonBadge;
