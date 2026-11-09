@@ -15,6 +15,7 @@ import { ContactIsland } from './islands/ContactIsland';
 import { FloatingLabelsTracker, ProjectedLabel } from './FloatingLabelsTracker';
 import { FloatingLabelsOverlay } from '../ui/FloatingLabelsOverlay';
 import { ISLAND_LAYOUT } from '../../constants/islandLayout';
+import { IslandLife } from './life/IslandLife';
 
 interface WorldSceneProps {
   activeSection: SectionId;
@@ -163,6 +164,9 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
             onOpenContact={onOpenContact}
             reducedMotion={reducedMotion}
           />
+
+          {/* Islanders, gulls, crabs, jumping fish */}
+          <IslandLife reducedMotion={reducedMotion} />
 
           {/* 3D Tracker inside Canvas */}
           <FloatingLabelsTracker

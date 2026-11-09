@@ -3,6 +3,17 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { RowingBoat } from './common/StyleRefDecor';
 import { createVoyageCurve } from '../../constants/voyageCurve';
+import { LowPolyPerson, PersonPose, PersonLook } from './life/LowPolyPerson';
+
+// Sharanya's avatar: rows while sailing, stands up and waves once docked
+const CAPTAIN_LOOK: PersonLook = {
+  skin: '#B07A55',
+  hair: '#1A1412',
+  top: '#1AA6A6',
+  bottom: '#0B1B2D',
+  braid: true,
+  scarf: '#F2765D',
+};
 
 interface HeroBoatProps {
   targetT: number;
@@ -22,6 +33,10 @@ export const HeroBoat: React.FC<HeroBoatProps> = ({
   const currentTRef = useRef(targetT);
   const prevAngleRef = useRef(0);
   const isMovingRef = useRef(false);
+  const captainPose = useRef<PersonPose>('wave');
+  const captainStand = useRef(1);
+  const captainRef = useRef<THREE.Group>(null);
+  const camLocal = useMemo(() => new THREE.Vector3(), []);
 
   const wakeCount = 32;
   const wakeParticles = useMemo(() => {
@@ -47,6 +62,8 @@ export const HeroBoat: React.FC<HeroBoatProps> = ({
     const diff = targetT - currentTRef.current;
     const moving = Math.abs(diff) > 0.001;
     isMovingRef.current = moving;
+    captainPose.current = moving ? 'row' : 'wave';
+    captainStand.current += ((moving ? 0 : 1) - captainStand.current) * Math.min(1, delta * 4);
 
     if (reducedMotion) {
       currentTRef.current = targetT;
@@ -75,6 +92,21 @@ export const HeroBoat: React.FC<HeroBoatProps> = ({
 
     boatGroupRef.current.position.set(pos.x, pos.y + waveBob + 0.06, pos.z);
     boatGroupRef.current.rotation.set(wavePitch, currentAngle, waveRoll);
+
+    // When docked, the captain turns to face the camera so you can see her wave
+    if (captainRef.current) {
+      let targetYaw = 0;
+      if (!moving) {
+        boatGroupRef.current.updateMatrixWorld();
+        camLocal.copy(state.camera.position);
+        boatGroupRef.current.worldToLocal(camLocal);
+        targetYaw = Math.atan2(camLocal.x, camLocal.z);
+      }
+      let dy = targetYaw - captainRef.current.rotation.y;
+      while (dy < -Math.PI) dy += Math.PI * 2;
+      while (dy > Math.PI) dy -= Math.PI * 2;
+      captainRef.current.rotation.y += dy * Math.min(1, delta * 3);
+    }
 
     if (onBoatUpdate) {
       onBoatUpdate(pos, tangent, moving);
@@ -124,6 +156,14 @@ export const HeroBoat: React.FC<HeroBoatProps> = ({
           flagColor="#1AA6A6"
           hasLantern={true}
         />
+        <group ref={captainRef} position={[0, 0.05, 1.05]} scale={1.3}>
+          <LowPolyPerson
+            look={CAPTAIN_LOOK}
+            pose={captainPose}
+            standRef={captainStand}
+            reducedMotion={reducedMotion}
+          />
+        </group>
       </group>
       <instancedMesh
         ref={wakeMeshRef}
