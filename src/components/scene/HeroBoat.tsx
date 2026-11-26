@@ -8,16 +8,19 @@ import { createVoyageCurve } from '../../constants/voyageCurve';
 import { LowPolyPerson, PersonPose, PersonLook, PersonAccessory } from './life/LowPolyPerson';
 import type { TimeOfDay } from './timeOfDay';
 
-// Sharanya's avatar: rows while sailing, stands up and waves once docked
+// Sharanya's avatar (in a frock): rows while sailing, stands up and waves once docked
 const CAPTAIN_LOOK: PersonLook = {
   skin: '#F2D3BC',
   hair: '#1A1412',
-  top: '#1AA6A6',      // kurta
-  kurta: '#1AA6A6',
-  bottom: '#F5E6D3',   // leggings
+  top: '#F5A9BE',
+  bottom: '#F2D3BC',
+  frock: '#F5A9BE',    // blush pink frock
+  ribbon: '#FFFFFF',   // white waist ribbon + bow
+  collar: '#FFF8F0',   // round white collar
+  socks: '#FFFFFF',
+  shoes: '#7A3B2E',
   braid: true,
   longHair: true,
-  scarf: '#F2765D',    // dupatta
   earrings: '#F5B82E',
   flower: '#F472B6',
   lips: '#D9776E',
