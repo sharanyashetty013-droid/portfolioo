@@ -60,7 +60,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, timeOfDay = 'day',
             className="flex items-center gap-1.5 px-3 py-1 sm:py-1.5 btn-glow !rounded-full text-xs"
             title="View Full Curriculum Vitae"
           >
-            <FileText className="w-3.5 h-3.5 text-white" />
+            <FileText className="w-3.5 h-3.5" />
             <span className="font-sans">View CV</span>
           </button>
         </div>
