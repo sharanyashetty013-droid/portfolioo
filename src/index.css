@@ -218,3 +218,61 @@ h1, h2, h3, h4, h5, h6 {
 @media (prefers-reduced-motion: reduce) {
   .card-3d-in, .modal-3d-in, .label-pop { animation: none; }
 }
+
+/* ---- Premium glass (adapts to day / sunset / night) ---- */
+:root {
+  --g-bg: rgba(255, 255, 255, 0.22);
+  --g-edge: rgba(255, 255, 255, 0.55);
+  --g-hi: rgba(255, 255, 255, 0.7);
+  --g-ink: #0E2230;
+  --g-ink-2: rgba(14, 34, 48, 0.72);
+  --g-chip: rgba(255, 255, 255, 0.35);
+  --g-shadow: 0 30px 60px -30px rgba(8, 40, 60, 0.45);
+}
+[data-time="sunset"] {
+  --g-bg: rgba(255, 240, 228, 0.2);
+  --g-edge: rgba(255, 225, 205, 0.6);
+  --g-hi: rgba(255, 245, 235, 0.75);
+  --g-ink: #2E140A;
+  --g-ink-2: rgba(46, 20, 10, 0.72);
+  --g-chip: rgba(255, 245, 235, 0.35);
+  --g-shadow: 0 30px 60px -30px rgba(90, 35, 10, 0.45);
+}
+[data-time="night"] {
+  --g-bg: rgba(255, 255, 255, 0.07);
+  --g-edge: rgba(255, 255, 255, 0.16);
+  --g-hi: rgba(255, 255, 255, 0.28);
+  --g-ink: #F5F7FB;
+  --g-ink-2: rgba(225, 233, 245, 0.72);
+  --g-chip: rgba(255, 255, 255, 0.08);
+  --g-shadow: 0 30px 70px -25px rgba(0, 0, 0, 0.75);
+}
+.glass {
+  color: var(--g-ink);
+  background: linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0) 45%), var(--g-bg);
+  -webkit-backdrop-filter: blur(28px) saturate(180%); backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid var(--g-edge);
+  border-radius: 24px;
+  box-shadow: inset 0 1px 0 var(--g-hi), inset 0 -1px 0 rgba(255,255,255,0.04), var(--g-shadow);
+  font-family: 'Geist', 'Nunito', sans-serif;
+}
+.glass-pill { border-radius: 999px; }
+.glass :is(p, div, span) { color: inherit; }
+#hero-card :is(p, div) { color: var(--g-ink-2); }
+.hero-name, .hero-name em {
+  font-family: 'Geist', sans-serif; font-weight: 600; letter-spacing: -0.04em; color: var(--g-ink);
+}
+.glass-chip {
+  font: 500 12px/1 'Geist', sans-serif; color: var(--g-ink);
+  background: var(--g-chip); border: 1px solid var(--g-edge);
+}
+.btn-glow, .btn-glass { font-family: 'Geist', sans-serif; font-weight: 600; border-radius: 999px; }
+.btn-glow { color: #0E2230; background: #F5F7FB; box-shadow: 0 8px 24px -10px rgba(0,0,0,0.5); }
+.btn-glow:hover { background: #FFFFFF; box-shadow: 0 12px 28px -10px rgba(0,0,0,0.55); }
+[data-time="day"] .btn-glow, [data-time="sunset"] .btn-glow { color: #F5F7FB; background: var(--g-ink); }
+.btn-glass { color: var(--g-ink); background: var(--g-chip); border: 1px solid var(--g-edge); }
+.btn-glass:hover { border-color: var(--g-hi); }
+#voyage-controls button:not(:disabled) { color: var(--g-ink) !important; font-family: 'Geist', sans-serif; }
+#voyage-controls button:not(:disabled):hover { background: var(--g-chip) !important; }
+.btn-glow:focus-visible, .btn-glass:focus-visible { outline: 2px solid var(--g-ink); outline-offset: 3px; }
+

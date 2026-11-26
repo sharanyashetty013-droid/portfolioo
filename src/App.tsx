@@ -59,7 +59,7 @@ export default function App() {
 
 
   return (
-    <div className="relative w-screen h-[100dvh] min-h-[100dvh] max-h-[100dvh] overflow-hidden bg-sky-50 font-sans text-slate-800 select-none">
+    <div className="relative w-screen h-[100dvh] min-h-[100dvh] max-h-[100dvh] overflow-hidden bg-sky-50 font-sans text-slate-800 select-none" data-time={timeOfDay}>
       {/* Fixed Top Navigation Bar */}
       <Navbar onOpenResume={() => setIsResumeOpen(true)} timeOfDay={timeOfDay} onCycleTime={cycleTimeOfDay} />
 
