@@ -13,6 +13,11 @@ export const portfolioData: PortfolioData = {
     resumeUrl: "/resume.pdf",
     location: "Karkala, Udupi, Karnataka",
   },
+  nowBuilding: {
+    name: "midsave",
+    line: "Crash-tests your app's saves",
+    url: "https://github.com/sharanyashetty013-droid/midsave",
+  },
   education: [
     {
       institution: "NMAM Institute of Technology (NMAMIT), Nitte",

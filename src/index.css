@@ -313,3 +313,51 @@ h1, h2, h3, h4, h5, h6 {
 .modal-3d-in hr, .modal-3d-in [class*="border-t-2"] { border-color: var(--g-edge) !important; border-width: 1px 0 0 0 !important; }
 .modal-3d-in [class*="border-b-2"] { border-color: var(--g-edge) !important; border-width: 0 0 1px 0 !important; }
 .modal-3d-in [class*="font-bold"][class*="text-[#0B1B2D]"], .modal-3d-in [class*="font-extrabold"][class*="text-[#0B1B2D]"] { color: var(--g-ink) !important; }
+
+/* ---- Now building signpost label ---- */
+.now-sign {
+  display: flex; align-items: center; gap: 10px; width: max-content;
+  padding: 9px 14px; border-radius: 14px; text-decoration: none;
+  font: 400 13px/1.25 'Geist', 'Nunito', sans-serif; color: var(--g-ink);
+  background: var(--g-modal, rgba(255,255,255,0.6));
+  -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%);
+  border: 1px solid var(--g-edge);
+  box-shadow: inset 0 1px 0 var(--g-hi), 0 14px 30px -16px rgba(0,0,0,0.5);
+  transition: transform 0.15s ease;
+}
+.now-sign:hover { transform: translateY(-2px); }
+.now-sign:focus-visible { outline: 2px solid var(--g-ink); outline-offset: 3px; }
+.now-sign b { font-weight: 600; }
+.now-sign small { display: block; font-size: 11.5px; color: var(--g-ink-2); margin-top: 2px; }
+.now-sign-dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: #3DDC97; animation: now-pulse 2.4s ease-out infinite; }
+@keyframes now-pulse { 0% { box-shadow: 0 0 0 0 rgba(61,220,151,0.55); } 70%, 100% { box-shadow: 0 0 0 9px rgba(61,220,151,0); } }
+@media (prefers-reduced-motion: reduce) { .now-sign-dot { animation: none; } }
+
+/* ---- Fast mode page: same glass look, no 3D ---- */
+.fast-view {
+  --fv-bg: linear-gradient(180deg, #E8F8F6 0%, #C6ECE7 55%, #9ADBD4 100%);
+  background: var(--fv-bg); color: var(--g-ink); font-family: 'Geist', 'Nunito', sans-serif;
+}
+[data-time="sunset"] .fast-view { --fv-bg: linear-gradient(180deg, #FFEDE0 0%, #FBD2BA 55%, #F2A988 100%); }
+[data-time="night"] .fast-view { --fv-bg: linear-gradient(180deg, #0B1830 0%, #12274A 60%, #183462 100%); }
+.fast-view > div { background: transparent !important; }
+.fast-view :is(h1, h2, h3)[class], .fast-view :is(h1, h2, h3) { font-family: 'Geist', sans-serif !important; font-weight: 600 !important; letter-spacing: -0.03em; color: var(--g-ink) !important; }
+.fast-view :is(h4, h5, p, li) { color: var(--g-ink-2) !important; font-family: 'Geist', sans-serif; }
+.fast-view [class*="text-[#"], .fast-view [class*="text-slate"] { color: var(--g-ink-2) !important; }
+.fast-view [class*="font-bold"][class*="text-[#0B1B2D]"], .fast-view [class*="font-extrabold"][class*="text-[#0B1B2D]"] { color: var(--g-ink) !important; }
+.fast-view [class*="shadow-["] { box-shadow: none !important; }
+.fast-view [class*="border-[#0B1B2D]"] { border-color: var(--g-edge) !important; }
+.fast-view [class*="border-[#0B1B2D]"]:not([class*="border-t"]):not([class*="border-b"]) { border-width: 1px !important; }
+.fast-view [class*="bg-[#FFF"], .fast-view [class*="bg-white"] {
+  background: var(--g-bg) !important; color: var(--g-ink) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(170%); backdrop-filter: blur(20px) saturate(170%);
+  box-shadow: inset 0 1px 0 var(--g-hi) !important;
+}
+.fast-view [class*="bg-[#FFF"][class*="rounded-2xl"], .fast-view [class*="bg-[#FFF"][class*="rounded-xl"] { border-radius: 20px !important; }
+.fast-view .btn-chunky-teal, .fast-view .btn-chunky-light {
+  border: 1px solid var(--g-edge) !important; box-shadow: none !important; border-radius: 999px !important;
+  font-family: 'Geist', sans-serif; font-weight: 600;
+}
+.fast-view .btn-chunky-teal { background: var(--g-ink) !important; color: #F5F7FB !important; }
+[data-time="night"] .fast-view .btn-chunky-teal { background: #F5F7FB !important; color: #0E2230 !important; }
+.fast-view .btn-chunky-light { background: var(--g-chip) !important; color: var(--g-ink) !important; }
