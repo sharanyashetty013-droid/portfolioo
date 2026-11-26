@@ -52,7 +52,7 @@ export const HeroBoat: React.FC<HeroBoatProps> = ({
   reducedMotion = false,
   timeOfDay = 'day',
 }) => {
-  const accessory: PersonAccessory = timeOfDay === 'night' ? 'lantern' : timeOfDay === 'day' ? 'sunglasses' : null;
+  const accessory: PersonAccessory = timeOfDay === 'night' ? 'lantern' : null;
   const lastActive = useRef(performance.now());
   const [bubble, setBubble] = useState<string | null>(null);
   const lineIndex = useRef(Math.floor(Math.random() * CAPTAIN_LINES.length));
