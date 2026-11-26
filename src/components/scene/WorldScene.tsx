@@ -196,6 +196,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
             targetT={targetT}
             onBoatUpdate={handleBoatUpdate}
             reducedMotion={reducedMotion}
+            timeOfDay={timeOfDay}
           />
 
           {/* Dynamic Camera Chase & Island Framing */}

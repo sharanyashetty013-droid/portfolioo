@@ -2,7 +2,8 @@ import React, { useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 
-export type PersonPose = 'walk' | 'idle' | 'cheer' | 'row' | 'wave';
+export type PersonPose = 'walk' | 'idle' | 'cheer' | 'row' | 'wave' | 'type';
+export type PersonAccessory = 'lantern' | 'sunglasses' | null;
 
 export interface PersonLook {
   skin: string;
@@ -28,6 +29,8 @@ interface LowPolyPersonProps {
   standRef?: React.MutableRefObject<number>;
   phase?: number;
   reducedMotion?: boolean;
+  /** Small prop that changes with the time of day */
+  accessory?: PersonAccessory;
 }
 
 const mat = (color: string, rough = 0.8) => (
@@ -44,7 +47,9 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
   standRef,
   phase = 0,
   reducedMotion = false,
+  accessory = null,
 }) => {
+  const laptop = useRef<THREE.Group>(null);
   const hips = useRef<THREE.Group>(null);
   const torso = useRef<THREE.Group>(null);
   const head = useRef<THREE.Group>(null);
@@ -104,7 +109,18 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
         headTilt = 0.12 + Math.sin(t * 1.4) * 0.05;
         break;
       }
+      case 'type': {
+        // hands on the laptop keys, small quick taps, head looking down at the screen
+        armLX = -1.15 + Math.max(0, Math.sin(t * 14)) * 0.08;
+        armRX = -1.15 + Math.max(0, Math.sin(t * 14 + 1.7)) * 0.08;
+        armLZ = 0.32;
+        armRZ = -0.32;
+        headTilt = Math.sin(t * 0.7) * 0.04;
+        break;
+      }
     }
+    head.current.rotation.x = p === 'type' ? 0.28 : 0;
+    if (laptop.current) laptop.current.visible = p === 'type';
 
     // sitting: fold legs forward, drop hips a touch
     const sit = 1 - stand;
@@ -162,6 +178,24 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
             </mesh>
           )}
 
+          {/* laptop, only shown while typing */}
+          <group ref={laptop} position={[0, 0.1, 0.4]} visible={false}>
+            <mesh>
+              <boxGeometry args={[0.36, 0.02, 0.24]} />
+              <meshStandardMaterial color="#C9CED6" metalness={0.5} roughness={0.35} />
+            </mesh>
+            <group position={[0, 0.01, -0.12]} rotation={[-0.35, 0, 0]}>
+              <mesh position={[0, 0.12, 0]}>
+                <boxGeometry args={[0.36, 0.24, 0.015]} />
+                <meshStandardMaterial color="#C9CED6" metalness={0.5} roughness={0.35} />
+              </mesh>
+              <mesh position={[0, 0.12, 0.009]}>
+                <planeGeometry args={[0.32, 0.2]} />
+                <meshBasicMaterial color="#4CE0B3" toneMapped={false} />
+              </mesh>
+            </group>
+          </group>
+
           {/* arms (pivot at shoulder) */}
           {([[-0.22, armL], [0.22, armR]] as const).map(([x, ref], i) => (
             <group key={i} ref={ref} position={[x, 0.44, 0]}>
@@ -177,6 +211,25 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
                 <icosahedronGeometry args={[0.055, 0]} />
                 {mat(look.skin, 0.7)}
               </mesh>
+              {i === 0 && accessory === 'lantern' && (
+                <group position={[0, -0.62, 0.02]}>
+                  <mesh position={[0, 0.12, 0]}>
+                    <torusGeometry args={[0.045, 0.01, 4, 10]} />
+                    <meshStandardMaterial color="#3B2A20" />
+                  </mesh>
+                  <mesh>
+                    <boxGeometry args={[0.13, 0.17, 0.13]} />
+                    <meshStandardMaterial color="#FFC861" emissive="#FFB547" emissiveIntensity={2.2} toneMapped={false} />
+                  </mesh>
+                  {[0.095, -0.095].map((y) => (
+                    <mesh key={y} position={[0, y, 0]}>
+                      <boxGeometry args={[0.16, 0.025, 0.16]} />
+                      <meshStandardMaterial color="#3B2A20" />
+                    </mesh>
+                  ))}
+                  <pointLight color="#FFB547" intensity={2.4} distance={5} decay={1.6} />
+                </group>
+              )}
             </group>
           ))}
 
@@ -261,6 +314,20 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
                 <boxGeometry args={[0.06, 0.018, 0.01]} />
                 <meshBasicMaterial color={look.lips} />
               </mesh>
+            )}
+            {accessory === 'sunglasses' && (
+              <group position={[0, 0.015, 0.178]}>
+                {[-0.068, 0.068].map((x) => (
+                  <mesh key={x} position={[x, 0, 0]}>
+                    <boxGeometry args={[0.1, 0.06, 0.02]} />
+                    <meshStandardMaterial color="#111827" metalness={0.6} roughness={0.15} />
+                  </mesh>
+                ))}
+                <mesh>
+                  <boxGeometry args={[0.05, 0.012, 0.015]} />
+                  <meshStandardMaterial color="#111827" />
+                </mesh>
+              </group>
             )}
             {look.bun && (
               <mesh position={[0, 0.22, -0.08]} castShadow>

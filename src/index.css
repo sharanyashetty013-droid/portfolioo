@@ -313,3 +313,23 @@ h1, h2, h3, h4, h5, h6 {
 .modal-3d-in hr, .modal-3d-in [class*="border-t-2"] { border-color: var(--g-edge) !important; border-width: 1px 0 0 0 !important; }
 .modal-3d-in [class*="border-b-2"] { border-color: var(--g-edge) !important; border-width: 0 0 1px 0 !important; }
 .modal-3d-in [class*="font-bold"][class*="text-[#0B1B2D]"], .modal-3d-in [class*="font-extrabold"][class*="text-[#0B1B2D]"] { color: var(--g-ink) !important; }
+
+/* ---- Captain speech bubble ---- */
+.captain-bubble {
+  position: relative; width: max-content; max-width: 220px;
+  padding: 10px 14px; border-radius: 16px;
+  font: 500 13px/1.35 'Geist', 'Nunito', sans-serif; color: var(--g-ink);
+  background: var(--g-modal, rgba(255,255,255,0.6));
+  -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%);
+  border: 1px solid var(--g-edge);
+  box-shadow: inset 0 1px 0 var(--g-hi), 0 14px 30px -14px rgba(0,0,0,0.5);
+  animation: bubble-in 0.35s cubic-bezier(.34,1.56,.64,1) both;
+  transform-origin: 50% 100%;
+}
+.captain-bubble::after {
+  content: ""; position: absolute; left: 50%; bottom: -7px; width: 12px; height: 12px; margin-left: -6px;
+  background: inherit; border-right: 1px solid var(--g-edge); border-bottom: 1px solid var(--g-edge);
+  transform: rotate(45deg); -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+@keyframes bubble-in { from { opacity: 0; transform: translateY(6px) scale(0.9); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .captain-bubble { animation: none; } }
