@@ -9,6 +9,7 @@ import { WaterSea } from './WaterSea';
 import { RoutePathLine } from './RoutePathLine';
 import { HeroBoat } from './HeroBoat';
 import { HomeIsland } from './islands/HomeIsland';
+import { NowBuildingSign } from './common/NowBuildingSign';
 import { SkillsIsland } from './islands/SkillsIsland';
 import { ProjectsIsland } from './islands/ProjectsIsland';
 import { HackathonsIsland } from './islands/HackathonsIsland';
@@ -142,6 +143,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
             onOpenResume={onOpenResume}
             reducedMotion={reducedMotion} 
           />
+          <NowBuildingSign showLabel={activeSection === 'home' && !isSailing && !isAnyModalOpen} />
 
           {/* Chapter 2: Skills */}
           <SkillsIsland

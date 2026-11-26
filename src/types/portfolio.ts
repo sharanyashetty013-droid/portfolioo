@@ -62,6 +62,12 @@ export interface PortfolioData {
     resumeUrl: string;
     location: string;
   };
+  /** Shown on the signpost on Home island. Change it whenever you start something new. */
+  nowBuilding: {
+    name: string;
+    line: string;
+    url: string;
+  };
   education: EducationItem[];
   leadership: string[];
   projects: ProjectItem[];

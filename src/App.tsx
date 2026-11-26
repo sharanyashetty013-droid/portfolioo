@@ -3,6 +3,7 @@ import { SectionId, ProjectItem, HackathonItem, SkillGroup } from './types/portf
 import { Navbar } from './components/navigation/Navbar';
 import { SceneLoader } from './components/ui/SceneLoader';
 import { OverlayHUD } from './components/ui/OverlayHUD';
+import { SimpleView } from './components/ui/SimpleView';
 import { ProjectModal } from './components/modals/ProjectModal';
 import { HackathonModal } from './components/modals/HackathonModal';
 import { SkillModal } from './components/modals/SkillModal';
@@ -37,6 +38,22 @@ export default function App() {
   const cycleTimeOfDay = () =>
     setTimeOfDay((t) => TIME_ORDER[(TIME_ORDER.indexOf(t) + 1) % TIME_ORDER.length]);
 
+  // Fast mode: a plain one-page view with no 3D, for people in a hurry.
+  // Turn it on with the navbar button or by sharing a link ending in ?fast
+  const [fastMode, setFastMode] = useState<boolean>(() => {
+    try {
+      if (new URLSearchParams(window.location.search).has('fast')) return true;
+      return window.localStorage.getItem('fastMode') === '1';
+    } catch {
+      return false;
+    }
+  });
+  const toggleFastMode = () =>
+    setFastMode((on) => {
+      try { window.localStorage.setItem('fastMode', on ? '0' : '1'); } catch { /* storage may be blocked */ }
+      return !on;
+    });
+
 
 
   // Detect prefers-reduced-motion
@@ -61,8 +78,20 @@ export default function App() {
   return (
     <div className="relative w-screen h-[100dvh] min-h-[100dvh] max-h-[100dvh] overflow-hidden bg-sky-50 font-sans text-slate-800 select-none" data-time={timeOfDay}>
       {/* Fixed Top Navigation Bar */}
-      <Navbar onOpenResume={() => setIsResumeOpen(true)} timeOfDay={timeOfDay} onCycleTime={cycleTimeOfDay} />
+      <Navbar onOpenResume={() => setIsResumeOpen(true)} timeOfDay={timeOfDay} onCycleTime={cycleTimeOfDay} fastMode={fastMode} onToggleFast={toggleFastMode} />
 
+      {fastMode ? (
+        <div className="fast-view absolute inset-0 overflow-y-auto">
+          <SimpleView
+            onSelectProject={(p) => setSelectedProject(p)}
+            onSelectHackathon={(h) => setSelectedHackathon(h)}
+            onSelectSkillGroup={(g) => setSelectedSkillGroup(g)}
+            onOpenResume={() => setIsResumeOpen(true)}
+            onOpenContact={() => setIsContactOpen(true)}
+          />
+        </div>
+      ) : (
+      <>
       {/* Main 3D Voyage Scene */}
       <div className="scene-backdrop relative w-full h-full min-h-[100dvh] max-h-[100dvh]">
         <SceneLoader visible={!sceneReady} />
@@ -94,6 +123,8 @@ export default function App() {
           introDone={introDone}
         />
       </div>
+      </>
+      )}
 
       {/* Interactive Modals */}
       <ProjectModal

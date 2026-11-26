@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Github, Mail, Sun, Sunset, Moon } from 'lucide-react';
+import { FileText, Github, Mail, Sun, Sunset, Moon, Zap, Box } from 'lucide-react';
 import type { TimeOfDay } from '../scene/timeOfDay';
 
 const TIME_META: Record<TimeOfDay, { icon: typeof Sun; label: string; next: string }> = {
@@ -12,9 +12,11 @@ interface NavbarProps {
   onOpenResume: () => void;
   timeOfDay?: TimeOfDay;
   onCycleTime?: () => void;
+  fastMode?: boolean;
+  onToggleFast?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, timeOfDay = 'day', onCycleTime }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, timeOfDay = 'day', onCycleTime, fastMode = false, onToggleFast }) => {
   const meta = TIME_META[timeOfDay];
   const TimeIcon = meta.icon;
   return (
@@ -31,6 +33,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenResume, timeOfDay = 'day',
               aria-label={`Time of day: ${meta.label}. Switch to ${meta.next}`}
             >
               <TimeIcon key={timeOfDay} className="w-3.5 h-3.5 time-icon-pop" />
+            </button>
+          )}
+
+          {/* Fast mode: switch between the 3D islands and a plain one-page view */}
+          {onToggleFast && (
+            <button
+              onClick={onToggleFast}
+              className="flex items-center gap-1.5 h-7 sm:h-8 px-2.5 rounded-full btn-glass !rounded-full text-xs"
+              title={fastMode ? 'Back to the 3D islands' : 'Fast mode: plain page, no 3D'}
+              aria-pressed={fastMode}
+            >
+              {fastMode ? <Box className="w-3.5 h-3.5" /> : <Zap className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{fastMode ? '3D view' : 'Fast mode'}</span>
             </button>
           )}
 
