@@ -1,37 +1,80 @@
-import React, { useRef, useMemo, useEffect } from 'react';
+import React, { useRef, useMemo, useEffect, useState, useCallback } from 'react';
+import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { RowingBoat } from './common/StyleRefDecor';
 import { StaticMerge } from './common/StaticMerge';
 import { createVoyageCurve } from '../../constants/voyageCurve';
-import { LowPolyPerson, PersonPose, PersonLook } from './life/LowPolyPerson';
+import { LowPolyPerson, PersonPose, PersonLook, PersonAccessory } from './life/LowPolyPerson';
+import type { TimeOfDay } from './timeOfDay';
 
-// Sharanya's avatar: rows while sailing, stands up and waves once docked
+// Sharanya's avatar (in a frock): rows while sailing, stands up and waves once docked
 const CAPTAIN_LOOK: PersonLook = {
   skin: '#F2D3BC',
   hair: '#1A1412',
-  top: '#1AA6A6',      // kurta
-  kurta: '#1AA6A6',
-  bottom: '#F5E6D3',   // leggings
+  top: '#F5A9BE',
+  bottom: '#F2D3BC',
+  frock: '#F5A9BE',    // blush pink frock
+  ribbon: '#FFFFFF',   // white waist ribbon + bow
+  collar: '#FFF8F0',   // round white collar
+  socks: '#FFFFFF',
+  shoes: '#7A3B2E',
   braid: true,
   longHair: true,
-  scarf: '#F2765D',    // dupatta
   earrings: '#F5B82E',
   flower: '#F472B6',
   lips: '#D9776E',
 };
 
+// Things she says when you click her. Keep these true and tech-only.
+const CAPTAIN_LINES = [
+  'Crash-testing my own code. It mostly survives.',
+  'midsave v0.1 is out. Try killing your app mid-save.',
+  'I got a PR merged into golang/go.',
+  'Gitea runs a bit of my code now.',
+  'If it never reached the disk, it never happened.',
+  'Backend by day, smart contracts by night.',
+  'Ask me about Go, Solidity or DSA.',
+];
+
+const IDLE_AFTER_MS = 10_000;
+
 interface HeroBoatProps {
   targetT: number;
   onBoatUpdate?: (pos: THREE.Vector3, forward: THREE.Vector3, isMoving: boolean) => void;
   reducedMotion?: boolean;
+  timeOfDay?: TimeOfDay;
 }
 
 export const HeroBoat: React.FC<HeroBoatProps> = ({
   targetT,
   onBoatUpdate,
   reducedMotion = false,
+  timeOfDay = 'day',
 }) => {
+  const accessory: PersonAccessory = timeOfDay === 'night' ? 'lantern' : null;
+  const lastActive = useRef(performance.now());
+  const [bubble, setBubble] = useState<string | null>(null);
+  const lineIndex = useRef(Math.floor(Math.random() * CAPTAIN_LINES.length));
+
+  // Any visitor activity wakes her up from typing
+  useEffect(() => {
+    const wake = () => { lastActive.current = performance.now(); };
+    const events = ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart'] as const;
+    events.forEach((e) => window.addEventListener(e, wake, { passive: true }));
+    return () => events.forEach((e) => window.removeEventListener(e, wake));
+  }, []);
+
+  useEffect(() => {
+    if (!bubble) return;
+    const id = window.setTimeout(() => setBubble(null), 4500);
+    return () => window.clearTimeout(id);
+  }, [bubble]);
+
+  const sayNext = useCallback(() => {
+    lineIndex.current = (lineIndex.current + 1) % CAPTAIN_LINES.length;
+    setBubble(CAPTAIN_LINES[lineIndex.current]);
+  }, []);
   const boatGroupRef = useRef<THREE.Group>(null);
   const wakeMeshRef = useRef<THREE.InstancedMesh>(null);
   const curve = useMemo(() => createVoyageCurve(), []);
@@ -86,8 +129,10 @@ export const HeroBoat: React.FC<HeroBoatProps> = ({
     }
     const moving = Math.abs(targetT - currentTRef.current) > 0.0004;
     isMovingRef.current = moving;
-    captainPose.current = moving ? 'row' : 'wave';
-    captainStand.current += ((moving ? 0 : 1) - captainStand.current) * Math.min(1, delta * 4);
+    const idle = !moving && !reducedMotion && performance.now() - lastActive.current > IDLE_AFTER_MS;
+    captainPose.current = moving ? 'row' : idle ? 'type' : 'wave';
+    const standTarget = moving || idle ? 0 : 1;
+    captainStand.current += (standTarget - captainStand.current) * Math.min(1, delta * 4);
 
     const tClamped = Math.max(0.0001, Math.min(0.9999, currentTRef.current));
     const pos = curve.getPointAt(tClamped);
@@ -174,13 +219,30 @@ export const HeroBoat: React.FC<HeroBoatProps> = ({
           hasLantern={true}
         />
         </StaticMerge>
-        <group ref={captainRef} position={[0, 0.05, 1.05]} scale={1.55}>
+        <group
+          ref={captainRef}
+          position={[0, 0.05, 1.05]}
+          scale={1.55}
+          onClick={(e) => { e.stopPropagation(); lastActive.current = performance.now(); sayNext(); }}
+          onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer'; }}
+          onPointerOut={() => { document.body.style.cursor = ''; }}
+        >
           <LowPolyPerson
             look={CAPTAIN_LOOK}
             pose={captainPose}
             standRef={captainStand}
             reducedMotion={reducedMotion}
+            accessory={accessory}
           />
+          {/* bigger invisible target so she's easy to click */}
+          <mesh position={[0, 0.8, 0]} visible={false}>
+            <boxGeometry args={[0.7, 1.6, 0.7]} />
+          </mesh>
+          {bubble && (
+            <Html position={[0, 1.75, 0]} center zIndexRange={[30, 0]} style={{ pointerEvents: 'none' }}>
+              <div className="captain-bubble" role="status">{bubble}</div>
+            </Html>
+          )}
         </group>
       </group>
       <instancedMesh
