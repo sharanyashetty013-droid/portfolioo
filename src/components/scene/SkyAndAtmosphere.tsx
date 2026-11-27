@@ -44,6 +44,7 @@ interface CloudProps {
   material: THREE.Material;
 }
 
+const _white = new THREE.Color('#FFFFFF');
 const LowPolyCloud: React.FC<CloudProps> = ({ initialPosition, speed, scale = 1, material }) => {
   const groupRef = useRef<THREE.Group>(null);
   const startX = initialPosition[0];
@@ -177,7 +178,7 @@ export const SkyAndAtmosphere: React.FC<{ reducedMotion?: boolean; timeOfDay?: T
   const moonRef = useRef<THREE.Mesh>(null);
   const palette = useMemo(() => makePalette(), []);
   const cloudMaterial = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: '#FFFFFF', roughness: 0.9, flatShading: true }),
+    () => new THREE.MeshStandardMaterial({ color: '#FFFFFF', roughness: 0.9, flatShading: true, emissive: '#FFFFFF', emissiveIntensity: 0.4 }),
     []
   );
 
@@ -210,6 +211,8 @@ export const SkyAndAtmosphere: React.FC<{ reducedMotion?: boolean; timeOfDay?: T
     }
     if (fogRef.current) fogRef.current.color.copy(palette.fog);
     cloudMaterial.color.copy(palette.cloud);
+    // keep sky clouds light (self-lit) so they never turn into dark lumps at sunset or night
+    cloudMaterial.emissive.copy(palette.cloud).lerp(_white, 0.65).multiplyScalar(0.6);
 
     // big low sun at sunset, moon at night (placed relative to the camera so they feel infinitely far)
     const cam = state.camera.position;

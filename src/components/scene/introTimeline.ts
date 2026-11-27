@@ -6,8 +6,8 @@
  */
 export const intro = { start: -1, skip: false };
 
-export const MAP_HOLD = 2.3; // seconds the camera holds the map view while the ink floods into water
-export const SWOOP = 3.6;    // then the dive down to Home
+export const MAP_HOLD = 1.4; // slow drift through the clouds at the start of the flight
+export const SWOOP = 4.6;    // then the dive down through the clouds to Home
 
 export const introElapsed = (clockTime: number) =>
   intro.skip ? 1e6 : intro.start < 0 ? 0 : clockTime - intro.start;

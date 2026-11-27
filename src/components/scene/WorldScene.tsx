@@ -11,6 +11,7 @@ import { HeroBoat } from './HeroBoat';
 import { HomeIsland } from './islands/HomeIsland';
 import { SeaLife } from './life/SeaLife';
 import { PostFX } from './effects/PostFX';
+import { IntroClouds } from './effects/IntroClouds';
 import { SkillsIsland } from './islands/SkillsIsland';
 import { ProjectsIsland } from './islands/ProjectsIsland';
 import { HackathonsIsland } from './islands/HackathonsIsland';
@@ -184,6 +185,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
           <IslandLife reducedMotion={reducedMotion} />
           <Fireflies reducedMotion={reducedMotion} />
           <SeaLife timeOfDay={timeOfDay} reducedMotion={reducedMotion} />
+          <IntroClouds reducedMotion={reducedMotion} timeOfDay={timeOfDay} />
 
           {/* 3D Tracker inside Canvas */}
           <FloatingLabelsTracker
