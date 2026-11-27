@@ -5,12 +5,13 @@ import { StaticMerge } from '../common/StaticMerge';
 import { 
   CurvedPalm, 
   DriftingHoverRocks, 
-  BluePlankCabin, 
   RowingBoat,
   WoodenBarrel,
   LowPolyBoulder
 } from '../common/StyleRefDecor';
 import { PondWaterfall } from '../common/PondWaterfall';
+import { Cottage } from '../common/Cottage';
+import type { TimeOfDay } from '../timeOfDay';
 import { Campfire, FlowerBush, LampPost } from '../common/IslandProps';
 import { ISLAND_LAYOUT } from '../../../constants/islandLayout';
 import { SectionId } from '../../../types/portfolio';
@@ -21,10 +22,12 @@ interface HomeIslandProps {
   onNavigate?: (section: SectionId) => void;
   onOpenResume?: () => void;
   reducedMotion?: boolean;
+  timeOfDay?: TimeOfDay;
 }
 
 export const HomeIsland: React.FC<HomeIslandProps> = ({ 
-  reducedMotion = false 
+  reducedMotion = false,
+  timeOfDay = 'day',
 }) => {
   const config = ISLAND_LAYOUT.home;
 
@@ -35,11 +38,7 @@ export const HomeIsland: React.FC<HomeIslandProps> = ({
 
       {/* 2. Blue Plank Cabin with Corrugated Tin Lean-to & Signboard */}
       <group position={[config.position[0], config.height, config.position[2]]}>
-        <BluePlankCabin
-          position={[0.2, 0.3, -1.2]}
-          rotation={[0, 0.35, 0]}
-          signText="Sharanya L Shetty"
-        />
+        <Cottage position={[0.2, 0.3, -1.2]} rotation={[0, 0.35, 0]} timeOfDay={timeOfDay} reducedMotion={reducedMotion} />
       </group>
 
       {/* 3. Wooden Pier on Stilts with Stairs down to Water Level */}

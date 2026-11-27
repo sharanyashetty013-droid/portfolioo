@@ -33,6 +33,8 @@ export const CameraController: React.FC<CameraControllerProps> = ({
 }) => {
   const { camera, size } = useThree();
   const controlsRef = useRef<OrbitControlsImpl>(null);
+  const parallaxRef = useRef(new THREE.Vector3());
+  const parallaxWantRef = useRef(new THREE.Vector3());
   const config = ISLAND_LAYOUT[activeSection];
 
   const targetCamPosRef = useRef(new THREE.Vector3(...config.cameraPos));
@@ -148,6 +150,7 @@ export const CameraController: React.FC<CameraControllerProps> = ({
     }
 
     if (isSailing) {
+      parallaxRef.current.set(0, 0, 0);
       // 1. SAILING MODE: follow boat from behind and above
       if (controlsRef.current) {
         controlsRef.current.enabled = false;
@@ -177,12 +180,30 @@ export const CameraController: React.FC<CameraControllerProps> = ({
       // 2. DOCKED MODE: ease to island framing and enable gentle OrbitControls
       const lerpSpeed = damp(2.2, delta);
       if (controlsRef.current) {
+        // take last frame's parallax back out so OrbitControls works from the real position
+        camera.position.sub(parallaxRef.current);
         controlsRef.current.enabled = !isAnyModalOpen;
         controlsRef.current.target.lerp(targetLookAtRef.current, lerpSpeed);
         if (camera.position.distanceTo(targetCamPosRef.current) > 0.4) {
           camera.position.lerp(targetCamPosRef.current, lerpSpeed);
         }
         controlsRef.current.update();
+
+        // parallax: the view leans gently toward the pointer (plus a slow breathing drift),
+        // so the islands feel like real 3D objects. Off for reduced motion and when a popup is open.
+        const want = parallaxWantRef.current;
+        if (!reducedMotion && !isAnyModalOpen) {
+          const t = _state.clock.elapsedTime;
+          const right = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0);
+          const up = new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 1);
+          want.copy(right).multiplyScalar(_state.pointer.x * 1.4 + Math.sin(t * 0.25) * 0.35)
+            .addScaledVector(up, _state.pointer.y * 0.8 + Math.sin(t * 0.33) * 0.2);
+        } else {
+          want.set(0, 0, 0);
+        }
+        parallaxRef.current.lerp(want, damp(2.5, delta));
+        camera.position.add(parallaxRef.current);
+        camera.lookAt(controlsRef.current.target);
       }
     }
   });
