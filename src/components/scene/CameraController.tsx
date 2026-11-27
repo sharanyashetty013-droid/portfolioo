@@ -5,7 +5,7 @@ import { OrbitControls } from '@react-three/drei';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { SectionId } from '../../types/portfolio';
 import { ISLAND_LAYOUT } from '../../constants/islandLayout';
-import { introElapsed, MAP_HOLD, SWOOP, mapView } from './introTimeline';
+import { introElapsed, MAP_HOLD, SWOOP } from './introTimeline';
 
 const clockTime = (st: { clock: THREE.Clock }) => st.clock.elapsedTime;
 
@@ -88,36 +88,39 @@ export const CameraController: React.FC<CameraControllerProps> = ({
     const persp0 = camera as THREE.PerspectiveCamera;
     const it = intro.current;
     if (!it.done) {
-      // phase 1 (MAP_HOLD): straight down from the exact viewpoint the ink map was drawn from
-      // phase 2 (SWOOP): tilt and dive down to Home
+      // phase 1 (MAP_HOLD): hold high in the sky while the loading clouds part
+      // phase 2 (SWOOP): dive down through the clouds to Home
       const P = introPts.current;
       const elapsed = introElapsed(clockTime(_state));
       if (isSailing || reducedMotion) it.t = 1;
-      else it.t = Math.max(0, (elapsed - MAP_HOLD) / SWOOP);
+      else it.t = Math.max(0, elapsed / (MAP_HOLD + SWOOP));
       it.t = Math.min(1, it.t);
+      // ease in slowly (drifting through the clouds), dive, then settle gently
       const k = it.t < 0.5 ? 4 * it.t ** 3 : 1 - (-2 * it.t + 2) ** 3 / 2; // easeInOutCubic
 
-      const mv = mapView(size.width / Math.max(1, size.height));
-      P.start.set(mv.cx, mv.H, mv.cz);
-      P.lookFrom.set(mv.cx, 0, mv.cz);
-      P.bend.set(mv.cx - 40, mv.H * 0.4, mv.cz + 150);
+      // start high in the sky behind Home, curve down through the clouds, level out at Home
       const end = targetCamPosRef.current;
+      const look = targetLookAtRef.current;
+      // same flight curve the 3D intro clouds are placed along (see IntroClouds.introPath)
+      P.start.set(look.x - 70, 150, look.z + 150);
+      P.bend.set(look.x - 95, 55, look.z + 60);
+      P.lookFrom.set(look.x + 10, 0, look.z - 40);
       const a = 1 - k;
       P.pos.set(0, 0, 0)
         .addScaledVector(P.start, a * a)
         .addScaledVector(P.bend, 2 * a * k)
         .addScaledVector(end, k * k);
-      const lk = Math.min(1, k * 1.1);
-      P.look.copy(P.lookFrom).lerp(targetLookAtRef.current, lk * lk * (3 - 2 * lk));
+      const lk = Math.min(1, k * 1.15);
+      P.look.copy(P.lookFrom).lerp(look, lk * lk * (3 - 2 * lk));
 
-      // screen-up starts as the chart's "north", turns to world up as we level out
-      const m = Math.min(1, k * 1.4);
-      camera.up.set(mv.up[0] * (1 - m), mv.up[1] * (1 - m) + m, mv.up[2] * (1 - m)).normalize();
+      // a gentle bank as we swoop, back to level at the end
+      const bank = Math.sin(k * Math.PI) * 0.12;
+      camera.up.set(Math.sin(bank), Math.cos(bank), 0).normalize();
       camera.position.copy(P.pos);
       camera.lookAt(P.look);
       currentLookAtRef.current.copy(P.look);
       if (persp0.isPerspectiveCamera) {
-        persp0.fov = mv.fov - (mv.fov - 44) * k;
+        persp0.fov = 62 - (62 - 44) * k;
         persp0.updateProjectionMatrix();
       }
       if (controlsRef.current) {
