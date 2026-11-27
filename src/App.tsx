@@ -4,6 +4,7 @@ import { Navbar } from './components/navigation/Navbar';
 import { SceneLoader } from './components/ui/SceneLoader';
 import { OverlayHUD } from './components/ui/OverlayHUD';
 import { ProjectModal } from './components/modals/ProjectModal';
+import { AllProjectsModal } from './components/modals/AllProjectsModal';
 import { HackathonModal } from './components/modals/HackathonModal';
 import { SkillModal } from './components/modals/SkillModal';
 import { ResumeModal } from './components/modals/ResumeModal';
@@ -24,6 +25,7 @@ export default function App() {
   const [selectedSkillGroup, setSelectedSkillGroup] = useState<SkillGroup | null>(null);
   const [isResumeOpen, setIsResumeOpen] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
+  const [isAllProjectsOpen, setIsAllProjectsOpen] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [sceneReady, setSceneReady] = useState(false);
   const [introDone, setIntroDone] = useState(false);
@@ -53,7 +55,7 @@ export default function App() {
   };
 
   const isAnyModalOpen = Boolean(
-    selectedProject || selectedHackathon || selectedSkillGroup || isResumeOpen || isContactOpen
+    selectedProject || selectedHackathon || selectedSkillGroup || isResumeOpen || isContactOpen || isAllProjectsOpen
   );
 
 
@@ -89,6 +91,7 @@ export default function App() {
           activeSection={activeSection}
           onNavigate={handleNavigate}
           onOpenContact={() => setIsContactOpen(true)}
+          onOpenAllProjects={() => setIsAllProjectsOpen(true)}
           onOpenResume={() => setIsResumeOpen(true)}
           isSailing={isSailing}
           introDone={introDone}
@@ -96,6 +99,11 @@ export default function App() {
       </div>
 
       {/* Interactive Modals */}
+      <AllProjectsModal
+        isOpen={isAllProjectsOpen && !selectedProject}
+        onClose={() => setIsAllProjectsOpen(false)}
+        onSelectProject={(p) => setSelectedProject(p)}
+      />
       <ProjectModal
         project={selectedProject}
         onClose={() => setSelectedProject(null)}

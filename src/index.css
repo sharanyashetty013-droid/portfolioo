@@ -333,3 +333,51 @@ h1, h2, h3, h4, h5, h6 {
 }
 @keyframes bubble-in { from { opacity: 0; transform: translateY(6px) scale(0.9); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .captain-bubble { animation: none; } }
+
+/* ---- All projects panel: a calm, editorial index ---- */
+.all-title { font: 600 28px/1.1 'Geist', sans-serif; letter-spacing: -0.035em; color: var(--g-ink); margin: 0; }
+.all-sub { margin: 8px 0 0; font: 400 14px/1.5 'Geist', sans-serif; color: var(--g-ink-2); }
+.all-tabs { display: flex; flex-wrap: wrap; gap: 4px 22px; margin-top: 20px; border-bottom: 1px solid var(--g-edge); }
+.all-tab {
+  position: relative; padding: 8px 0 10px; background: none; border: 0; cursor: pointer;
+  font: 500 13.5px/1 'Geist', sans-serif; color: var(--g-ink-2); transition: color 0.15s ease;
+}
+.all-tab:hover { color: var(--g-ink); }
+.all-tab.is-on { color: var(--g-ink); }
+.all-tab.is-on::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--g-ink); }
+.all-tab:focus-visible { outline: 2px solid var(--g-ink); outline-offset: 2px; border-radius: 4px; }
+.all-list { list-style: none; margin: 0; }
+.all-row { display: flex; align-items: flex-start; gap: 20px; padding: 16px 0; border-bottom: 1px solid var(--g-edge); }
+.all-row:last-child { border-bottom: 0; }
+.all-row-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; text-align: left; background: none; border: 0; padding: 0; cursor: pointer; color: inherit; }
+.all-row-main:focus-visible { outline: 2px solid var(--g-ink); outline-offset: 4px; border-radius: 6px; }
+.all-row-head { display: flex; align-items: baseline; gap: 10px; }
+.all-row-title { font: 600 16.5px/1.25 'Geist', sans-serif; letter-spacing: -0.02em; color: var(--g-ink); }
+.all-row-main:hover .all-row-title { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.all-row-feat { font: 500 11.5px/1 'Geist', sans-serif; color: var(--g-ink-2); }
+.all-row-desc {
+  font: 400 13.5px/1.5 'Geist', sans-serif; color: var(--g-ink-2); max-width: 62ch;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.all-row-meta { font: 400 12.5px/1.3 'Geist', sans-serif; color: var(--g-ink-2); opacity: 0.85; }
+.all-row-links { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding-top: 2px; flex: none; }
+.all-row-links a {
+  display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; text-decoration: none;
+  font: 500 13px/1 'Geist', sans-serif; color: var(--g-ink);
+}
+.all-row-links a:hover { text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 640px) {
+  .all-row { flex-direction: column; gap: 10px; }
+  .all-row-links { flex-direction: row; align-items: center; gap: 16px; }
+}
+.chapter-all-btn {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 10px; padding: 8px 14px; border-radius: 999px; cursor: pointer;
+  font: 600 13px/1 'Geist', sans-serif; color: #F5F7FB; background: var(--g-ink); border: 0; transition: transform 0.15s ease;
+}
+[data-time="night"] .chapter-all-btn { color: #0E2230; background: #F5F7FB; }
+.chapter-all-btn:hover { transform: translateY(-1px); }
+.chapter-all-btn:focus-visible { outline: 2px solid var(--g-ink); outline-offset: 3px; }
+/* the project index holds a lot of text, so its glass is more solid than the other popups */
+.all-panel { --g-modal: rgba(248, 252, 252, 0.86); -webkit-backdrop-filter: blur(40px) saturate(160%) !important; backdrop-filter: blur(40px) saturate(160%) !important; }
+[data-time="sunset"] .all-panel { --g-modal: rgba(255, 244, 236, 0.86); }
+[data-time="night"] .all-panel { --g-modal: rgba(14, 22, 40, 0.88); }

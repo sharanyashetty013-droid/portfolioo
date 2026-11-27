@@ -13,6 +13,7 @@ interface OverlayHUDProps {
   activeSection: SectionId;
   onNavigate: (section: SectionId) => void;
   onOpenContact: () => void;
+  onOpenAllProjects?: () => void;
   onOpenResume?: () => void;
   isSailing?: boolean;
   introDone?: boolean;
@@ -22,6 +23,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
   activeSection,
   onNavigate,
   onOpenContact,
+  onOpenAllProjects,
   isSailing = false,
   introDone = true,
 }) => {
@@ -146,6 +148,11 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
             <p className="text-[11.5px] sm:text-[13px] text-[#24505A] font-semibold leading-relaxed [@media(max-height:500px)]:hidden">
               {currentConfig.storyLine}
             </p>
+            {activeSection === 'projects' && onOpenAllProjects && (
+              <button className="chapter-all-btn" onClick={onOpenAllProjects}>
+                See all {portfolioData.projects.length} projects
+              </button>
+            )}
           </div>
           </Tilt3D>
         )}

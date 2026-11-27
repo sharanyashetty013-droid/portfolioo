@@ -64,7 +64,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({ project, onClose }) 
                 className="btn-chunky-light inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 text-xs font-bold rounded-xl"
               >
                 <Github className="w-4 h-4" />
-                <span>Source code</span>
+                <span>{project.sourceLabel ?? 'Source code'}</span>
               </a>
             )}
             {project.liveUrl && (
