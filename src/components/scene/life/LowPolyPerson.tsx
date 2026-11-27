@@ -214,15 +214,15 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
     <group>
       <group ref={hips} position={[0, 0.58, 0]}>
         {/* legs */}
-        {([[-0.1, legL], [0.1, legR]] as const).map(([x, ref], i) => (
+        {([[-0.075, legL], [0.075, legR]] as const).map(([x, ref], i) => (
           <group key={i} ref={ref} position={[x, 0, 0]}>
             <mesh position={[0, -0.27, 0]} castShadow>
-              <capsuleGeometry args={[0.062, 0.36, 4, 12]} />
+              <capsuleGeometry args={[0.05, 0.37, 4, 12]} />
               {mat(look.frock ? look.skin : look.bottom, 0.7, true)}
             </mesh>
             {look.socks && (
               <mesh position={[0, -0.46, 0]} castShadow>
-                <cylinderGeometry args={[0.068, 0.066, 0.1, 16]} />
+                <cylinderGeometry args={[0.056, 0.054, 0.1, 16]} />
                 {mat(look.socks, 0.7, true)}
               </mesh>
             )}
@@ -235,42 +235,42 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
 
         {/* pelvis */}
         <mesh position={[0, 0.02, 0]} rotation={[0, 0, Math.PI / 2]} castShadow>
-          <capsuleGeometry args={[0.1, 0.16, 4, 12]} />
+          <capsuleGeometry args={[0.08, 0.12, 4, 12]} />
           {mat(look.frock ?? look.bottom, 0.7, true)}
         </mesh>
 
         <group ref={torso} position={[0, 0.06, 0]}>
           {/* torso */}
           <mesh position={[0, 0.25, 0]} castShadow>
-            <cylinderGeometry args={[0.15, 0.18, 0.46, 20]} />
+            <cylinderGeometry args={[0.125, 0.135, 0.46, 20]} />
             {mat(look.frock ?? look.top, 0.65, true)}
           </mesh>
           {look.frock && (
             <>
               {/* flared skirt that ends at the knee */}
               <mesh position={[0, -0.05, 0]} castShadow>
-                <cylinderGeometry args={[0.18, 0.36, 0.34, 28, 1, true]} />
+                <cylinderGeometry args={[0.135, 0.28, 0.36, 28, 1, true]} />
                 <meshToonMaterial color={look.frock} gradientMap={toonRamp} side={THREE.DoubleSide} />
               </mesh>
               {/* soft lace hem */}
-              <mesh position={[0, -0.22, 0]} rotation={[Math.PI / 2, 0, 0]}>
-                <torusGeometry args={[0.36, 0.02, 8, 48]} />
+              <mesh position={[0, -0.23, 0]} rotation={[Math.PI / 2, 0, 0]}>
+                <torusGeometry args={[0.28, 0.016, 8, 48]} />
                 <meshToonMaterial color="#FFF8F0" gradientMap={toonRamp} />
               </mesh>
               {look.ribbon && (
                 <>
                   <mesh position={[0, 0.115, 0]} rotation={[Math.PI / 2, 0, 0]}>
-                    <torusGeometry args={[0.178, 0.022, 8, 40]} />
+                    <torusGeometry args={[0.136, 0.018, 8, 40]} />
                     <meshToonMaterial color={look.ribbon} gradientMap={toonRamp} />
                   </mesh>
                   {/* bow at the back */}
                   {[-1, 1].map((side) => (
-                    <mesh key={side} position={[side * 0.06, 0.115, -0.19]} rotation={[0, 0, side * 0.5]} scale={[1.4, 0.8, 0.45]}>
+                    <mesh key={side} position={[side * 0.05, 0.115, -0.15]} rotation={[0, 0, side * 0.5]} scale={[1.2, 0.7, 0.4]}>
                       <sphereGeometry args={[0.045, 14, 10]} />
                       <meshToonMaterial color={look.ribbon} gradientMap={toonRamp} />
                     </mesh>
                   ))}
-                  <mesh position={[0, 0.115, -0.2]}>
+                  <mesh position={[0, 0.115, -0.155]}>
                     <sphereGeometry args={[0.026, 10, 8]} />
                     <meshToonMaterial color={look.ribbon} gradientMap={toonRamp} />
                   </mesh>
@@ -322,24 +322,24 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
           </group>
 
           {/* arms (pivot at shoulder) */}
-          {([[-0.22, armL], [0.22, armR]] as const).map(([x, ref], i) => (
+          {([[-0.17, armL], [0.17, armR]] as const).map(([x, ref], i) => (
             <group key={i} ref={ref} position={[x, 0.44, 0]}>
               <mesh position={[0, -0.12, 0]} castShadow>
-                <capsuleGeometry args={[look.frock ? 0.048 : 0.058, 0.16, 4, 12]} />
+                <capsuleGeometry args={[look.frock ? 0.038 : 0.05, 0.17, 4, 12]} />
                 {mat(look.frock ? look.skin : look.top, 0.65, true)}
               </mesh>
               {look.frock && (
                 <mesh position={[0, -0.04, 0]} scale={[1, 0.85, 1]} castShadow>
-                  <sphereGeometry args={[0.085, 16, 12]} />
+                  <sphereGeometry args={[0.068, 16, 12]} />
                   {mat(look.frock, 0.65, true)}
                 </mesh>
               )}
               <mesh position={[0, -0.32, 0]} castShadow>
-                <capsuleGeometry args={[0.045, 0.14, 4, 12]} />
+                <capsuleGeometry args={[0.036, 0.15, 4, 12]} />
                 {mat(look.skin, 0.55, true)}
               </mesh>
               <mesh position={[0, -0.44, 0]} castShadow>
-                <sphereGeometry args={[0.052, 14, 12]} />
+                <sphereGeometry args={[0.042, 14, 12]} />
                 {mat(look.skin, 0.55, true)}
               </mesh>
               {i === 0 && accessory === 'lantern' && (
@@ -365,9 +365,14 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
           ))}
 
           {/* head */}
-          <group ref={head} position={[0, 0.69, 0]} scale={1.18}>
-            <mesh castShadow scale={[1, 1.03, 0.97]}>
+          <group ref={head} position={[0, 0.68, 0]} scale={1.06}>
+            <mesh castShadow scale={[0.84, 1.06, 0.9]}>
               <sphereGeometry args={[0.2, 32, 24]} />
+              {mat(look.skin, 0.55, true)}
+            </mesh>
+            {/* gently tapered chin so the face reads oval, not round */}
+            <mesh position={[0, -0.08, 0.03]} scale={[0.62, 0.62, 0.74]}>
+              <sphereGeometry args={[0.16, 24, 18]} />
               {mat(look.skin, 0.55, true)}
             </mesh>
             {/* eyes with a little shine */}
@@ -412,18 +417,18 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
             ))}
             {/* cheeks */}
             {[-0.1, 0.1].map((x) => (
-              <mesh key={x} position={[x * 1.3, -0.06, 0.155]} scale={[1.3, 0.65, 0.4]}>
+              <mesh key={x} position={[x * 1.2, -0.055, 0.15]} scale={[1.1, 0.6, 0.4]}>
                 <sphereGeometry args={[0.03, 12, 10]} />
                 <meshBasicMaterial color="#F08C8C" transparent opacity={0.45} />
               </mesh>
             ))}
             {/* hair cap */}
-            <mesh position={[0, 0.04, -0.035]} scale={[1.08, 1.02, 1.06]} castShadow>
+            <mesh position={[0, 0.04, -0.03]} scale={[0.96, 1.02, 1.0]} castShadow>
               <sphereGeometry args={[0.2, 32, 24, 0, Math.PI * 2, 0, Math.PI * 0.58]} />
               <meshToonMaterial color={look.hair} gradientMap={toonRamp} side={THREE.DoubleSide} />
             </mesh>
             {/* soft shine band on the hair */}
-            <mesh position={[0, 0.045, -0.035]} rotation={[-0.35, 0, 0]} scale={[1.1, 1, 1.08]}>
+            <mesh position={[0, 0.045, -0.03]} rotation={[-0.35, 0, 0]} scale={[0.98, 1, 1.02]}>
               <torusGeometry args={[0.19, 0.008, 4, 28, Math.PI * 0.55]} />
               <meshBasicMaterial color="#6B5A55" transparent opacity={0.7} />
             </mesh>
@@ -440,14 +445,14 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
                   {mat(look.hair, 0.45, true)}
                 </mesh>
                 {/* hair falling down the back */}
-                <mesh position={[0, -0.12, -0.11]} scale={[1, 1.2, 0.55]} castShadow>
-                  <cylinderGeometry args={[0.2, 0.15, 0.36, 24]} />
+                <mesh position={[0, -0.12, -0.1]} scale={[0.9, 1.2, 0.5]} castShadow>
+                  <cylinderGeometry args={[0.19, 0.14, 0.36, 24]} />
                   {mat(look.hair, 0.45, true)}
                 </mesh>
                 {/* side locks framing the face */}
-                {[-0.17, 0.17].map((x) => (
-                  <mesh key={x} position={[x, -0.1, 0.03]} rotation={[0, 0, x > 0 ? -0.08 : 0.08]} castShadow>
-                    <capsuleGeometry args={[0.04, 0.26, 4, 10]} />
+                {[-0.155, 0.155].map((x) => (
+                  <mesh key={x} position={[x, -0.1, 0.02]} rotation={[0, 0, x > 0 ? -0.08 : 0.08]} castShadow>
+                    <capsuleGeometry args={[0.034, 0.26, 4, 10]} />
                     {mat(look.hair, 0.45, true)}
                   </mesh>
                 ))}
@@ -459,7 +464,7 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
               </mesh>
             )}
             {look.earrings &&
-              [-0.19, 0.19].map((x) => (
+              [-0.16, 0.16].map((x) => (
                 <mesh key={x} position={[x, -0.08, 0.02]}>
                   <sphereGeometry args={[0.022, 12, 10]} />
                   <meshStandardMaterial color={look.earrings} metalness={0.7} roughness={0.25} emissive={look.earrings} emissiveIntensity={0.3} />
@@ -480,7 +485,7 @@ export const LowPolyPerson: React.FC<LowPolyPersonProps> = ({
               </group>
             )}
             {look.lips && (
-              <mesh position={[0, -0.092, 0.186]} rotation={[0, 0, Math.PI]}>
+              <mesh position={[0, -0.09, 0.172]} rotation={[0, 0, Math.PI]}>
                 <torusGeometry args={[0.022, 0.0045, 6, 16, Math.PI]} />
                 <meshBasicMaterial color={look.lips} />
               </mesh>

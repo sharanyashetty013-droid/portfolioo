@@ -1,59 +1,119 @@
 import React, { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { ISLAND_LAYOUT, IslandConfig } from '../../../constants/islandLayout';
 import type { TimeOfDay } from '../timeOfDay';
 
 // ---------------------------------------------------------------------------
 // Dolphins: a small pod that leaps in arcs near an island every few seconds
 // ---------------------------------------------------------------------------
-const DOLPHIN_BODY = '#7C9CBF';
-const DOLPHIN_BELLY = '#E6EEF6';
+// Built once and shared by every dolphin: a smooth lathe body with countershading,
+// a swept-back dorsal fin, side flippers and a crescent tail fluke.
+const DOLPHIN_DARK = new THREE.Color('#4F6F8F');
+const DOLPHIN_LIGHT = new THREE.Color('#E3EBF2');
+
+const DOLPHIN = (() => {
+  // body profile from tail (y = -1) to beak tip (y = 1); radius per point
+  const prof: [number, number][] = [
+    [0.0, -1.0], [0.045, -0.95], [0.07, -0.8], [0.12, -0.55], [0.19, -0.28], [0.235, -0.02],
+    [0.24, 0.18], [0.215, 0.4], [0.17, 0.58], [0.12, 0.7], [0.075, 0.78], [0.05, 0.88],
+    [0.035, 0.96], [0.0, 1.0],
+  ];
+  // run a smooth curve through the profile so the body has no hard rings
+  const curve = new THREE.SplineCurve(prof.map(([r, y]) => new THREE.Vector2(r, y)));
+  const body = new THREE.LatheGeometry(curve.getPoints(60), 28);
+  body.rotateZ(-Math.PI / 2); // nose points along +x
+  body.scale(1, 1, 0.9);       // a little narrower side to side
+  const paint = (g: THREE.BufferGeometry, f: (p: THREE.Vector3) => THREE.Color) => {
+    const pos = g.attributes.position;
+    const col = new Float32Array(pos.count * 3);
+    const v = new THREE.Vector3();
+    for (let i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i);
+      const c = f(v);
+      col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
+    }
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    return g;
+  };
+  // dark back, pale belly, with a soft line between
+  paint(body, (p) => DOLPHIN_LIGHT.clone().lerp(DOLPHIN_DARK, THREE.MathUtils.smoothstep(p.y, -0.1, 0.1)));
+
+  const fin = (shape: THREE.Shape, depth: number) => {
+    const g = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: true, bevelThickness: 0.015, bevelSize: 0.015, bevelSegments: 2, curveSegments: 10 });
+    g.translate(0, 0, -depth / 2);
+    return g;
+  };
+  // dorsal fin, curved and swept back
+  const ds = new THREE.Shape();
+  ds.moveTo(0.22, 0);
+  ds.quadraticCurveTo(0.05, 0.12, -0.18, 0.36);
+  ds.quadraticCurveTo(-0.12, 0.14, -0.26, 0);
+  ds.lineTo(0.22, 0);
+  const dorsal = fin(ds, 0.04);
+  dorsal.translate(-0.05, 0.2, 0);
+  paint(dorsal, () => DOLPHIN_DARK);
+
+  // flippers on each side, angled down and back
+  const fs = new THREE.Shape();
+  fs.moveTo(0, 0);
+  fs.quadraticCurveTo(-0.08, -0.06, -0.3, -0.14);
+  fs.quadraticCurveTo(-0.1, -0.02, 0.08, 0.02);
+  fs.lineTo(0, 0);
+  const flippers = [1, -1].map((side) => {
+    const g = fin(fs, 0.025);
+    g.rotateX(side * 0.9);
+    g.translate(0.3, -0.1, side * 0.16);
+    return paint(g, () => DOLPHIN_DARK);
+  });
+
+  // crescent tail fluke lying flat
+  const ts = new THREE.Shape();
+  ts.moveTo(0.06, 0);
+  ts.quadraticCurveTo(-0.08, 0.18, -0.28, 0.36);
+  ts.quadraticCurveTo(-0.14, 0.1, -0.12, 0);
+  ts.quadraticCurveTo(-0.14, -0.1, -0.28, -0.36);
+  ts.quadraticCurveTo(-0.08, -0.18, 0.06, 0);
+  const fluke = fin(ts, 0.03);
+  fluke.rotateX(Math.PI / 2);
+  fluke.translate(-0.96, 0, 0);
+  paint(fluke, () => DOLPHIN_DARK);
+
+  // keep each part's own smooth normals when merging
+  const toNI = (g: THREE.BufferGeometry) => {
+    g.computeVertexNormals();
+    const n = g.index ? g.toNonIndexed() : g;
+    n.deleteAttribute('uv');
+    return n;
+  };
+  return mergeGeometries([body, dorsal, ...flippers, fluke].map(toNI))!;
+})();
 
 const DolphinMesh: React.FC = () => (
   <group>
-    {/* body */}
-    <mesh scale={[1, 0.42, 0.42]} castShadow>
-      <sphereGeometry args={[0.7, 20, 14]} />
-      <meshStandardMaterial color={DOLPHIN_BODY} roughness={0.35} metalness={0.1} />
+    <mesh geometry={DOLPHIN} castShadow>
+      <meshStandardMaterial vertexColors roughness={0.3} metalness={0.05} />
     </mesh>
-    {/* belly */}
-    <mesh position={[0.05, -0.08, 0]} scale={[0.85, 0.3, 0.34]}>
-      <sphereGeometry args={[0.7, 18, 12]} />
-      <meshStandardMaterial color={DOLPHIN_BELLY} roughness={0.4} />
-    </mesh>
-    {/* snout */}
-    <mesh position={[0.78, -0.04, 0]} rotation={[0, 0, -Math.PI / 2]} scale={[0.6, 1, 0.6]}>
-      <capsuleGeometry args={[0.08, 0.2, 4, 10]} />
-      <meshStandardMaterial color={DOLPHIN_BODY} roughness={0.35} />
-    </mesh>
-    {/* eyes */}
     {[-1, 1].map((s) => (
-      <mesh key={s} position={[0.52, 0.06, s * 0.2]}>
-        <sphereGeometry args={[0.035, 8, 6]} />
-        <meshBasicMaterial color="#14202E" />
+      <mesh key={s} position={[0.66, 0.05, s * 0.1]}>
+        <sphereGeometry args={[0.022, 10, 8]} />
+        <meshBasicMaterial color="#0E1620" />
       </mesh>
     ))}
-    {/* dorsal fin */}
-    <mesh position={[-0.05, 0.3, 0]} rotation={[0, 0, -0.5]} scale={[1, 1, 0.25]}>
-      <coneGeometry args={[0.16, 0.38, 12]} />
-      <meshStandardMaterial color={DOLPHIN_BODY} roughness={0.35} />
-    </mesh>
-    {/* tail */}
-    <mesh position={[-0.72, 0, 0]} rotation={[0, 0, Math.PI / 2]} scale={[0.5, 1, 0.5]}>
-      <coneGeometry args={[0.14, 0.4, 12]} />
-      <meshStandardMaterial color={DOLPHIN_BODY} roughness={0.35} />
-    </mesh>
-    <mesh position={[-0.95, 0, 0]} scale={[0.35, 0.08, 1]}>
-      <sphereGeometry args={[0.32, 14, 8]} />
-      <meshStandardMaterial color={DOLPHIN_BODY} roughness={0.35} />
-    </mesh>
   </group>
 );
+
+// a little burst of spray where a dolphin leaves or re-enters the water
+const SPRAY = Array.from({ length: 10 }, (_, i) => {
+  const a = (i / 10) * Math.PI * 2 + i;
+  return { dx: Math.cos(a), dz: Math.sin(a), up: 1.8 + (i % 3) * 0.6, size: 0.06 + (i % 4) * 0.025 };
+});
 
 const DolphinPod: React.FC<{ cfg: IslandConfig; seed: number; reducedMotion?: boolean }> = ({ cfg, seed, reducedMotion }) => {
   const dolphins = useRef<(THREE.Group | null)[]>([]);
   const rings = useRef<(THREE.Mesh | null)[]>([]);
+  const sprays = useRef<(THREE.Group | null)[]>([]);
   const PERIOD = 9 + (seed % 4);
   const JUMP = 1.6; // seconds in the air
   const pod = useRef({ x: 0, z: 0, dir: 0, cycle: -1 });
@@ -88,7 +148,24 @@ const DolphinPod: React.FC<{ cfg: IslandConfig; seed: number; reducedMotion?: bo
         const y = Math.sin(k * Math.PI) * 2.2 - 0.25;
         g.position.set(ox + Math.cos(dir) * along, y, oz + Math.sin(dir) * along);
         // nose follows the arc: up on the way out, down on the way in
-        g.rotation.set(0, -dir, Math.cos(k * Math.PI) * 0.9);
+        g.rotation.set(Math.sin(k * Math.PI * 2) * 0.08, -dir, Math.cos(k * Math.PI) * 1.0);
+      }
+      // spray bursts as it leaves the water and as it dives back in
+      const sp = sprays.current[i];
+      if (sp) {
+        const exitT = local - start;
+        const entryT = local - start - JUMP;
+        const burst = exitT >= 0 && exitT < 0.7 ? { t: exitT, along: -3 } : entryT >= 0 && entryT < 0.7 ? { t: entryT, along: 3 } : null;
+        sp.visible = !!burst;
+        if (burst) {
+          sp.position.set(ox + Math.cos(dir) * burst.along, 0, oz + Math.sin(dir) * burst.along);
+          sp.children.forEach((c, k) => {
+            const d = SPRAY[k];
+            const tt = burst.t;
+            c.position.set(d.dx * tt * 1.1, Math.max(0, d.up * tt - 4.9 * tt * tt), d.dz * tt * 1.1);
+            c.scale.setScalar(d.size * (1 - tt / 0.7) * 10);
+          });
+        }
       }
       // splash where it dives back in
       const s = local - start - JUMP;
@@ -107,6 +184,14 @@ const DolphinPod: React.FC<{ cfg: IslandConfig; seed: number; reducedMotion?: bo
         <React.Fragment key={i}>
           <group ref={(el) => { dolphins.current[i] = el; }} visible={false} scale={1.1 - i * 0.12}>
             <DolphinMesh />
+          </group>
+          <group ref={(el) => { sprays.current[i] = el; }} visible={false}>
+            {SPRAY.map((_, k) => (
+              <mesh key={k}>
+                <sphereGeometry args={[0.1, 8, 6]} />
+                <meshStandardMaterial color="#FFFFFF" transparent opacity={0.85} roughness={0.2} />
+              </mesh>
+            ))}
           </group>
           <mesh ref={(el) => { rings.current[i] = el; }} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
             <ringGeometry args={[0.6, 0.85, 24]} />
