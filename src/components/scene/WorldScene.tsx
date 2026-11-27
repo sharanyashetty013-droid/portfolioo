@@ -9,6 +9,7 @@ import { WaterSea } from './WaterSea';
 import { RoutePathLine } from './RoutePathLine';
 import { HeroBoat } from './HeroBoat';
 import { HomeIsland } from './islands/HomeIsland';
+import { PostFX } from './effects/PostFX';
 import { SkillsIsland } from './islands/SkillsIsland';
 import { ProjectsIsland } from './islands/ProjectsIsland';
 import { HackathonsIsland } from './islands/HackathonsIsland';
@@ -88,6 +89,8 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
   const sailingRef = useRef(false);
   const [projectedLabels, setProjectedLabels] = useState<ProjectedLabel[]>([]);
   const [dpr, setDpr] = useState(1.5);
+  // drop the heavier screen effects on devices that are struggling
+  const [liteFX, setLiteFX] = useState(false);
 
   const targetT = ISLAND_LAYOUT[activeSection].routeT;
 
@@ -122,7 +125,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
         }}
       >
         {/* drop resolution on struggling devices, raise it back when there's headroom */}
-        <PerformanceMonitor onDecline={() => setDpr(1)} onIncline={() => setDpr(Math.min(1.75, window.devicePixelRatio || 1))} flipflops={3} onFallback={() => setDpr(1)} />
+        <PerformanceMonitor onDecline={() => { setDpr(1); setLiteFX(true); }} onIncline={() => setDpr(Math.min(1.75, window.devicePixelRatio || 1))} flipflops={3} onFallback={() => { setDpr(1); setLiteFX(true); }} />
         <Suspense fallback={null}>
           {/* Dynamic Sky & Sunlight with Shadows */}
           <SkyAndAtmosphere reducedMotion={reducedMotion} timeOfDay={timeOfDay} />
@@ -141,6 +144,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
             onNavigate={onNavigate}
             onOpenResume={onOpenResume}
             reducedMotion={reducedMotion} 
+            timeOfDay={timeOfDay}
           />
 
           {/* Chapter 2: Skills */}
@@ -212,6 +216,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
 
           <SceneWarmup onDone={() => setCompiled(true)} />
           {compiled && <FirstFrame onFrame={() => { setVisible(true); onReady?.(); }} />}
+          {compiled && <PostFX lite={liteFX} timeOfDay={timeOfDay} />}
         </Suspense>
       </Canvas>
 
