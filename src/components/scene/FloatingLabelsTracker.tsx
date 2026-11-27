@@ -92,16 +92,16 @@ export const FloatingLabelsTracker: React.FC<FloatingLabelsTrackerProps> = ({
 
     if (activeSection === 'projects') {
       const isl = ISLAND_LAYOUT.projects;
-      return portfolioData.projects.map((p) => ({
+      return portfolioData.projects.filter((p) => p.featured && p.slotPosition).map((p) => ({
         id: p.id,
         name: p.title,
         shortName: p.title,
         badge: p.tags[0],
         dotColor: p.buildingColor,
         worldPos: new THREE.Vector3(
-          isl.position[0] + p.slotPosition[0],
+          isl.position[0] + p.slotPosition![0],
           isl.height + 2.7,
-          isl.position[2] + p.slotPosition[2]
+          isl.position[2] + p.slotPosition![2]
         ),
         onClick: () => onSelectProject(p),
         category: 'project',

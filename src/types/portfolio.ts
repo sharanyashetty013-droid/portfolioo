@@ -10,7 +10,13 @@ export interface ProjectItem {
   liveUrl?: string;   // Only show live deploy button if present
   buildingColor: string;
   roofColor: string;
-  slotPosition: [number, number, number];
+  /** Featured projects get a cabin on the Projects island (max 6, one per slot) */
+  featured?: boolean;
+  slotPosition?: [number, number, number];
+  /** Used by the filter chips in the "All projects" panel */
+  categories: string[];
+  /** Label for the source button, e.g. "View PR" for open-source work */
+  sourceLabel?: string;
 }
 
 export type HackathonBadge = 'Runner-up' | '2nd Runner-up' | 'Internal finals' | 'Pitched' | 'Participant';

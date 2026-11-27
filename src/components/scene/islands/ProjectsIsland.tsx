@@ -121,7 +121,8 @@ export const ProjectsIsland: React.FC<ProjectsIslandProps> = ({
   reducedMotion = false,
 }) => {
   const config = ISLAND_LAYOUT.projects;
-  const { projects } = portfolioData;
+  // only featured projects get a cabin; the rest live in the All projects panel
+  const projects = portfolioData.projects.filter((p) => p.featured && p.slotPosition);
 
   return (
     <StaticMerge>

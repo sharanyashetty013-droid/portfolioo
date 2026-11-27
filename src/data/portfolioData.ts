@@ -33,6 +33,20 @@ export const portfolioData: PortfolioData = {
     "ACM Student Chapter   Core Member, Documentation Team; supported registration workflows and event data tracking.",
   ],
   projects: [
+    // ---- Featured: these six get a cabin on the Projects island ----
+    {
+      id: 'midsave',
+      title: 'midsave',
+      systemTag: 'OPEN SOURCE // SHIPPED',
+      tags: ['Go', 'CLI', 'Testing'],
+      description: 'My own open-source Go CLI that crash-tests apps. It starts your app, kills it at a random moment while it is saving, then runs your checker to see if the data survived. Crash times can be replayed with --seed, and it runs on Windows, macOS and Linux with CI and downloadable releases. It already has an outside contributor.',
+      sourceUrl: 'https://github.com/sharanyashetty013-droid/midsave',
+      buildingColor: '#14B8A6', // Teal
+      roofColor: '#A9714B',
+      featured: true,
+      slotPosition: [3.75, 0, 6.5],
+      categories: ['Backend', 'Open Source'],
+    },
     {
       id: 'satoshi-trace',
       title: 'Satoshi Trace',
@@ -43,19 +57,9 @@ export const portfolioData: PortfolioData = {
       liveUrl: 'https://satoshitrace.vercel.app/',
       buildingColor: '#3B82F6', // Vibrant Blue
       roofColor: '#A9714B',
+      featured: true,
       slotPosition: [7.5, 0, 0],
-    },
-    {
-      id: 'poison-utxo',
-      title: 'Poison UTXO',
-      systemTag: 'SYSTEM // SHIPPED',
-      tags: ['Blockchain', 'Forensics', 'Solidity'],
-      description: 'A blockchain forensics project that traces and flags suspicious "poisoned" UTXOs in cryptocurrency wallets to aid fraud detection. Built for Smart India Hackathon, shortlisted for the institute-level internal finals.',
-      sourceUrl: undefined, // No source button
-      liveUrl: 'https://poison-utxo.vercel.app/',
-      buildingColor: '#10B981', // Emerald
-      roofColor: '#A9714B',
-      slotPosition: [3.75, 0, 6.5],
+      categories: ['Blockchain'],
     },
     {
       id: 'provenrely',
@@ -67,7 +71,36 @@ export const portfolioData: PortfolioData = {
       liveUrl: 'https://frontend-pink-gamma-26.vercel.app/',
       buildingColor: '#8B5CF6', // Violet
       roofColor: '#A9714B',
+      featured: true,
       slotPosition: [-3.75, 0, 6.5],
+      categories: ['Blockchain', 'Hackathon'],
+    },
+    {
+      id: 'poison-utxo',
+      title: 'Poison UTXO',
+      systemTag: 'SYSTEM // SHIPPED',
+      tags: ['Blockchain', 'Forensics', 'Solidity'],
+      description: 'A blockchain forensics project that traces and flags suspicious "poisoned" UTXOs in cryptocurrency wallets to aid fraud detection. Built for Smart India Hackathon, shortlisted for the institute-level internal finals.',
+      liveUrl: 'https://poison-utxo.vercel.app/',
+      buildingColor: '#10B981', // Emerald
+      roofColor: '#A9714B',
+      featured: true,
+      slotPosition: [3.75, 0, -6.5],
+      categories: ['Blockchain', 'Hackathon'],
+    },
+    {
+      id: 'umbra',
+      title: 'Umbra',
+      systemTag: 'GAME // SHIPPED',
+      tags: ['three.js', 'Devvit', 'Game'],
+      description: "A daily 3D shadow-matching puzzle built for Reddit's Game of the Day Hackathon: rotate block pieces until their shadow fills the outline. Built with three.js on Devvit Web, playable on Reddit.",
+      sourceUrl: 'https://github.com/sharanyashetty013-droid/umbra',
+      liveUrl: 'https://www.reddit.com/r/PlayUmbra/',
+      buildingColor: '#6366F1', // Indigo
+      roofColor: '#A9714B',
+      featured: true,
+      slotPosition: [-3.75, 0, -6.5],
+      categories: ['Hackathon', 'Web & Games'],
     },
     {
       id: 'gitnaut',
@@ -79,7 +112,80 @@ export const portfolioData: PortfolioData = {
       liveUrl: 'https://gitnaut2.vercel.app/',
       buildingColor: '#F97316', // Orange
       roofColor: '#A9714B',
+      featured: true,
       slotPosition: [-7.5, 0, 0],
+      categories: ['Web & Games'],
+    },
+
+    // ---- Open source contributions ----
+    {
+      id: 'oss-golang',
+      title: 'Go (golang/go)',
+      systemTag: 'OPEN SOURCE // MERGED',
+      tags: ['Go', 'Open Source', 'database/sql'],
+      description: 'Merged contribution to the Go programming language: documented that database/sql Rows must always be closed, reviewed and approved by the Go team.',
+      sourceUrl: 'https://github.com/golang/go/pull/83293',
+      sourceLabel: 'View PR',
+      buildingColor: '#00ADD8',
+      roofColor: '#A9714B',
+      categories: ['Open Source'],
+    },
+    {
+      id: 'oss-gitea',
+      title: 'Gitea',
+      systemTag: 'OPEN SOURCE // MERGED',
+      tags: ['Go', 'Open Source', 'Refactor'],
+      description: 'Merged into Gitea 29.0: split the pre-receive branch checks into smaller, clearer functions.',
+      sourceUrl: 'https://github.com/go-gitea/gitea/pull/40463',
+      sourceLabel: 'View PR',
+      buildingColor: '#609926',
+      roofColor: '#A9714B',
+      categories: ['Open Source'],
+    },
+    {
+      id: 'oss-relay',
+      title: 'Relay',
+      systemTag: 'OPEN SOURCE // MERGED',
+      tags: ['Go', 'Webhooks', 'CI'],
+      description: 'Contributor to Relay, a Go webhook delivery service: added the service health endpoint (merged), and worked on a worker-crash recovery test and SDK release CI.',
+      sourceUrl: 'https://github.com/rajputomsingh/Relay/pull/124',
+      sourceLabel: 'View PR',
+      buildingColor: '#F2765D',
+      roofColor: '#A9714B',
+      categories: ['Open Source', 'Backend'],
+    },
+
+    // ---- More builds ----
+    {
+      id: 'zaroori',
+      title: 'Zaroori',
+      systemTag: 'HACKATHON // BUILD',
+      tags: ['Health', 'Dashboard'],
+      description: 'Hackathon build: an app for ASHA health workers plus a dashboard for officials, piloted around Udupi with NFHS-5 data for context.',
+      buildingColor: '#EC4899',
+      roofColor: '#A9714B',
+      categories: ['Hackathon'],
+    },
+    {
+      id: 'escape-the-castle',
+      title: 'Escape the Castle',
+      systemTag: 'GAME // SHIPPED',
+      tags: ['Game', '3D', 'Puzzle'],
+      description: 'A replayable puzzle escape room inside a 3D castle, with a dying-torch timer and an animated guide character.',
+      liveUrl: 'https://escape-the-castle-beta.vercel.app',
+      buildingColor: '#A855F7',
+      roofColor: '#A9714B',
+      categories: ['Web & Games'],
+    },
+    {
+      id: 'live-search-assistant',
+      title: 'Live Search Assistant',
+      systemTag: 'AI AGENT // BUILT',
+      tags: ['n8n', 'AI Agent', 'OpenAI'],
+      description: 'An AI agent built in n8n that answers questions from live Google search with sources (places, news, prices). Uses an OpenAI chat model, memory, SerpApi search and a calculator tool.',
+      buildingColor: '#F59E0B',
+      roofColor: '#A9714B',
+      categories: ['AI'],
     },
     {
       id: 'url-shortener',
@@ -88,10 +194,9 @@ export const portfolioData: PortfolioData = {
       tags: ['Go', 'Backend'],
       description: 'A backend learning project built end to end in Go: MD5-based hashing, in-memory storage, a /shorten route, and a working redirect route, tested in Postman and the browser.',
       sourceUrl: 'https://github.com/sharanyashetty013-droid/url-shortner',
-      liveUrl: undefined, // No live button
       buildingColor: '#0EA5E9', // Sky
       roofColor: '#A9714B',
-      slotPosition: [-3.75, 0, -6.5],
+      categories: ['Backend'],
     },
     {
       id: 'leetcode-solutions',
@@ -100,10 +205,9 @@ export const portfolioData: PortfolioData = {
       tags: ['DSA', 'C++'],
       description: "An ongoing log of Data Structures & Algorithms solutions worked through via Striver's A2Z Sheet, tracking a daily solving streak.",
       sourceUrl: 'https://github.com/sharanyashetty013-droid/leetcode-sol',
-      liveUrl: undefined, // No live button
       buildingColor: '#F59E0B', // Amber
       roofColor: '#A9714B',
-      slotPosition: [3.75, 0, -6.5],
+      categories: ['DSA'],
     },
   ],
   hackathons: [
