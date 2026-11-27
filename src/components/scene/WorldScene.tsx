@@ -90,9 +90,15 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
   const [isSailing, setIsSailing] = useState(false);
   const sailingRef = useRef(false);
   const [projectedLabels, setProjectedLabels] = useState<ProjectedLabel[]>([]);
-  const [dpr, setDpr] = useState(1.5);
+  // Draw sharp: phones have ~3x screens, so rendering at 1x looked blurry.
+  // Phones skip the heaviest effect (ambient occlusion) up front so they can afford a sharper picture.
+  const isPhone = typeof window !== 'undefined' && (window.matchMedia?.('(pointer: coarse)').matches || window.innerWidth < 768);
+  const screenDpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+  const maxDpr = Math.min(2, screenDpr);
+  const minDpr = Math.min(1.5, screenDpr);
+  const [dpr, setDpr] = useState(maxDpr);
   // drop the heavier screen effects on devices that are struggling
-  const [liteFX, setLiteFX] = useState(false);
+  const [liteFX, setLiteFX] = useState(isPhone);
 
   const targetT = ISLAND_LAYOUT[activeSection].routeT;
 
@@ -127,7 +133,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
         }}
       >
         {/* drop resolution on struggling devices, raise it back when there's headroom */}
-        <PerformanceMonitor onDecline={() => { setDpr(1); setLiteFX(true); }} onIncline={() => setDpr(Math.min(1.75, window.devicePixelRatio || 1))} flipflops={3} onFallback={() => { setDpr(1); setLiteFX(true); }} />
+        <PerformanceMonitor onDecline={() => { setLiteFX(true); setDpr(minDpr); }} onIncline={() => setDpr(maxDpr)} flipflops={3} onFallback={() => { setLiteFX(true); setDpr(minDpr); }} />
         <Suspense fallback={null}>
           {/* Dynamic Sky & Sunlight with Shadows */}
           <SkyAndAtmosphere reducedMotion={reducedMotion} timeOfDay={timeOfDay} />
