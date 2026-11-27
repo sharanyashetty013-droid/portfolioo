@@ -1,6 +1,7 @@
 import React, { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
+import { FLOWER } from './palmGeometry';
 
 type V3 = [number, number, number];
 
@@ -16,28 +17,39 @@ export const FlowerBush: React.FC<{ position: V3; color?: string; scale?: number
   color = '#F472B6',
   scale = 1,
 }) => {
+  // leafy clumps of slightly different greens, and flowers sitting on top of them
+  const clumps = useMemo(
+    () =>
+      [
+        { p: [0, 0.36, 0] as V3, r: 0.5, c: '#4A9E55' },
+        { p: [0.38, 0.26, 0.18] as V3, r: 0.34, c: '#5DB866' },
+        { p: [-0.34, 0.25, 0.12] as V3, r: 0.32, c: '#56AE5F' },
+        { p: [0.05, 0.24, -0.36] as V3, r: 0.33, c: '#4FA65A' },
+        { p: [0.12, 0.62, 0.08] as V3, r: 0.28, c: '#68C26F' },
+      ],
+    []
+  );
   const blossoms = useMemo(
     () =>
-      Array.from({ length: 6 }).map((_, i) => {
-        const a = (i / 6) * Math.PI * 2 + i;
-        return [Math.cos(a) * 0.42, 0.45 + (i % 3) * 0.12, Math.sin(a) * 0.42] as V3;
+      Array.from({ length: 9 }).map((_, i) => {
+        const a = (i / 9) * Math.PI * 2 + i * 0.7;
+        const up = 0.4 + (i % 3) * 0.14;
+        const r = 0.5 - (i % 3) * 0.1;
+        return { p: [Math.cos(a) * r, up, Math.sin(a) * r] as V3, rot: [Math.cos(a) * 0.6, a, Math.sin(a) * 0.6] as V3 };
       }),
     []
   );
   return (
     <group position={position} scale={scale}>
-      <mesh position={[0, 0.32, 0]} scale={[1, 0.8, 1]} castShadow receiveShadow>
-        <icosahedronGeometry args={[0.55, 0]} />
-        {flat('#4FA65A')}
-      </mesh>
-      <mesh position={[0.35, 0.22, 0.2]} castShadow>
-        <icosahedronGeometry args={[0.35, 0]} />
-        {flat('#5DB866')}
-      </mesh>
-      {blossoms.map((p, i) => (
-        <mesh key={i} position={p}>
-          <octahedronGeometry args={[0.09, 0]} />
-          <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.25} flatShading />
+      {clumps.map((c, i) => (
+        <mesh key={i} position={c.p} scale={[1, 0.82, 1]} castShadow receiveShadow>
+          <icosahedronGeometry args={[c.r, 1]} />
+          {flat(c.c)}
+        </mesh>
+      ))}
+      {blossoms.map((b, i) => (
+        <mesh key={i} position={b.p} rotation={b.rot} geometry={FLOWER} scale={1.25}>
+          <meshStandardMaterial vertexColors color={color} emissive={color} emissiveIntensity={0.12} roughness={0.6} />
         </mesh>
       ))}
     </group>

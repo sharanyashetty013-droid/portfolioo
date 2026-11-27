@@ -1,6 +1,7 @@
 import React, { useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
+import { PALM_TRUNK, PALM_CROWN, PALM_COCONUTS, BOULDER } from './palmGeometry';
 
 // ---------------------------------------------------------------------------
 // 1. COZY LOW-POLY ROWING BOAT (Hero Boat & Moored Variants)
@@ -465,50 +466,35 @@ export const CurvedPalm: React.FC<CurvedPalmProps> = ({
   rotation = [0, 0, 0],
   scale = 1.0,
 }) => {
-  const trunkSegments = 8;
+  const crown = useRef<THREE.Group>(null);
+  const trunk = useRef<THREE.Group>(null);
+  // each palm sways a little out of step with the others
+  const phase = (position[0] * 0.37 + position[2] * 0.61) % (Math.PI * 2);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime * 0.9 + phase;
+    const gust = Math.sin(t) * 0.6 + Math.sin(t * 2.3) * 0.25 + Math.sin(t * 0.37) * 0.4;
+    if (crown.current) {
+      crown.current.rotation.z = -0.15 + gust * 0.06;
+      crown.current.rotation.x = Math.sin(t * 1.3) * 0.04;
+    }
+    if (trunk.current) trunk.current.rotation.z = gust * 0.012;
+  });
 
   return (
-    <group position={position} rotation={rotation} scale={scale}>
-      <group>
-        {Array.from({ length: trunkSegments }).map((_, i) => {
-          const frac = i / trunkSegments;
-          const y = frac * 5.2;
-          const xOffset = Math.sin(frac * Math.PI * 0.45) * 1.8;
-          const rotZ = frac * -0.35;
-          const rTop = 0.25 - frac * 0.08;
-          const rBottom = 0.32 - frac * 0.08;
-          return (
-            <mesh 
-              key={`pseg-${i}`} 
-              position={[xOffset, y + 0.35, 0]} 
-              rotation={[0, 0, rotZ]}
-              castShadow 
-              receiveShadow
-            >
-              <cylinderGeometry args={[rTop, rBottom, 0.8, 7]} />
-              <meshStandardMaterial color={i % 2 === 0 ? '#BFA077' : '#AA885B'} roughness={0.85} flatShading />
-            </mesh>
-          );
-        })}
-      </group>
-
-      <group position={[1.7, 5.3, 0]} rotation={[0, 0, -0.3]}>
-        {Array.from({ length: 8 }).map((_, i) => {
-          const angle = (i / 8) * Math.PI * 2;
-          const droop = 0.48 + (i % 2) * 0.12;
-          return (
-            <group key={`l-${i}`} rotation={[0, angle, 0]}>
-              <mesh position={[1.5, -0.45, 0]} rotation={[0, 0, droop]} castShadow>
-                <coneGeometry args={[0.6, 2.8, 4]} />
-                <meshStandardMaterial 
-                  color="#5FBF4A" 
-                  roughness={0.75} 
-                  flatShading 
-                />
-              </mesh>
-            </group>
-          );
-        })}
+    <group position={position} rotation={rotation} scale={scale} userData={{ noMerge: true }}>
+      <group ref={trunk}>
+        <mesh geometry={PALM_TRUNK} castShadow receiveShadow>
+          <meshStandardMaterial vertexColors roughness={0.85} flatShading />
+        </mesh>
+        <group ref={crown} position={[1.72, 5.55, 0]}>
+          <mesh geometry={PALM_CROWN} castShadow>
+            <meshStandardMaterial vertexColors roughness={0.7} side={THREE.DoubleSide} />
+          </mesh>
+          <mesh geometry={PALM_COCONUTS} castShadow>
+            <meshStandardMaterial vertexColors roughness={0.6} />
+          </mesh>
+        </group>
       </group>
     </group>
   );
@@ -552,9 +538,8 @@ export const LowPolyBoulder: React.FC<{ position: [number, number, number]; rota
   rotation = [0, 0, 0],
   scale = 1.0,
 }) => (
-  <mesh position={position} rotation={rotation} scale={scale} castShadow receiveShadow>
-    <dodecahedronGeometry args={[0.65, 0]} />
-    <meshStandardMaterial color="#9CA3AF" roughness={0.88} flatShading />
+  <mesh position={position} rotation={rotation} scale={scale} geometry={BOULDER} castShadow receiveShadow>
+    <meshStandardMaterial vertexColors roughness={0.9} flatShading />
   </mesh>
 );
 

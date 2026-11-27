@@ -9,6 +9,7 @@ import { WaterSea } from './WaterSea';
 import { RoutePathLine } from './RoutePathLine';
 import { HeroBoat } from './HeroBoat';
 import { HomeIsland } from './islands/HomeIsland';
+import { SeaLife } from './life/SeaLife';
 import { SkillsIsland } from './islands/SkillsIsland';
 import { ProjectsIsland } from './islands/ProjectsIsland';
 import { HackathonsIsland } from './islands/HackathonsIsland';
@@ -178,6 +179,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
           {/* Islanders, gulls, crabs, jumping fish */}
           <IslandLife reducedMotion={reducedMotion} />
           <Fireflies reducedMotion={reducedMotion} />
+          <SeaLife timeOfDay={timeOfDay} reducedMotion={reducedMotion} />
 
           {/* 3D Tracker inside Canvas */}
           <FloatingLabelsTracker
