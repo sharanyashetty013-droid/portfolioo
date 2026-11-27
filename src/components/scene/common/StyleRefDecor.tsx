@@ -1,6 +1,7 @@
 import React, { useRef, useMemo } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
+import { PALM_TRUNK, PALM_CROWN, PALM_COCONUTS, BOULDER } from './palmGeometry';
 
 // ---------------------------------------------------------------------------
 // 1. COZY LOW-POLY ROWING BOAT (Hero Boat & Moored Variants)
@@ -30,64 +31,86 @@ export const RowingBoat: React.FC<RowingBoatProps> = ({
   flagColor = '#1AA6A6',       // Teal pennant flag
   hasLantern = false,
 }) => {
-  // Build faceted low-poly wooden hull
-  const hullGeo = useMemo(() => {
-    const geom = new THREE.BufferGeometry();
-    const vertices = new Float32Array([
-      // Bottom face
-      -0.6, 0.0, 1.4,   0.6, 0.0, 1.4,   0.0, 0.05, -1.8,
-      -0.6, 0.0, 1.4,   0.0, 0.05, -1.8, -0.65, 0.0, 0.0,
-      0.6, 0.0, 1.4,    0.65, 0.0, 0.0,   0.0, 0.05, -1.8,
-      // Starboard (Right) outer wall
-      0.6, 0.0, 1.4,    0.85, 0.48, 1.4,   0.9, 0.5, 0.0,
-      0.6, 0.0, 1.4,    0.9, 0.5, 0.0,     0.65, 0.0, 0.0,
-      0.65, 0.0, 0.0,   0.9, 0.5, 0.0,     0.0, 0.58, -1.9,
-      0.65, 0.0, 0.0,   0.0, 0.58, -1.9,   0.0, 0.05, -1.8,
-      // Port (Left) outer wall
-      -0.6, 0.0, 1.4,   -0.9, 0.5, 0.0,    -0.85, 0.48, 1.4,
-      -0.6, 0.0, 1.4,   -0.65, 0.0, 0.0,   -0.9, 0.5, 0.0,
-      -0.65, 0.0, 0.0,  -0.0, 0.58, -1.9,  -0.9, 0.5, 0.0,
-      -0.65, 0.0, 0.0,  0.0, 0.05, -1.8,   -0.0, 0.58, -1.9,
-      // Transom (Back stern wall)
-      -0.6, 0.0, 1.4,   -0.85, 0.48, 1.4,  0.85, 0.48, 1.4,
-      -0.6, 0.0, 1.4,   0.85, 0.48, 1.4,   0.6, 0.0, 1.4,
-    ]);
-    geom.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
-    geom.computeVertexNormals();
-    return geom;
-  }, []);
+  // Smooth planked hull, lofted from U-shaped cross-sections: full at the stern, widest
+  // just behind the middle, pinched to a raised point at the bow.
+  const { hullGeo, innerGeo, railGeo } = useMemo(() => {
+    const U = 28, V = 16;
+    const zAt = (u: number) => 1.4 - u * 3.3;
+    const width = (u: number) =>
+      u < 0.55 ? 0.88 * (0.8 + 0.2 * Math.sin((u / 0.55) * Math.PI / 2)) : 0.88 * Math.pow(Math.cos(((u - 0.55) / 0.45) * Math.PI / 2), 0.75);
+    const depth = (u: number) => 0.5 * (1 - 0.12 * u);
+    const sheer = (u: number) => 0.5 + 0.16 * Math.pow(u, 3);
+    const point = (u: number, v: number, shrink = 0) => {
+      const th = (v - 0.5) * Math.PI; // -90..90 degrees, 0 = keel
+      const w = Math.max(0, width(u) - shrink);
+      const x = w * Math.sin(th);
+      const y = sheer(u) - (depth(u) - shrink) * Math.pow(Math.cos(th), 0.6);
+      // the inner skin is pulled in at both ends too, so it never overlaps the outer one
+      return new THREE.Vector3(x, y, zAt(u) + shrink * (2 * u - 1) * 1.2);
+    };
+    const base = new THREE.Color(hullColor);
+    const dark = base.clone().multiplyScalar(0.86);
+    const build = (shrink: number, plankLines: boolean) => {
+      const pos: number[] = [], col: number[] = [], idx: number[] = [];
+      for (let i = 0; i <= U; i++) {
+        for (let j = 0; j <= V; j++) {
+          const p = point(i / U, j / V, shrink);
+          pos.push(p.x, p.y, p.z);
+          const plank = Math.floor((j / V) * 7);
+          const c = plankLines && plank % 2 ? dark : base;
+          col.push(c.r, c.g, c.b);
+        }
+      }
+      for (let i = 0; i < U; i++) {
+        for (let j = 0; j < V; j++) {
+          const a0 = i * (V + 1) + j, b0 = (i + 1) * (V + 1) + j;
+          idx.push(a0, b0, a0 + 1, a0 + 1, b0, b0 + 1);
+        }
+      }
+      // flat transom closing the stern
+      const centre = pos.length / 3;
+      const cs = point(0, 0.5, shrink);
+      pos.push(0, (cs.y + sheer(0)) / 2, zAt(0) - shrink * 1.2);
+      col.push(base.r, base.g, base.b);
+      for (let j = 0; j < V; j++) idx.push(centre, j + 1, j);
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+      g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+      g.setIndex(idx);
+      g.computeVertexNormals();
+      return g;
+    };
+    // rail along both gunwales and across the stern
+    const railPts = (side: number) =>
+      Array.from({ length: U + 1 }, (_, i) => point(i / U, side > 0 ? 1 : 0).add(new THREE.Vector3(0, 0.02, 0)));
+    const rails = [
+      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(railPts(1)), 40, 0.055, 6),
+      new THREE.TubeGeometry(new THREE.CatmullRomCurve3(railPts(-1)), 40, 0.055, 6),
+      new THREE.TubeGeometry(new THREE.LineCurve3(point(0, 0).add(new THREE.Vector3(0, 0.02, 0)), point(0, 1).add(new THREE.Vector3(0, 0.02, 0))), 2, 0.055, 6),
+    ];
+    return { hullGeo: build(0, true), innerGeo: build(0.06, false), railGeo: rails };
+  }, [hullColor]);
 
   return (
     <group position={position} rotation={rotation} scale={scale}>
-      {/* Outer Hull */}
+      {/* Outer hull with plank lines */}
       <mesh geometry={hullGeo} castShadow receiveShadow>
-        <meshStandardMaterial
-          color={hullColor}
-          roughness={0.75}
-          metalness={0.02}
-          side={THREE.DoubleSide}
-          flatShading
-        />
+        <meshStandardMaterial vertexColors roughness={0.6} metalness={0.02} side={THREE.DoubleSide} />
       </mesh>
-
-      {/* Cream Stripe along the top edge */}
-      <mesh position={[-0.83, 0.49, 0.4]} rotation={[0, 0.1, 0]} castShadow>
-        <boxGeometry args={[0.09, 0.09, 1.9]} />
-        <meshStandardMaterial color={stripeColor} roughness={0.7} flatShading />
+      {/* inside of the hull, a lighter wood */}
+      <mesh geometry={innerGeo} receiveShadow>
+        <meshStandardMaterial color={innerColor} roughness={0.85} side={THREE.DoubleSide} />
       </mesh>
-      <mesh position={[0.83, 0.49, 0.4]} rotation={[0, -0.1, 0]} castShadow>
-        <boxGeometry args={[0.09, 0.09, 1.9]} />
-        <meshStandardMaterial color={stripeColor} roughness={0.7} flatShading />
-      </mesh>
-      <mesh position={[0, 0.49, 1.4]} castShadow>
-        <boxGeometry args={[1.7, 0.09, 0.09]} />
-        <meshStandardMaterial color={stripeColor} roughness={0.7} flatShading />
-      </mesh>
-
-      {/* Bow Prow Cap Stem */}
-      <mesh position={[0, 0.35, -1.85]} rotation={[0.3, 0, 0]} castShadow>
-        <boxGeometry args={[0.1, 0.62, 0.1]} />
-        <meshStandardMaterial color={stripeColor} roughness={0.7} flatShading />
+      {/* cream rails along the top edge */}
+      {railGeo.map((g, i) => (
+        <mesh key={i} geometry={g} castShadow>
+          <meshStandardMaterial color={stripeColor} roughness={0.6} />
+        </mesh>
+      ))}
+      {/* bow post */}
+      <mesh position={[0, 0.62, -1.9]} rotation={[0.35, 0, 0]} castShadow>
+        <capsuleGeometry args={[0.05, 0.22, 4, 8]} />
+        <meshStandardMaterial color={stripeColor} roughness={0.6} />
       </mesh>
 
       {/* Interior Cream Planks & Bench Seats */}
@@ -121,7 +144,7 @@ export const RowingBoat: React.FC<RowingBoatProps> = ({
       {/* Oars */}
       {hasOars && (
         <group position={[0, 0.40, 0.15]}>
-          <group position={[-0.1, 0.05, 0]} rotation={[0.08, -0.35, 0.22]}>
+          <group position={[-0.42, 0.06, -0.1]} rotation={[Math.PI / 2 - 0.12, 0, 0.06]}>
             <mesh position={[0, 0, 0]} castShadow>
               <cylinderGeometry args={[0.024, 0.028, 2.7, 6]} />
               <meshStandardMaterial color="#E2BA84" roughness={0.7} flatShading />
@@ -135,7 +158,7 @@ export const RowingBoat: React.FC<RowingBoatProps> = ({
               <meshStandardMaterial color="#E2BA84" roughness={0.7} flatShading />
             </mesh>
           </group>
-          <group position={[0.1, 0.05, 0]} rotation={[-0.06, 0.38, -0.25]}>
+          <group position={[0.42, 0.06, -0.1]} rotation={[Math.PI / 2 - 0.12, 0, -0.06]}>
             <mesh position={[0, 0, 0]} castShadow>
               <cylinderGeometry args={[0.024, 0.028, 2.7, 6]} />
               <meshStandardMaterial color="#E2BA84" roughness={0.7} flatShading />
@@ -465,50 +488,35 @@ export const CurvedPalm: React.FC<CurvedPalmProps> = ({
   rotation = [0, 0, 0],
   scale = 1.0,
 }) => {
-  const trunkSegments = 8;
+  const crown = useRef<THREE.Group>(null);
+  const trunk = useRef<THREE.Group>(null);
+  // each palm sways a little out of step with the others
+  const phase = (position[0] * 0.37 + position[2] * 0.61) % (Math.PI * 2);
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime * 0.9 + phase;
+    const gust = Math.sin(t) * 0.6 + Math.sin(t * 2.3) * 0.25 + Math.sin(t * 0.37) * 0.4;
+    if (crown.current) {
+      crown.current.rotation.z = -0.15 + gust * 0.06;
+      crown.current.rotation.x = Math.sin(t * 1.3) * 0.04;
+    }
+    if (trunk.current) trunk.current.rotation.z = gust * 0.012;
+  });
 
   return (
-    <group position={position} rotation={rotation} scale={scale}>
-      <group>
-        {Array.from({ length: trunkSegments }).map((_, i) => {
-          const frac = i / trunkSegments;
-          const y = frac * 5.2;
-          const xOffset = Math.sin(frac * Math.PI * 0.45) * 1.8;
-          const rotZ = frac * -0.35;
-          const rTop = 0.25 - frac * 0.08;
-          const rBottom = 0.32 - frac * 0.08;
-          return (
-            <mesh 
-              key={`pseg-${i}`} 
-              position={[xOffset, y + 0.35, 0]} 
-              rotation={[0, 0, rotZ]}
-              castShadow 
-              receiveShadow
-            >
-              <cylinderGeometry args={[rTop, rBottom, 0.8, 7]} />
-              <meshStandardMaterial color={i % 2 === 0 ? '#BFA077' : '#AA885B'} roughness={0.85} flatShading />
-            </mesh>
-          );
-        })}
-      </group>
-
-      <group position={[1.7, 5.3, 0]} rotation={[0, 0, -0.3]}>
-        {Array.from({ length: 8 }).map((_, i) => {
-          const angle = (i / 8) * Math.PI * 2;
-          const droop = 0.48 + (i % 2) * 0.12;
-          return (
-            <group key={`l-${i}`} rotation={[0, angle, 0]}>
-              <mesh position={[1.5, -0.45, 0]} rotation={[0, 0, droop]} castShadow>
-                <coneGeometry args={[0.6, 2.8, 4]} />
-                <meshStandardMaterial 
-                  color="#5FBF4A" 
-                  roughness={0.75} 
-                  flatShading 
-                />
-              </mesh>
-            </group>
-          );
-        })}
+    <group position={position} rotation={rotation} scale={scale} userData={{ noMerge: true }}>
+      <group ref={trunk}>
+        <mesh geometry={PALM_TRUNK} castShadow receiveShadow>
+          <meshStandardMaterial vertexColors roughness={0.85} flatShading />
+        </mesh>
+        <group ref={crown} position={[1.72, 5.55, 0]}>
+          <mesh geometry={PALM_CROWN} castShadow>
+            <meshStandardMaterial vertexColors roughness={0.7} side={THREE.DoubleSide} />
+          </mesh>
+          <mesh geometry={PALM_COCONUTS} castShadow>
+            <meshStandardMaterial vertexColors roughness={0.6} />
+          </mesh>
+        </group>
       </group>
     </group>
   );
@@ -552,9 +560,8 @@ export const LowPolyBoulder: React.FC<{ position: [number, number, number]; rota
   rotation = [0, 0, 0],
   scale = 1.0,
 }) => (
-  <mesh position={position} rotation={rotation} scale={scale} castShadow receiveShadow>
-    <dodecahedronGeometry args={[0.65, 0]} />
-    <meshStandardMaterial color="#9CA3AF" roughness={0.88} flatShading />
+  <mesh position={position} rotation={rotation} scale={scale} geometry={BOULDER} castShadow receiveShadow>
+    <meshStandardMaterial vertexColors roughness={0.9} flatShading />
   </mesh>
 );
 

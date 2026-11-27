@@ -38,19 +38,30 @@ const waterFragmentShader = `
   void main() {
     vec2 pos = vWorldPosition.xz;
     
-    // Multi-layered animated ripples matching the style reference
+    // Wave field: several directional waves summed, with their slopes, so the surface
+    // has real relief (light crests, darker troughs) and a properly tilted normal for lighting
     float t = uTime * 0.75;
-    float wave1 = sin(pos.x * 0.18 + pos.y * 0.14 + t * 1.3);
-    float wave2 = cos(pos.x * 0.24 - pos.y * 0.20 - t * 1.0);
-    float wave3 = sin(pos.x * 0.50 + pos.y * 0.38 + t * 2.0) * 0.5;
-    float ripple = (wave1 + wave2 + wave3) / 2.5;
-
-    // Perturb surface normal for sparkling light facets
-    vec3 n = normalize(vec3(
-      cos(pos.x * 0.22 + t) * 0.08 + sin(pos.y * 0.42 - t) * 0.05,
-      1.0,
-      sin(pos.y * 0.22 + t) * 0.08 + cos(pos.x * 0.42 - t) * 0.05
-    ));
+    float h = 0.0;
+    vec2 slope = vec2(0.0);
+    // direction, frequency, amplitude, speed
+    vec4 W[6];
+    W[0] = vec4(normalize(vec2( 1.0,  0.35)), 0.16, 1.0);
+    W[1] = vec4(normalize(vec2(-0.6,  1.0)),  0.23, 0.7);
+    W[2] = vec4(normalize(vec2( 0.8, -0.9)),  0.37, 0.45);
+    W[3] = vec4(normalize(vec2(-1.0, -0.2)),  0.61, 0.28);
+    W[4] = vec4(normalize(vec2( 0.3,  1.0)),  1.05, 0.16);
+    W[5] = vec4(normalize(vec2(-0.7, -0.8)),  1.7,  0.09);
+    float speeds[6] = float[6](1.1, 1.3, 1.7, 2.1, 2.8, 3.6);
+    for (int i = 0; i < 6; i++) {
+      vec2 d = W[i].xy;
+      float f = W[i].z;
+      float a = W[i].w;
+      float ph = dot(d, pos) * f + t * speeds[i];
+      h += sin(ph) * a;
+      slope += d * cos(ph) * a * f;
+    }
+    float ripple = h / 1.6;                 // about -1..1
+    vec3 n = normalize(vec3(-slope.x * 0.9, 1.0, -slope.y * 0.9));
 
     vec3 viewDir = normalize(uCameraPos - vWorldPosition);
     vec3 lightDir = normalize(uSunDirection);
@@ -95,15 +106,30 @@ const waterFragmentShader = `
       caustic = pow(max(c1 * c2, 0.0), 1.6) * shoreWeight * 0.55;
     }
 
-    // Base water gradient
-    vec3 waterColor = mix(uTealColor, uDeepColor, clamp(fresnel * 0.6, 0.0, 1.0));
-    waterColor = mix(waterColor, uShallowColor, clamp(shoreWeight * 0.85 + ripple * 0.1, 0.0, 1.0));
+    // Base water gradient: deeper colour in the troughs, brighter on the crests
+    vec3 waterColor = mix(uTealColor, uDeepColor, clamp(fresnel * 0.6 + (0.5 - ripple * 0.5) * 0.35, 0.0, 1.0));
+    waterColor = mix(waterColor, uShallowColor, clamp(shoreWeight * 0.85 + max(ripple, 0.0) * 0.22, 0.0, 1.0));
+    // a little self-shadowing on the side of each wave facing away from the sun
+    float lambert = clamp(dot(n, lightDir) * 0.5 + 0.5, 0.0, 1.0);
+    waterColor *= mix(0.82, 1.08, lambert);
     waterColor += vec3(caustic);
 
-    // Specular sun glints
+    // sky reflection toward the horizon
+    waterColor = mix(waterColor, uFogColor, clamp(fresnel * 0.35, 0.0, 0.35));
+
+    // sun / moon glints: a broad sheen plus sharp sparkles on the wave facets
     vec3 halfVec = normalize(lightDir + viewDir);
-    float spec = pow(max(dot(n, halfVec), 0.0), 32.0);
-    waterColor += uGlint * spec * 0.75;
+    float nh = max(dot(n, halfVec), 0.0);
+    float spec = pow(nh, 28.0) * 0.4 + pow(nh, 220.0) * 2.2;
+    waterColor += uGlint * spec;
+
+    // waves lapping toward each shore: foam lines rolling in
+    if (minShoreDist > 0.0 && minShoreDist < 7.0) {
+      float roll = fract(minShoreDist * 0.32 + t * 0.35);
+      float line = smoothstep(0.0, 0.06, roll) * smoothstep(0.16, 0.06, roll);
+      float breakUp = 0.55 + 0.45 * sin(pos.x * 1.3 + pos.y * 1.1 + t);
+      waterColor = mix(waterColor, uFoamColor, line * breakUp * (1.0 - minShoreDist / 7.0) * 0.6);
+    }
 
     // Contact foam ring at cliff base waterline
     float foamRing = 0.0;
