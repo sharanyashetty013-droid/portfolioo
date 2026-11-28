@@ -9,7 +9,6 @@ import { FlowerBush, LampPost, Bunting } from '../common/IslandProps';
 import { ProjectItem } from '../../../types/portfolio';
 import { portfolioData } from '../../../data/portfolioData';
 import { ISLAND_LAYOUT } from '../../../constants/islandLayout';
-import { KrakenCove } from './KrakenCove';
 
 type V3 = [number, number, number];
 
@@ -46,12 +45,37 @@ export const shipToWorld = (x: number, y: number, z: number) => {
   return new THREE.Vector3(HARBOR_SHIP.pos[0] + x * c + z * s, y, HARBOR_SHIP.pos[2] - x * s + z * c);
 };
 
-export { CRASH_COVE, crashCoveBus } from './KrakenCove';
+
+const LID_NAMES: Record<string, string> = { 'oss-golang': 'GO', 'oss-gitea': 'GITEA', 'oss-relay': 'RELAY' };
+const lidTexture = (text: string) => {
+  const c = document.createElement('canvas');
+  c.width = 256;
+  c.height = 160;
+  const x = c.getContext('2d')!;
+  x.fillStyle = 'rgba(255,255,255,0)';
+  x.fillRect(0, 0, 256, 160);
+  x.fillStyle = '#FFFFFF';
+  x.textAlign = 'center';
+  x.textBaseline = 'middle';
+  let size = 86;
+  x.font = `900 ${size}px system-ui, -apple-system, Segoe UI, sans-serif`;
+  while (x.measureText(text).width > 228 && size > 30) {
+    size -= 4;
+    x.font = `900 ${size}px system-ui, -apple-system, Segoe UI, sans-serif`;
+  }
+  x.fillText(text, 128, 84);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  return t;
+};
 
 // ---------------------------------------------------------------------------
 // Shipping container: corrugated box in the repo's colour
 // ---------------------------------------------------------------------------
-const Container: React.FC<{ color: string; hovered?: boolean }> = ({ color, hovered }) => (
+const Container: React.FC<{ color: string; label?: string; hovered?: boolean }> = ({ color, label, hovered }) => {
+  const tex = useMemo(() => (label && typeof document !== 'undefined' ? lidTexture(label) : null), [label]);
+  return (
   <group>
     <mesh position={[0, 0.45, 0]} castShadow receiveShadow>
       <boxGeometry args={[1.45, 0.9, 1.15]} />
@@ -70,10 +94,20 @@ const Container: React.FC<{ color: string; hovered?: boolean }> = ({ color, hove
     </mesh>
     <mesh position={[0, 0.91, 0]}>
       <boxGeometry args={[1.5, 0.04, 1.2]} />
-      {flat('#F8FAFC')}
+      {flat(new THREE.Color(color).multiplyScalar(0.85).getStyle())}
     </mesh>
+    {/* repo name painted on the lid, readable from the harbor camera */}
+    {tex && (
+      <group position={[0, 0.935, 0]} rotation={[0, -Math.PI / 2, 0]}>
+        <mesh rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[1.12, 0.7]} />
+          <meshBasicMaterial map={tex} transparent depthWrite={false} toneMapped={false} />
+        </mesh>
+      </group>
+    )}
   </group>
-);
+  );
+};
 
 // ---------------------------------------------------------------------------
 // Cargo ship moored by the harbor; merged PRs ride on deck as containers
@@ -217,7 +251,7 @@ const CargoShip: React.FC<{
             document.body.style.cursor = 'auto';
           }}
         >
-          <Container color={REPO_COLORS[p.id] ?? '#94A3B8'} hovered={hovered === p.id} />
+          <Container color={REPO_COLORS[p.id] ?? '#94A3B8'} label={LID_NAMES[p.id]} hovered={hovered === p.id} />
         </group>
       ))}
     </group>
@@ -469,7 +503,6 @@ export const OpenSourceHarbor: React.FC<OpenSourceHarborProps> = ({ isAnyModalOp
 
       <HarborCrane reducedMotion={reducedMotion} />
       <CargoShip ossProjects={ossProjects} isAnyModalOpen={isAnyModalOpen} onSelectProject={onSelectProject} reducedMotion={reducedMotion} shipRef={shipRef} />
-      <KrakenCove isAnyModalOpen={isAnyModalOpen} reducedMotion={reducedMotion} />
     </>
   );
 };

@@ -4,7 +4,6 @@ import { useFrame, useThree } from '@react-three/fiber';
 import { SectionId, ProjectItem, HackathonItem, SkillGroup } from '../../types/portfolio';
 import { portfolioData } from '../../data/portfolioData';
 import { ISLAND_LAYOUT } from '../../constants/islandLayout';
-import { getOssProjects, SHIP_SLOTS, shipToWorld, CRASH_COVE, crashCoveBus } from './islands/OpenSourceHarbor';
 
 export interface LabelItem {
   id: string;
@@ -125,32 +124,6 @@ export const FloatingLabelsTracker: React.FC<FloatingLabelsTrackerProps> = ({
         onClick: () => onSelectSkillGroup(g),
         category: 'skill',
       }));
-    }
-
-    if (activeSection === 'opensource') {
-      const crates = getOssProjects().slice(0, SHIP_SLOTS.length).map((p, i) => ({
-        id: `oss-${p.id}`,
-        name: p.title,
-        shortName: p.title.replace(/\s*\(.*\)/, ''),
-        badge: 'Merged',
-        dotColor: '#22C55E',
-        worldPos: shipToWorld(SHIP_SLOTS[i], 2.5, 0),
-        onClick: () => onSelectProject(p),
-        category: 'project' as const,
-      }));
-      return [
-        ...crates,
-        {
-          id: 'crash-cove',
-          name: 'midsave crash test',
-          shortName: 'Crash test',
-          badge: 'Click to release the kraken',
-          dotColor: '#F2765D',
-          worldPos: new THREE.Vector3(CRASH_COVE.pos[0], 4.2, CRASH_COVE.pos[2]),
-          onClick: () => crashCoveBus.crash(),
-          category: 'project' as const,
-        },
-      ];
     }
 
     if (activeSection === 'contact') {
