@@ -7,16 +7,20 @@ import { IslandConfig } from '../../../constants/islandLayout';
 // instead of sailing into them. Deck height follows the island height.
 const SIDE_OFFSET = 0.38; // radians
 
-export const IslandPier: React.FC<{ config: IslandConfig }> = ({ config }) => {
+/** Where an island's pier sits: its origin and heading. Deck top is 3.36 above the origin. */
+export const pierFrame = (config: IslandConfig) => {
   const [px, , pz] = config.position;
   const [dx, , dz] = config.dockPosition;
   const angle = Math.atan2(dx - px, dz - pz) + SIDE_OFFSET;
   const dist = config.radius + 1.6;
+  return {
+    position: [px + Math.sin(angle) * dist, config.height - 3.2, pz + Math.cos(angle) * dist] as [number, number, number],
+    angle,
+  };
+};
+export const PIER_DECK_Y = 3.36;
 
-  return (
-    <WoodenPier
-      position={[px + Math.sin(angle) * dist, config.height - 3.2, pz + Math.cos(angle) * dist]}
-      rotation={[0, angle, 0]}
-    />
-  );
+export const IslandPier: React.FC<{ config: IslandConfig }> = ({ config }) => {
+  const { position, angle } = pierFrame(config);
+  return <WoodenPier position={position} rotation={[0, angle, 0]} />;
 };

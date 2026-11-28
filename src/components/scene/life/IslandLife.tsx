@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import type { PersonPose } from './LowPolyPerson';
 import { ModelPerson, PersonModel } from './ModelPerson';
+import { Fisherman } from './Fisherman';
 import { ISLAND_LAYOUT, IslandConfig } from '../../../constants/islandLayout';
 
 // Height of the sand dune at a given distance from the island centre
@@ -265,6 +266,7 @@ export const IslandLife: React.FC<{ reducedMotion?: boolean }> = ({ reducedMotio
       {/* Home: someone strolling the beach */}
       <NearCamera cfg={L.home}>
         <Walker cfg={L.home} center={[0, 1]} radius={6.8} speed={0.22} model="remy" reducedMotion={rm} />
+        <Fisherman cfg={L.home} reducedMotion={rm} />
         <Seagulls cfg={L.home} count={3} reducedMotion={rm} />
         <Crab cfg={L.home} angle={1.1} reducedMotion={rm} />
         <JumpingFish cfg={L.home} seed={fishSeeds[0]} reducedMotion={rm} />
