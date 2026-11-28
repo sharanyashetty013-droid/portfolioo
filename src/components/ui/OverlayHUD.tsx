@@ -105,7 +105,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
       {/* Center Sailing Notification */}
       {isSailing && (
         <div className="relative self-center glass glass-pill text-[#0F4C5C] px-5 py-2 sm:py-2.5 flex items-center gap-2 text-xs sm:text-sm font-extrabold my-2">
-          <Navigation className="w-4 h-4 text-[#F2765D]" />
+          <Navigation className="w-4 h-4 text-[#FFD9A0]" />
           <span>Sailing to {currentConfig.name}...</span>
         </div>
       )}

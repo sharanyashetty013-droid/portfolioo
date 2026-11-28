@@ -143,11 +143,12 @@ const ModelPersonInner: React.FC<ModelPersonProps> = ({
         break;
       }
       case 'wave':
+        // upper arm out to the side, forearm upright, swaying from the elbow
         lowerL = 1.2;
-        lowerR = -1.0;
+        lowerR = -0.2;
         elL = 0.2;
-        elR = 0.55;
-        waveR = Math.sin(t * 8) * 0.45;
+        elR = 0.12;
+        waveR = -1.35 + Math.sin(t * 7) * 0.32;
         tilt = 0.1 + Math.sin(t * 1.4) * 0.04;
         break;
       case 'row': {
@@ -204,13 +205,17 @@ const ModelPersonInner: React.FC<ModelPersonProps> = ({
     // elbows bend the hand forward
     turn(rig.LeftForeArm, Y, -c.elL);
     turn(rig.RightForeArm, Y, c.elR);
+    // when waving, roll the forearm so the palm faces forward, then lift it upright
+    turn(rig.RightForeArm, X, -1.2 * Math.min(1, Math.abs(c.waveR) / 1.2));
     turn(rig.RightForeArm, Z, c.waveR);
-    // relaxed hands
+    // relaxed hands; the waving hand opens flat
+    const open = Math.min(1, Math.abs(c.waveR) / 1.2);
     turn(rig.LeftHand, Z, -0.12);
-    turn(rig.RightHand, Z, 0.12);
+    turn(rig.RightHand, Z, 0.12 * (1 - open));
     for (const f of fingers) {
       f.bone.quaternion.copy(f.rest);
-      turn(f, Z, f.bone.name.includes('Left') ? -0.32 : 0.32);
+      const left = f.bone.name.includes('Left');
+      turn(f, Z, left ? -0.32 : 0.32 * (1 - open * 0.85));
     }
     // legs
     turn(rig.LeftUpLeg, X, c.upL);
