@@ -6,7 +6,6 @@ import { SectionId, ProjectItem, HackathonItem, SkillGroup } from '../../types/p
 import { CameraController } from './CameraController';
 import { SkyAndAtmosphere } from './SkyAndAtmosphere';
 import { WaterSea } from './WaterSea';
-import { RoutePathLine } from './RoutePathLine';
 import { HeroBoat } from './HeroBoat';
 import { HomeIsland } from './islands/HomeIsland';
 import { SeaLife } from './life/SeaLife';
@@ -142,8 +141,6 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
           {/* Rippling Sea with Custom Shader */}
           <WaterSea />
 
-          {/* Dotted / Solid Navigation Route Path */}
-          <RoutePathLine currentT={targetT} />
 
           {/* Six Islands of the Archipelago */}
           {/* Chapter 1: Home */}
