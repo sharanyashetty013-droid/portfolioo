@@ -172,12 +172,13 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
             reducedMotion={reducedMotion}
           />
 
-          {/* Chapter 4: Open Source Harbor + midsave crash test cove */}
+          {/* Chapter 4: Open Source Harbor */}
           <OpenSourceHarbor
             isActive={activeSection === 'opensource'}
             isAnyModalOpen={isAnyModalOpen}
             onSelectProject={onSelectProject}
             reducedMotion={reducedMotion}
+            timeOfDay={timeOfDay}
           />
 
           {/* Chapter 5: Hackathons */}
