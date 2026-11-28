@@ -212,6 +212,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
                 <button
                   key={chId}
                   onClick={() => onNavigate(chId)}
+                  aria-current={isActive ? 'true' : undefined}
                   className={`group relative flex items-center justify-center gap-1 px-1.5 sm:px-2.5 py-1 rounded-full text-[10.5px] sm:text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     isActive
                       ? 'text-white bg-[#1AA6A6] shadow-[0_6px_14px_-6px_rgba(26,166,166,0.9)]'

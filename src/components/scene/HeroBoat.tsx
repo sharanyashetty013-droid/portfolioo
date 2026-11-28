@@ -5,26 +5,10 @@ import { useFrame } from '@react-three/fiber';
 import { RowingBoat } from './common/StyleRefDecor';
 import { StaticMerge } from './common/StaticMerge';
 import { createVoyageCurve } from '../../constants/voyageCurve';
-import { LowPolyPerson, PersonPose, PersonLook, PersonAccessory } from './life/LowPolyPerson';
+import type { PersonPose, PersonAccessory } from './life/LowPolyPerson';
+import { ModelPerson } from './life/ModelPerson';
 import type { TimeOfDay } from './timeOfDay';
 
-// Sharanya's avatar (in a frock): rows while sailing, stands up and waves once docked
-const CAPTAIN_LOOK: PersonLook = {
-  skin: '#F2D3BC',
-  hair: '#1A1412',
-  top: '#F5A9BE',
-  bottom: '#F2D3BC',
-  frock: '#F5A9BE',    // blush pink frock
-  ribbon: '#FFFFFF',   // white waist ribbon + bow
-  collar: '#FFF8F0',   // round white collar
-  socks: '#FFFFFF',
-  shoes: '#7A3B2E',
-  braid: true,
-  longHair: true,
-  earrings: '#F5B82E',
-  flower: '#F472B6',
-  lips: '#D9776E',
-};
 
 // Things she says when you click her. Keep these true and tech-only.
 const CAPTAIN_LINES = [
@@ -227,8 +211,9 @@ export const HeroBoat: React.FC<HeroBoatProps> = ({
           onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = 'pointer'; }}
           onPointerOut={() => { document.body.style.cursor = ''; }}
         >
-          <LowPolyPerson
-            look={CAPTAIN_LOOK}
+          {/* Sharanya's avatar: rows while sailing, stands up and waves once docked */}
+          <ModelPerson
+            model="kachujin"
             pose={captainPose}
             standRef={captainStand}
             reducedMotion={reducedMotion}

@@ -399,3 +399,162 @@ h1, h2, h3, h4, h5, h6 {
 [data-time="night"] .sky-glow { background: radial-gradient(circle, rgba(200, 215, 255, 0.25) 0%, rgba(200, 215, 255, 0) 55%); }
 .sky-loader.is-parting { opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .sky-loader { transition-duration: 0.2s; } }
+
+/* ==========================================================================
+   Island theme for the HUD: sun-warmed sailcloth panels with a stitched edge,
+   ink-brown text and terracotta (the cottage roofs) for actions.
+   Overrides the frosted-glass look above for every time of day.
+   ========================================================================== */
+:root {
+  --sail: #F8EFDC;
+  --sail-2: #F1E3C6;
+  --sail-edge: #D8BD8E;
+  --stitch: rgba(139, 94, 52, 0.45);
+  --ink: #3B2416;
+  --ink-2: #6E4A30;
+  --roof: #B5562E;
+  --roof-dark: #7E3519;
+  --panel-shadow: 0 2px 0 rgba(120, 78, 40, 0.18), 0 22px 40px -20px rgba(60, 35, 15, 0.55);
+}
+[data-time="night"] {
+  --sail: #2A2420;
+  --sail-2: #221D19;
+  --sail-edge: #5C4732;
+  --stitch: rgba(232, 200, 150, 0.35);
+  --ink: #F4E6CC;
+  --ink-2: #CDB592;
+  --roof: #D9774A;
+  --roof-dark: #9A4523;
+  --panel-shadow: 0 2px 0 rgba(0, 0, 0, 0.3), 0 26px 50px -22px rgba(0, 0, 0, 0.75);
+}
+.glass,
+[data-time] .glass {
+  color: var(--ink);
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 55%),
+    repeating-linear-gradient(90deg, rgba(120, 80, 40, 0.025) 0 2px, transparent 2px 5px),
+    linear-gradient(180deg, var(--sail), var(--sail-2));
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  border: 1.5px solid var(--sail-edge);
+  border-radius: 18px;
+  box-shadow: var(--panel-shadow);
+  font-family: 'Nunito', sans-serif;
+}
+@media (min-width: 640px) { #hero-card, #chapter-box { position: relative; } }
+[data-time="night"] .glass {
+  background:
+    radial-gradient(120% 90% at 0% 0%, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 55%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.015) 0 2px, transparent 2px 5px),
+    linear-gradient(180deg, var(--sail), var(--sail-2));
+}
+/* stitched seam just inside the edge */
+.glass:not(.glass-pill)::after {
+  content: ''; position: absolute; inset: 6px; border-radius: 13px; pointer-events: none;
+  border: 1.5px dashed var(--stitch);
+}
+.glass-pill { border-radius: 999px; }
+.glass :is(p, div, span) { color: inherit; }
+#hero-card :is(p, div) { color: var(--ink-2); }
+#hero-card > div:first-of-type { color: var(--roof); letter-spacing: 0.08em; text-transform: uppercase; font-size: 11px; font-weight: 800; }
+@media (min-width: 640px) { #hero-card > div:first-of-type { font-size: 12px; } }
+.hero-name, .hero-name em,
+[data-time] .hero-name, [data-time] .hero-name em {
+  font-family: 'Fraunces', Georgia, serif; font-weight: 700; letter-spacing: -0.025em; color: var(--ink);
+}
+.hero-name em, [data-time] .hero-name em { font-style: italic; font-weight: 500; color: var(--roof); }
+#chapter-box h2 { font-family: 'Fraunces', Georgia, serif !important; font-weight: 700 !important; color: var(--ink) !important; }
+#chapter-box > div:first-child { border-color: var(--stitch) !important; }
+#chapter-box p { color: var(--ink-2) !important; }
+
+.glass-chip, [data-time] .glass-chip {
+  font: 800 11px/1 'Nunito', sans-serif; color: var(--ink-2);
+  background: transparent; border: 1.5px dashed var(--sail-edge); border-radius: 8px; padding: 6px 10px;
+}
+.btn-glow, .btn-glass,
+[data-time] .btn-glow, [data-time] .btn-glass {
+  font-family: 'Nunito', sans-serif; font-weight: 800; border-radius: 12px;
+}
+.btn-glow, [data-time] .btn-glow, [data-time="day"] .btn-glow, [data-time="sunset"] .btn-glow {
+  color: #FFF8EC; background: var(--roof); border: 0;
+  box-shadow: 0 3px 0 var(--roof-dark), 0 10px 18px -10px rgba(126, 53, 25, 0.8);
+}
+.btn-glow:hover, [data-time] .btn-glow:hover { background: var(--roof); filter: brightness(1.06); transform: translateY(-1px); box-shadow: 0 4px 0 var(--roof-dark), 0 14px 22px -10px rgba(126, 53, 25, 0.85); }
+.btn-glow:active, [data-time] .btn-glow:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--roof-dark); }
+.btn-glass, [data-time] .btn-glass { color: var(--roof-dark); background: transparent; border: 1.5px solid var(--roof); }
+[data-time="night"] .btn-glass { color: var(--ink); }
+.btn-glass:hover, [data-time] .btn-glass:hover { background: rgba(181, 86, 46, 0.08); border-color: var(--roof); transform: translateY(-1px); }
+.btn-glow:focus-visible, .btn-glass:focus-visible { outline: 2px solid var(--roof); outline-offset: 3px; }
+
+/* bottom chapter bar */
+#voyage-controls button:not(:disabled) { color: var(--ink) !important; font-family: 'Nunito', sans-serif; }
+#voyage-controls button:not(:disabled):hover { background: rgba(181, 86, 46, 0.1) !important; }
+#voyage-controls button[aria-current="true"] { opacity: 1 !important; color: #FFF8EC !important; background: var(--roof) !important; box-shadow: 0 2px 0 var(--roof-dark) !important; }
+
+/* ---- Wooden signboard: planks, grain, a darker frame, painted lettering ---- */
+:root, [data-time] {
+  --wood-1: #A0703F;
+  --wood-2: #8E6036;
+  --wood-3: #7C5230;
+  --wood-frame: #4F3019;
+  --paint: #FFF3DC;
+  --paint-2: #F2DDB8;
+  --gold: #FFC861;
+}
+[data-time="night"] { --wood-1: #6E4A2B; --wood-2: #5F3F24; --wood-3: #52361F; --wood-frame: #2E1C0F; }
+.glass, [data-time] .glass, [data-time="night"] .glass {
+  color: var(--paint);
+  background:
+    /* soft light from the top-left */
+    radial-gradient(130% 100% at 10% 0%, rgba(255, 230, 190, 0.22), rgba(255, 230, 190, 0) 60%),
+    /* wood grain */
+    repeating-linear-gradient(178deg, rgba(60, 30, 10, 0) 0 9px, rgba(60, 30, 10, 0.12) 9px 10px, rgba(60, 30, 10, 0) 10px 23px, rgba(255, 220, 170, 0.06) 23px 24px),
+    /* plank seams */
+    repeating-linear-gradient(180deg, transparent 0 46px, rgba(40, 20, 8, 0.55) 46px 48px, rgba(255, 215, 160, 0.18) 48px 49px),
+    linear-gradient(180deg, var(--wood-1), var(--wood-2) 55%, var(--wood-3));
+  border: 3px solid var(--wood-frame);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 220, 170, 0.35),
+    inset 0 -3px 0 rgba(30, 15, 5, 0.35),
+    0 4px 0 var(--wood-frame),
+    0 24px 40px -18px rgba(30, 15, 5, 0.7);
+}
+.glass-pill, [data-time] .glass-pill {
+  border-radius: 999px;
+  background:
+    repeating-linear-gradient(178deg, rgba(60, 30, 10, 0) 0 7px, rgba(60, 30, 10, 0.12) 7px 8px),
+    linear-gradient(180deg, var(--wood-1), var(--wood-3));
+}
+.glass:not(.glass-pill)::after { inset: 7px; border-radius: 9px; border: 1.5px dashed rgba(255, 225, 180, 0.28); }
+.glass :is(p, div, span) { color: inherit; }
+#hero-card :is(p, div), #chapter-box p { color: var(--paint-2) !important; }
+#hero-card > div:first-of-type { color: var(--gold) !important; }
+.hero-name, .hero-name em, [data-time] .hero-name, [data-time] .hero-name em {
+  color: var(--paint); text-shadow: 0 2px 0 rgba(40, 20, 8, 0.45);
+}
+.hero-name em, [data-time] .hero-name em { color: var(--gold); }
+#chapter-box h2 { color: var(--paint) !important; text-shadow: 0 2px 0 rgba(40, 20, 8, 0.45); }
+#chapter-box > div:first-child { border-color: rgba(255, 225, 180, 0.3) !important; }
+#hero-card p, .glass p { text-shadow: 0 1px 0 rgba(40, 20, 8, 0.35); }
+
+/* labels burned into the wood */
+.glass-chip, [data-time] .glass-chip {
+  color: var(--paint); background: rgba(40, 20, 8, 0.28);
+  border: 1px solid rgba(255, 225, 180, 0.25); border-radius: 7px;
+  box-shadow: inset 0 1px 2px rgba(20, 10, 4, 0.45);
+}
+/* painted buttons */
+.btn-glow, [data-time] .btn-glow, [data-time="day"] .btn-glow, [data-time="sunset"] .btn-glow {
+  color: #4A2A14; background: var(--paint); border: 0;
+  box-shadow: 0 3px 0 #C9A878, 0 10px 18px -10px rgba(20, 10, 4, 0.8);
+}
+.btn-glow:hover, [data-time] .btn-glow:hover { background: #FFFFFF; box-shadow: 0 4px 0 #C9A878, 0 14px 22px -10px rgba(20, 10, 4, 0.85); }
+.btn-glow:active, [data-time] .btn-glow:active { box-shadow: 0 1px 0 #C9A878; }
+.btn-glass, [data-time] .btn-glass, [data-time="night"] .btn-glass { color: var(--paint); background: rgba(40, 20, 8, 0.2); border: 1.5px solid rgba(255, 235, 200, 0.7); }
+.btn-glass:hover, [data-time] .btn-glass:hover { background: rgba(255, 235, 200, 0.12); border-color: var(--paint); }
+.btn-glow:focus-visible, .btn-glass:focus-visible { outline: 2px solid var(--gold); }
+
+#voyage-controls button:not(:disabled) { color: var(--paint) !important; text-shadow: 0 1px 0 rgba(40, 20, 8, 0.4); }
+#voyage-controls button:disabled { color: rgba(255, 235, 200, 0.4) !important; }
+#voyage-controls button:not(:disabled):hover { background: rgba(255, 235, 200, 0.14) !important; }
+#voyage-controls button[aria-current="true"] { color: #4A2A14 !important; background: var(--paint) !important; box-shadow: 0 2px 0 #C9A878 !important; text-shadow: none; }
