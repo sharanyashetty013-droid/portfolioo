@@ -19,6 +19,8 @@ interface ModelPersonProps {
   accessory?: PersonAccessory;
   /** Height in world units */
   height?: number;
+  /** Filled every frame with the world positions of both hands */
+  handsRef?: React.MutableRefObject<{ l: THREE.Vector3; r: THREE.Vector3 } | null>;
 }
 
 // Joints we move by hand. Names are Mixamo's with the "mixamorig" prefix removed.
@@ -60,6 +62,7 @@ const ModelPersonInner: React.FC<ModelPersonProps> = ({
   reducedMotion = false,
   accessory = null,
   height = 1.45,
+  handsRef,
 }) => {
   const gltf = useGLTF(url(model));
   const body = useRef<THREE.Group>(null);
@@ -159,6 +162,22 @@ const ModelPersonInner: React.FC<ModelPersonProps> = ({
         lean = 0.12 + s * 0.16;
         break;
       }
+      case 'fish':
+        // both hands on the rod, resting on the lap
+        lowerL = lowerR = 1.05;
+        swingL = swingR = -0.7 + Math.sin(t * 1.3) * 0.03;
+        elL = elR = 0.95;
+        lean = 0.06 + Math.sin(t * 1.3) * 0.02;
+        nod = 0.12;
+        break;
+      case 'reel':
+        // yank the rod up and back
+        lowerL = lowerR = 0.9;
+        swingL = swingR = -1.45;
+        elL = elR = 0.45;
+        lean = -0.14;
+        nod = -0.1;
+        break;
       case 'type':
         lowerL = lowerR = 1.2;
         swingL = swingR = -0.75 + Math.max(0, Math.sin(t * 14)) * 0.03;
@@ -215,7 +234,8 @@ const ModelPersonInner: React.FC<ModelPersonProps> = ({
     for (const f of fingers) {
       f.bone.quaternion.copy(f.rest);
       const left = f.bone.name.includes('Left');
-      turn(f, Z, left ? -0.32 : 0.32 * (1 - open * 0.85));
+      const grip = p === 'fish' || p === 'reel' ? 0.55 : 0;
+      turn(f, Z, left ? -(0.32 + grip) : (0.32 + grip) * (1 - open * 0.85));
     }
     // legs
     turn(rig.LeftUpLeg, X, c.upL);
@@ -231,6 +251,13 @@ const ModelPersonInner: React.FC<ModelPersonProps> = ({
     turn(rig.Head, X, c.nod);
     turn(rig.Head, Z, c.tilt);
 
+    if (handsRef && rig.LeftHand && rig.RightHand && body.current) {
+      body.current.updateWorldMatrix(true, true);
+      const h = handsRef.current ?? (handsRef.current = { l: new THREE.Vector3(), r: new THREE.Vector3() });
+      // middle of the palm, a little past the wrist bone
+      rig.LeftHand.bone.getWorldPosition(h.l);
+      rig.RightHand.bone.getWorldPosition(h.r);
+    }
     if (body.current) body.current.position.y = c.bounce * height - c.drop * 0.27 * height;
     if (laptop.current) laptop.current.visible = p === 'type';
 

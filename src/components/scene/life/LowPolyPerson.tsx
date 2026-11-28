@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 
-export type PersonPose = 'walk' | 'idle' | 'cheer' | 'row' | 'wave' | 'type';
+export type PersonPose = 'walk' | 'idle' | 'cheer' | 'row' | 'wave' | 'type' | 'fish' | 'reel';
 export type PersonAccessory = 'lantern' | 'sunglasses' | null;
 
 export interface PersonLook {

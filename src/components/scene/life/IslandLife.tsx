@@ -3,6 +3,8 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import type { PersonPose } from './LowPolyPerson';
 import { ModelPerson, PersonModel } from './ModelPerson';
+import { Fisherman } from './Fisherman';
+import { Fish } from './Fish';
 import { ISLAND_LAYOUT, IslandConfig } from '../../../constants/islandLayout';
 
 // Height of the sand dune at a given distance from the island centre
@@ -233,16 +235,7 @@ const JumpingFish: React.FC<{ cfg: IslandConfig; seed: number; reducedMotion?: b
 
   return (
     <group position={[cfg.position[0], 0, cfg.position[2]]}>
-      <group ref={fish}>
-        <mesh scale={[1, 0.6, 0.45]}>
-          <icosahedronGeometry args={[0.32, 0]} />
-          <meshStandardMaterial color="#F59E0B" roughness={0.4} metalness={0.2} flatShading />
-        </mesh>
-        <mesh position={[-0.36, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-          <coneGeometry args={[0.16, 0.24, 4]} />
-          <meshStandardMaterial color="#F97316" flatShading />
-        </mesh>
-      </group>
+      <Fish ref={fish} scale={1.3} />
       <mesh ref={ring} rotation={[-Math.PI / 2, 0, 0]}>
         <ringGeometry args={[0.55, 0.75, 20]} />
         <meshBasicMaterial color="#FFFFFF" transparent opacity={0.8} depthWrite={false} />
@@ -265,6 +258,7 @@ export const IslandLife: React.FC<{ reducedMotion?: boolean }> = ({ reducedMotio
       {/* Home: someone strolling the beach */}
       <NearCamera cfg={L.home}>
         <Walker cfg={L.home} center={[0, 1]} radius={6.8} speed={0.22} model="remy" reducedMotion={rm} />
+        <Fisherman cfg={L.home} reducedMotion={rm} />
         <Seagulls cfg={L.home} count={3} reducedMotion={rm} />
         <Crab cfg={L.home} angle={1.1} reducedMotion={rm} />
         <JumpingFish cfg={L.home} seed={fishSeeds[0]} reducedMotion={rm} />
