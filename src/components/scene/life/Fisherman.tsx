@@ -5,9 +5,8 @@ import type { PersonPose } from './LowPolyPerson';
 import { ModelPerson } from './ModelPerson';
 import { Fish } from './Fish';
 import { IslandConfig } from '../../../constants/islandLayout';
-import { pierFrame, PIER_DECK_Y } from '../common/IslandPier';
 
-// Remy sits on the edge of the home pier with a fishing rod.
+// Remy sits on a big flat rock in the shallows with a fishing rod.
 // Every PERIOD seconds: the float bobs, a fish bites, he yanks it out of the
 // water, the fish flies up into his hand and he cheers, then casts again.
 const PERIOD = 11;
@@ -25,17 +24,19 @@ const tmp = new THREE.Vector3();
 const tmp2 = new THREE.Vector3();
 const UP = new THREE.Vector3(0, 1, 0);
 
-export const Fisherman: React.FC<{ cfg: IslandConfig; reducedMotion?: boolean }> = ({ cfg, reducedMotion }) => {
-  const { position: pierPos, angle } = pierFrame(cfg);
-  // seat: side edge of the deck, just past the last rope post, facing out to sea
-  const seat = useMemo(() => {
-    const local = new THREE.Vector3(1.2, PIER_DECK_Y, 3.35);
-    local.applyAxisAngle(UP, angle);
-    return new THREE.Vector3(pierPos[0] + local.x, pierPos[1] + local.y, pierPos[2] + local.z);
-  }, [pierPos, angle]);
-  const facing = angle + Math.PI / 2; // looks along the pier's +x side
+const ROCK_TOP = 0.9;
+
+/** `angle` is where around the island the rock sits (0 = +z), he faces out to sea */
+export const Fisherman: React.FC<{ cfg: IslandConfig; angle: number; reducedMotion?: boolean }> = ({ cfg, angle, reducedMotion }) => {
+  const facing = angle;
   const fwd = useMemo(() => new THREE.Vector3(Math.sin(facing), 0, Math.cos(facing)), [facing]);
-  const waterY = pierPos[1] + 0.05;
+  const rockPos = useMemo(
+    () => new THREE.Vector3(cfg.position[0] + fwd.x * (cfg.radius + 2.4), 0, cfg.position[2] + fwd.z * (cfg.radius + 2.4)),
+    [cfg, fwd],
+  );
+  // seat: the sea-side edge of the rock
+  const seat = useMemo(() => rockPos.clone().addScaledVector(fwd, 0.5).setY(ROCK_TOP), [rockPos, fwd]);
+  const waterY = 0.05;
   const floatHome = useMemo(
     () => new THREE.Vector3(seat.x + fwd.x * CAST, waterY, seat.z + fwd.z * CAST),
     [seat, fwd, waterY],
@@ -143,7 +144,31 @@ export const Fisherman: React.FC<{ cfg: IslandConfig; reducedMotion?: boolean }>
 
   return (
     <group>
-      {/* the fisherman, sitting with his legs over the side of the pier */}
+      {/* his rock: big, flat on top, half in the water */}
+      <group position={[rockPos.x, 0, rockPos.z]} rotation={[0, facing, 0]}>
+        <mesh position={[0, ROCK_TOP / 2 - 0.25, 0]} scale={[1.25, 1, 1.05]} castShadow receiveShadow>
+          <cylinderGeometry args={[0.85, 1.15, ROCK_TOP + 0.5, 9]} />
+          <meshStandardMaterial color="#8A8178" roughness={0.95} flatShading />
+        </mesh>
+        <mesh position={[0, ROCK_TOP - 0.02, 0]} scale={[1.25, 0.18, 1.05]}>
+          <sphereGeometry args={[0.86, 9, 6]} />
+          <meshStandardMaterial color="#9C948A" roughness={0.95} flatShading />
+        </mesh>
+        <mesh position={[-0.95, 0.15, -0.6]} rotation={[0.3, 0.5, 0.2]} castShadow>
+          <dodecahedronGeometry args={[0.45, 0]} />
+          <meshStandardMaterial color="#7C746B" roughness={0.95} flatShading />
+        </mesh>
+        <mesh position={[0.9, 0.05, 0.4]} rotation={[0.6, 0.2, 0.4]} castShadow>
+          <dodecahedronGeometry args={[0.32, 0]} />
+          <meshStandardMaterial color="#857D74" roughness={0.95} flatShading />
+        </mesh>
+        <mesh position={[0, 0.06, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <ringGeometry args={[1.2, 1.5, 24]} />
+          <meshBasicMaterial color="#FFFFFF" transparent opacity={0.35} depthWrite={false} />
+        </mesh>
+      </group>
+
+      {/* the fisherman, sitting with his legs over the edge of the rock */}
       <group position={[seat.x, seat.y - 0.36, seat.z]} rotation={[0, facing, 0]} scale={SCALE}>
         <ModelPerson model="remy" pose={pose} standRef={stand} reducedMotion={reducedMotion} handsRef={hands} height={HEIGHT} />
       </group>
