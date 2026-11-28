@@ -28,14 +28,6 @@ export const FloatingLabelsOverlay: React.FC<FloatingLabelsOverlayProps> = ({ la
                 strokeDasharray="3,3"
                 opacity={0.8}
               />
-              <circle
-                cx={lbl.anchorX}
-                cy={lbl.anchorY}
-                r={3}
-                fill="#F2765D"
-                stroke="#FFFFFF"
-                strokeWidth={1.5}
-              />
             </g>
           );
         })}
@@ -68,10 +60,6 @@ export const FloatingLabelsOverlay: React.FC<FloatingLabelsOverlayProps> = ({ la
                   : 'bg-[#EEFBF8]/85 text-[#0F4C5C] border border-white backdrop-blur-md shadow-[0_10px_22px_-12px_rgba(15,76,92,0.55)]'
               }`}
             >
-              <span
-                className="w-2 h-2 rounded-full shrink-0"
-                style={{ backgroundColor: lbl.dotColor }}
-              />
               <span className="tracking-tight font-bold">
                 {isHovered ? lbl.name : lbl.shortName}
               </span>

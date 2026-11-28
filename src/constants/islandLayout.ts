@@ -19,7 +19,7 @@ export interface IslandConfig {
   cliffColor: string;
 }
 
-export const CHAPTER_ORDER: SectionId[] = ['home', 'skills', 'projects', 'hackathons', 'contact'];
+export const CHAPTER_ORDER: SectionId[] = ['home', 'skills', 'projects', 'opensource', 'hackathons', 'contact'];
 
 /**
  * Single source of truth for the Archipelago layout.
@@ -57,7 +57,7 @@ export const ISLAND_LAYOUT: Record<SectionId, IslandConfig> = {
     dockPosition: [50, 0, -46],
     cameraPos: [46, 16, -26],
     targetPos: [63, 2.5, -53],
-    routeT: 0.25,
+    routeT: 0.2046,
     seed: 202,
     sandColor: '#F9E7B8',
     cliffColor: '#B8A58F',
@@ -75,16 +75,34 @@ export const ISLAND_LAYOUT: Record<SectionId, IslandConfig> = {
     dockPosition: [-30, 0, -116],
     cameraPos: [-32, 18, -96],
     targetPos: [-16, 3, -123],
-    routeT: 0.50,
+    routeT: 0.442,
     seed: 303,
     sandColor: '#F9E7B8',
     cliffColor: '#C5B39E',
   },
+  opensource: {
+    id: 'opensource',
+    name: 'Open Source Harbor',
+    chapterTitle: 'Chapter 4: Shipped upstream',
+    chapterNumber: 4,
+    storyLine: 'Merged pull requests in golang/go, Gitea and Relay, plus my own crash tester, midsave.',
+    radius: 10,
+    height: 3.2,
+    position: [-6, 0, -172],
+    pierPosition: [-15, 0, -167],
+    dockPosition: [-21, 0, -162.5],
+    cameraPos: [-20, 16, -142],
+    targetPos: [3, 2.5, -165],
+    routeT: 0.5582,
+    seed: 606,
+    sandColor: '#F9E7B8',
+    cliffColor: '#BFAE99',
+  },
   hackathons: {
     id: 'hackathons',
     name: 'Hackathons Summit',
-    chapterTitle: 'Chapter 4: Putting it to the test',
-    chapterNumber: 4,
+    chapterTitle: 'Chapter 5: Putting it to the test',
+    chapterNumber: 5,
     storyLine: 'Competitive hackathons, SIH internal finals, enterprise datathons, and 24-hour sprints.',
     radius: 12,
     height: 3.8,
@@ -93,7 +111,7 @@ export const ISLAND_LAYOUT: Record<SectionId, IslandConfig> = {
     dockPosition: [45, 0, -191],
     cameraPos: [43, 17, -172],
     targetPos: [58, 3, -198],
-    routeT: 0.75,
+    routeT: 0.7662,
     seed: 404,
     sandColor: '#F9E7B8',
     cliffColor: '#BFAC97',
@@ -101,8 +119,8 @@ export const ISLAND_LAYOUT: Record<SectionId, IslandConfig> = {
   contact: {
     id: 'contact',
     name: 'Lighthouse Beacon',
-    chapterTitle: "Chapter 5: Let's connect",
-    chapterNumber: 5,
+    chapterTitle: "Chapter 6: Let's connect",
+    chapterNumber: 6,
     storyLine: 'Direct email, GitHub, LinkedIn, and LeetCode. Available for backend and blockchain opportunities.',
     radius: 9,
     height: 3.0,
@@ -135,15 +153,20 @@ export const ROUTE_WAYPOINTS: [number, number, number][] = [
   [-4, 0, -106],
   // Chapter 3: Projects Dock
   [-30, 0, -116],
-  [-26, 0, -145],
-  [0, 0, -168],
-  [28, 0, -182],
-  // Chapter 4: Hackathons Dock
+  [-38, 0, -133],
+  [-34, 0, -151],
+  // Chapter 4: Open Source Harbor Dock
+  [-21, 0, -162.5],
+  [-24, 0, -183],
+  [-8, 0, -197],
+  [18, 0, -201],
+  [34, 0, -198],
+  // Chapter 5: Hackathons Dock
   [45, 0, -191],
   [36, 0, -218],
   [12, 0, -242],
   [-12, 0, -252],
-  // Chapter 5: Contact Dock
+  // Chapter 6: Contact Dock
   [-33, 0, -262],
 ];
 

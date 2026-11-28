@@ -15,6 +15,7 @@ import { IntroClouds } from './effects/IntroClouds';
 import { SkillsIsland } from './islands/SkillsIsland';
 import { ProjectsIsland } from './islands/ProjectsIsland';
 import { HackathonsIsland } from './islands/HackathonsIsland';
+import { OpenSourceHarbor } from './islands/OpenSourceHarbor';
 import { ContactIsland } from './islands/ContactIsland';
 import { FloatingLabelsTracker, ProjectedLabel } from './FloatingLabelsTracker';
 import { FloatingLabelsOverlay } from '../ui/FloatingLabelsOverlay';
@@ -144,7 +145,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
           {/* Dotted / Solid Navigation Route Path */}
           <RoutePathLine currentT={targetT} />
 
-          {/* Five Realized Islands of the Archipelago */}
+          {/* Six Islands of the Archipelago */}
           {/* Chapter 1: Home */}
           <HomeIsland 
             isActive={activeSection === 'home'}
@@ -171,7 +172,15 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
             reducedMotion={reducedMotion}
           />
 
-          {/* Chapter 4: Hackathons */}
+          {/* Chapter 4: Open Source Harbor + midsave crash test cove */}
+          <OpenSourceHarbor
+            isActive={activeSection === 'opensource'}
+            isAnyModalOpen={isAnyModalOpen}
+            onSelectProject={onSelectProject}
+            reducedMotion={reducedMotion}
+          />
+
+          {/* Chapter 5: Hackathons */}
           <HackathonsIsland
             isActive={activeSection === 'hackathons'}
             isAnyModalOpen={isAnyModalOpen}
@@ -179,7 +188,7 @@ export const WorldScene: React.FC<WorldSceneProps> = ({
             reducedMotion={reducedMotion}
           />
 
-          {/* Chapter 5: Contact */}
+          {/* Chapter 6: Contact */}
           <ContactIsland
             isActive={activeSection === 'contact'}
             isAnyModalOpen={isAnyModalOpen}
