@@ -293,6 +293,13 @@ export const IslandLife: React.FC<{ reducedMotion?: boolean }> = ({ reducedMotio
         <JumpingFish cfg={L.projects} seed={fishSeeds[2]} reducedMotion={rm} />
       </NearCamera>
 
+      {/* Open Source Harbor: dock worker on the quay */}
+      <NearCamera cfg={L.opensource}>
+        <Walker cfg={L.opensource} center={[1.6, 5.2]} radius={1.6} speed={0.3} look={LOOKS.builder} phase={0.7} reducedMotion={rm} />
+        <Seagulls cfg={L.opensource} count={3} reducedMotion={rm} />
+        <Crab cfg={L.opensource} angle={2.6} reducedMotion={rm} />
+      </NearCamera>
+
       {/* Hackathons: two hackers celebrating in front of the summit */}
       <NearCamera cfg={L.hackathons}>
         <Stander cfg={L.hackathons} at={[-1.0, 3.6]} facing={0.3} pose="cheer" look={LOOKS.hacker1} reducedMotion={rm} />

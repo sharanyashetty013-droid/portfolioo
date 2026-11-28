@@ -122,7 +122,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
 
       {/* Bottom Stack: Chapter Caption Box & Navigation Bar */}
       <div className="w-full flex flex-col items-center gap-2 shrink-0">
-        {/* Caption Box: Shown on chapters 2 through 5 - NO scrollbar, compact */}
+        {/* Caption Box: Shown on every chapter after Home - NO scrollbar, compact */}
         {activeSection !== 'home' && (
           <Tilt3D key={activeSection} max={6} className="sm:w-full sm:max-w-[80%] lg:max-w-xl sm:mb-14">
           <div
@@ -136,13 +136,12 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
           >
             <div className="flex items-center justify-between gap-2 border-b border-[#BDE8E2] pb-1.5 mb-1.5 sm:pb-2 sm:mb-2">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#F2765D]" />
                 <h2 className="text-[15px] sm:text-lg font-black text-[#0F4C5C]">
                   {currentConfig.chapterTitle}
                 </h2>
               </div>
               <span className="glass-chip shrink-0">
-                Island {currentIndex + 1} of 5
+                Island {currentIndex + 1} of {CHAPTER_ORDER.length}
               </span>
             </div>
             <p className="text-[11.5px] sm:text-[13px] text-[#24505A] font-semibold leading-relaxed [@media(max-height:500px)]:hidden">
@@ -152,6 +151,11 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
               <button className="chapter-all-btn" onClick={onOpenAllProjects}>
                 See all {portfolioData.projects.length} projects
               </button>
+            )}
+            {activeSection === 'opensource' && (
+              <p className="mt-1.5 text-[11px] sm:text-[12px] font-bold text-[#1AA6A6] [@media(max-height:500px)]:hidden">
+                Tap a crate on the ship to see the PR · tap the beached ship to crash-test it
+              </p>
             )}
           </div>
           </Tilt3D>
@@ -187,7 +191,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
             <span className="hidden sm:inline">Previous</span>
           </button>
 
-          {/* 5 Chapters with Dots - Always fully visible on all mobile interfaces */}
+          {/* 6 Chapters with Dots - Always fully visible on all mobile interfaces */}
           <div className="flex items-center justify-center gap-0.5 sm:gap-1.5 shrink-0">
             {CHAPTER_ORDER.map((chId, idx) => {
               const isActive = activeSection === chId;
@@ -197,10 +201,12 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
                 chId === 'home' ? 'Home' :
                 chId === 'skills' ? 'Skills' :
                 chId === 'projects' ? 'Projects' :
+                chId === 'opensource' ? 'Open Source' :
                 chId === 'hackathons' ? 'Hackathons' : 'Contact';
 
               const labelMobile = 
-                chId === 'hackathons' ? 'Hacks' : labelFull;
+                chId === 'hackathons' ? 'Hacks' :
+                chId === 'opensource' ? 'OSS' : labelFull;
 
               return (
                 <button
@@ -215,11 +221,6 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
                   }`}
                   title={`Sail to ${labelFull}`}
                 >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full transition-all shrink-0 ${
-                      isActive ? 'bg-white scale-110' : isPassed ? 'bg-[#1AA6A6]' : 'bg-[#9CC5C4]'
-                    }`}
-                  />
                   <span className="hidden sm:inline">{labelFull}</span>
                   <span className="inline sm:hidden">{labelMobile}</span>
                 </button>

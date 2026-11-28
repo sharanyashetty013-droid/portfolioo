@@ -1,4 +1,4 @@
-export type SectionId = 'home' | 'skills' | 'projects' | 'hackathons' | 'contact';
+export type SectionId = 'home' | 'skills' | 'projects' | 'opensource' | 'hackathons' | 'contact';
 
 export interface ProjectItem {
   id: string;
