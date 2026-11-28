@@ -258,7 +258,6 @@ export const IslandLife: React.FC<{ reducedMotion?: boolean }> = ({ reducedMotio
       {/* Home: someone strolling the beach */}
       <NearCamera cfg={L.home}>
         <Walker cfg={L.home} center={[0, 1]} radius={6.8} speed={0.22} model="remy" reducedMotion={rm} />
-        <Fisherman cfg={L.home} reducedMotion={rm} />
         <Seagulls cfg={L.home} count={3} reducedMotion={rm} />
         <Crab cfg={L.home} angle={1.1} reducedMotion={rm} />
         <JumpingFish cfg={L.home} seed={fishSeeds[0]} reducedMotion={rm} />
@@ -297,6 +296,8 @@ export const IslandLife: React.FC<{ reducedMotion?: boolean }> = ({ reducedMotio
 
       {/* Contact: lighthouse keeper on rounds */}
       <NearCamera cfg={L.contact}>
+        {/* fisherman on a rock off the front-right shore, where the camera sees him */}
+        <Fisherman cfg={L.contact} angle={0.66} reducedMotion={rm} />
         <Walker cfg={L.contact} center={[-1.2, -1.0]} radius={3.1} speed={0.25} model="eve" phase={3} reducedMotion={rm} />
         <Seagulls cfg={L.contact} count={3} reducedMotion={rm} />
         <Crab cfg={L.contact} angle={0.9} reducedMotion={rm} />
