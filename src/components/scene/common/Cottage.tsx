@@ -321,8 +321,8 @@ export const Cottage: React.FC<{
 
       {/* firewood stack by the side wall */}
       {[0, 1, 2].map((r) =>
-        [0, 1, 2 - r].map((c) => (
-          <mesh key={`${r}-${c}`} position={[-W / 2 - 0.35, 0.14 + r * 0.2, D / 2 - 0.5 - c * 0.22 - r * 0.11]} rotation={[0, 0, Math.PI / 2]} castShadow>
+        [0, 1, 2 - r].map((c, ci) => (
+          <mesh key={`wood-${r}-${ci}`} position={[-W / 2 - 0.35, 0.14 + r * 0.2, D / 2 - 0.5 - c * 0.22 - r * 0.11]} rotation={[0, 0, Math.PI / 2]} castShadow>
             <cylinderGeometry args={[0.1, 0.1, 0.6, 7]} />
             {std(c % 2 ? '#8A5A36' : '#9C6A42')}
           </mesh>

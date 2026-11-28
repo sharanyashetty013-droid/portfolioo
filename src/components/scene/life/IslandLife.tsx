@@ -1,7 +1,8 @@
 import React, { useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
-import { LowPolyPerson, PersonLook, PersonPose } from './LowPolyPerson';
+import type { PersonPose } from './LowPolyPerson';
+import { ModelPerson, PersonModel } from './ModelPerson';
 import { ISLAND_LAYOUT, IslandConfig } from '../../../constants/islandLayout';
 
 // Height of the sand dune at a given distance from the island centre
@@ -27,10 +28,10 @@ const Walker: React.FC<{
   center: [number, number];
   radius: number;
   speed: number;
-  look: PersonLook;
+  model: PersonModel;
   phase?: number;
   reducedMotion?: boolean;
-}> = ({ cfg, center, radius, speed, look, phase = 0, reducedMotion }) => {
+}> = ({ cfg, center, radius, speed, model, phase = 0, reducedMotion }) => {
   const ref = useRef<THREE.Group>(null);
   useFrame((state) => {
     if (!ref.current) return;
@@ -43,7 +44,7 @@ const Walker: React.FC<{
   });
   return (
     <group ref={ref} scale={1.25}>
-      <LowPolyPerson look={look} pose="walk" phase={phase} reducedMotion={reducedMotion} />
+      <ModelPerson model={model} pose="walk" phase={phase} reducedMotion={reducedMotion} />
     </group>
   );
 };
@@ -54,16 +55,16 @@ const Stander: React.FC<{
   at: [number, number];
   facing: number;
   pose: PersonPose;
-  look: PersonLook;
+  model: PersonModel;
   phase?: number;
   reducedMotion?: boolean;
-}> = ({ cfg, at, facing, pose, look, phase, reducedMotion }) => (
+}> = ({ cfg, at, facing, pose, model, phase, reducedMotion }) => (
   <group
     position={[cfg.position[0] + at[0], duneY(cfg, Math.hypot(at[0], at[1])), cfg.position[2] + at[1]]}
     rotation={[0, facing, 0]}
     scale={1.25}
   >
-    <LowPolyPerson look={look} pose={pose} phase={phase} reducedMotion={reducedMotion} />
+    <ModelPerson model={model} pose={pose} phase={phase} reducedMotion={reducedMotion} />
   </group>
 );
 
@@ -253,14 +254,6 @@ const JumpingFish: React.FC<{ cfg: IslandConfig; seed: number; reducedMotion?: b
 // ---------------------------------------------------------------------------
 // Cast of islanders
 // ---------------------------------------------------------------------------
-const LOOKS: Record<string, PersonLook> = {
-  fisher: { skin: '#C98E66', hair: '#2B211C', top: '#F2765D', bottom: '#334155', cap: '#1AA6A6' },
-  coder: { skin: '#A9714B', hair: '#1F1A17', top: '#0EA5E9', bottom: '#1E293B', bun: true, longHair: true },
-  builder: { skin: '#8D5A3B', hair: '#1F1A17', top: '#F59E0B', bottom: '#475569', cap: '#FDE047' },
-  hacker1: { skin: '#B97A57', hair: '#1F1A17', top: '#8B5CF6', bottom: '#1E293B' },
-  hacker2: { skin: '#D6A07A', hair: '#3B2A20', top: '#10B981', kurta: '#10B981', bottom: '#334155', braid: true, longHair: true, earrings: '#F5B82E' },
-  keeper: { skin: '#C98E66', hair: '#E2E8F0', top: '#1E3A8A', bottom: '#334155', cap: '#0B1B2D' },
-};
 
 export const IslandLife: React.FC<{ reducedMotion?: boolean }> = ({ reducedMotion }) => {
   const L = ISLAND_LAYOUT;
@@ -271,7 +264,7 @@ export const IslandLife: React.FC<{ reducedMotion?: boolean }> = ({ reducedMotio
     <group>
       {/* Home: someone strolling the beach */}
       <NearCamera cfg={L.home}>
-        <Walker cfg={L.home} center={[0, 1]} radius={6.8} speed={0.22} look={LOOKS.fisher} reducedMotion={rm} />
+        <Walker cfg={L.home} center={[0, 1]} radius={6.8} speed={0.22} model="remy" reducedMotion={rm} />
         <Seagulls cfg={L.home} count={3} reducedMotion={rm} />
         <Crab cfg={L.home} angle={1.1} reducedMotion={rm} />
         <JumpingFish cfg={L.home} seed={fishSeeds[0]} reducedMotion={rm} />
@@ -279,7 +272,7 @@ export const IslandLife: React.FC<{ reducedMotion?: boolean }> = ({ reducedMotio
 
       {/* Skills: a coder doing laps of the cobblestone ring */}
       <NearCamera cfg={L.skills}>
-        <Walker cfg={L.skills} center={[0, 0]} radius={3.25} speed={-0.3} look={LOOKS.coder} phase={1.2} reducedMotion={rm} />
+        <Walker cfg={L.skills} center={[0, 0]} radius={3.25} speed={-0.3} model="megan" phase={1.2} reducedMotion={rm} />
         <Seagulls cfg={L.skills} count={2} reducedMotion={rm} />
         <Crab cfg={L.skills} angle={1.9} reducedMotion={rm} />
         <JumpingFish cfg={L.skills} seed={fishSeeds[1]} reducedMotion={rm} />
@@ -287,7 +280,7 @@ export const IslandLife: React.FC<{ reducedMotion?: boolean }> = ({ reducedMotio
 
       {/* Projects: builder walking around the plaza */}
       <NearCamera cfg={L.projects}>
-        <Walker cfg={L.projects} center={[0, 0]} radius={2.4} speed={0.28} look={LOOKS.builder} phase={2} reducedMotion={rm} />
+        <Walker cfg={L.projects} center={[0, 0]} radius={2.4} speed={0.28} model="remy" phase={2} reducedMotion={rm} />
         <Seagulls cfg={L.projects} count={3} reducedMotion={rm} />
         <Crab cfg={L.projects} angle={1.4} reducedMotion={rm} />
         <JumpingFish cfg={L.projects} seed={fishSeeds[2]} reducedMotion={rm} />
@@ -295,22 +288,22 @@ export const IslandLife: React.FC<{ reducedMotion?: boolean }> = ({ reducedMotio
 
       {/* Open Source Harbor: dock worker on the quay */}
       <NearCamera cfg={L.opensource}>
-        <Walker cfg={L.opensource} center={[1.6, 5.2]} radius={1.6} speed={0.3} look={LOOKS.builder} phase={0.7} reducedMotion={rm} />
+        <Walker cfg={L.opensource} center={[1.6, 5.2]} radius={1.6} speed={0.3} model="eve" phase={0.7} reducedMotion={rm} />
         <Seagulls cfg={L.opensource} count={3} reducedMotion={rm} />
         <Crab cfg={L.opensource} angle={2.6} reducedMotion={rm} />
       </NearCamera>
 
       {/* Hackathons: two hackers celebrating in front of the summit */}
       <NearCamera cfg={L.hackathons}>
-        <Stander cfg={L.hackathons} at={[-1.0, 3.6]} facing={0.3} pose="cheer" look={LOOKS.hacker1} reducedMotion={rm} />
-        <Stander cfg={L.hackathons} at={[1.2, 3.9]} facing={-0.3} pose="cheer" look={LOOKS.hacker2} phase={0.5} reducedMotion={rm} />
+        <Stander cfg={L.hackathons} at={[-1.0, 3.6]} facing={0.3} pose="cheer" model="remy" reducedMotion={rm} />
+        <Stander cfg={L.hackathons} at={[1.2, 3.9]} facing={-0.3} pose="cheer" model="megan" phase={0.5} reducedMotion={rm} />
         <Seagulls cfg={L.hackathons} count={2} reducedMotion={rm} />
         <JumpingFish cfg={L.hackathons} seed={fishSeeds[3]} reducedMotion={rm} />
       </NearCamera>
 
       {/* Contact: lighthouse keeper on rounds */}
       <NearCamera cfg={L.contact}>
-        <Walker cfg={L.contact} center={[-1.2, -1.0]} radius={3.1} speed={0.25} look={LOOKS.keeper} phase={3} reducedMotion={rm} />
+        <Walker cfg={L.contact} center={[-1.2, -1.0]} radius={3.1} speed={0.25} model="eve" phase={3} reducedMotion={rm} />
         <Seagulls cfg={L.contact} count={3} reducedMotion={rm} />
         <Crab cfg={L.contact} angle={0.9} reducedMotion={rm} />
         <JumpingFish cfg={L.contact} seed={fishSeeds[4]} reducedMotion={rm} />

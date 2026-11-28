@@ -6,6 +6,8 @@ import { IslandPier } from '../common/IslandPier';
 import { StaticMerge } from '../common/StaticMerge';
 import { CurvedPalm, WoodenBarrel, WoodenCrate, LowPolyBoulder, DriftingHoverRocks } from '../common/StyleRefDecor';
 import { FlowerBush, LampPost, Bunting } from '../common/IslandProps';
+import { HarborHouse } from '../common/HarborHouse';
+import type { TimeOfDay } from '../timeOfDay';
 import { ProjectItem } from '../../../types/portfolio';
 import { portfolioData } from '../../../data/portfolioData';
 import { ISLAND_LAYOUT } from '../../../constants/islandLayout';
@@ -420,11 +422,12 @@ interface OpenSourceHarborProps {
   isAnyModalOpen: boolean;
   onSelectProject: (p: ProjectItem) => void;
   reducedMotion?: boolean;
+  timeOfDay?: TimeOfDay;
 }
 
 export const getOssProjects = () => portfolioData.projects.filter((p) => p.id.startsWith('oss-'));
 
-export const OpenSourceHarbor: React.FC<OpenSourceHarborProps> = ({ isAnyModalOpen, onSelectProject, reducedMotion = false }) => {
+export const OpenSourceHarbor: React.FC<OpenSourceHarborProps> = ({ isAnyModalOpen, onSelectProject, reducedMotion = false, timeOfDay = 'day' }) => {
   const ossProjects = useMemo(getOssProjects, []);
   const shipRef = useRef<THREE.Group>(null);
 
@@ -447,38 +450,8 @@ export const OpenSourceHarbor: React.FC<OpenSourceHarborProps> = ({ isAnyModalOp
             </mesh>
           ))}
 
-          {/* harbor office */}
-          <group position={[-3.2, 0, -1.6]} rotation={[0, 0.5, 0]}>
-            <mesh position={[0, 0.95, 0]} castShadow receiveShadow>
-              <boxGeometry args={[3.0, 1.9, 2.2]} />
-              {flat('#3E7CB1')}
-            </mesh>
-            {[-1.2, -0.6, 0, 0.6, 1.2].map((x) => (
-              <mesh key={x} position={[x, 0.95, 1.11]}>
-                <boxGeometry args={[0.05, 1.8, 0.02]} />
-                {flat('#336A99')}
-              </mesh>
-            ))}
-            <mesh position={[0, 2.25, 0]} rotation={[0, 0, 0]} castShadow>
-              <cylinderGeometry args={[0.01, 1.95, 0.9, 4, 1]} />
-              {flat('#A9714B')}
-            </mesh>
-            <mesh position={[0, 0.6, 1.13]}>
-              <boxGeometry args={[0.6, 1.1, 0.04]} />
-              {flat('#8D6B4F')}
-            </mesh>
-            {[-0.95, 0.95].map((x) => (
-              <mesh key={x} position={[x, 1.15, 1.13]}>
-                <boxGeometry args={[0.5, 0.45, 0.04]} />
-                <meshStandardMaterial color="#E0F2FE" emissive="#FDE68A" emissiveIntensity={0.35} roughness={0.3} />
-              </mesh>
-            ))}
-            {/* sign board */}
-            <mesh position={[0, 2.0, 1.16]}>
-              <boxGeometry args={[1.9, 0.38, 0.06]} />
-              {flat('#FFF8E7')}
-            </mesh>
-          </group>
+          {/* harbormaster's office */}
+          <HarborHouse position={[-3.0, 0, -1.8]} rotation={[0, -0.33, 0]} timeOfDay={timeOfDay} reducedMotion={reducedMotion} />
 
           {/* crates waiting on the dock = PRs still in review */}
           <WoodenCrate position={[0.9, 0, 3.4]} scale={0.9} />
@@ -487,7 +460,7 @@ export const OpenSourceHarbor: React.FC<OpenSourceHarborProps> = ({ isAnyModalOp
           <WoodenBarrel position={[3.9, 0, 1.0]} />
           <WoodenBarrel position={[4.5, 0, 1.6]} />
 
-          <CurvedPalm position={[-6.2, 0, 2.2]} rotation={[0, 0.5, 0]} scale={1.05} />
+          <CurvedPalm position={[-6.8, 0, -2.4]} rotation={[0, 0.5, 0]} scale={1.05} />
           <CurvedPalm position={[-1.0, 0, -6.4]} rotation={[0, -1.0, 0]} scale={1.1} />
           <CurvedPalm position={[5.2, 0, -4.6]} rotation={[0, 1.8, 0]} scale={0.95} />
           <LampPost position={[2.6, 0.1, 8.4]} />
