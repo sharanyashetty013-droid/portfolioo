@@ -558,3 +558,50 @@ h1, h2, h3, h4, h5, h6 {
 #voyage-controls button:disabled { color: rgba(255, 235, 200, 0.4) !important; }
 #voyage-controls button:not(:disabled):hover { background: rgba(255, 235, 200, 0.14) !important; }
 #voyage-controls button[aria-current="true"] { color: #4A2A14 !important; background: var(--paint) !important; box-shadow: 0 2px 0 #C9A878 !important; text-shadow: none; }
+
+/* ---- Home title: words straight on the scene, like a game's title screen ---- */
+.hero-shade {
+  pointer-events: none;
+  background: linear-gradient(0deg, rgba(18, 26, 34, 0.62), rgba(18, 26, 34, 0.25) 45%, transparent 70%);
+}
+@media (min-width: 640px) {
+  .hero-shade { background: linear-gradient(90deg, rgba(18, 26, 34, 0.55), rgba(18, 26, 34, 0.2) 38%, transparent 58%); }
+}
+.hero-title { color: #FFF8EC; font-family: 'Fraunces', Georgia, serif; }
+#hero-card.hero-title :is(p, div) { color: inherit !important; }
+.hero-kicker {
+  font: 700 11px/1.4 'Fraunces', Georgia, serif; letter-spacing: 0.22em; text-transform: uppercase;
+  color: #FFD9A0 !important; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+}
+.hero-title .hero-name, .hero-title .hero-name em,
+[data-time] .hero-title .hero-name, [data-time] .hero-title .hero-name em {
+  display: block; margin-top: 12px;
+  font-family: 'Fraunces', Georgia, serif; font-weight: 700; font-size: clamp(44px, 6.2vw, 80px); line-height: 0.95;
+  letter-spacing: -0.03em; color: #FFF8EC; text-shadow: 0 4px 30px rgba(0, 0, 0, 0.45);
+}
+.hero-title .hero-name em, [data-time] .hero-title .hero-name em { display: inline; margin: 0; font-style: italic; font-weight: 400; color: #FFD9A0; }
+.hero-rule { width: 64px; height: 2px; background: #FFD9A0; opacity: 0.85; margin: 24px 0 18px; }
+.hero-lede {
+  margin: 0; max-width: 34ch; font: 500 clamp(15px, 1.35vw, 18px)/1.6 'Fraunces', Georgia, serif;
+  color: #F4E9DA !important; text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+}
+.hero-cta {
+  margin-top: 26px; cursor: pointer; border: 0; border-radius: 999px; padding: 13px 26px;
+  font: 700 16px 'Fraunces', Georgia, serif; color: #3B2416; background: #FFF8EC;
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.55);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.hero-cta span { display: inline-block; transition: transform 0.25s ease; }
+.hero-cta:hover { transform: translateY(-2px); box-shadow: 0 16px 34px -10px rgba(0, 0, 0, 0.6); }
+.hero-cta:hover span { transform: translateX(4px); }
+.hero-cta:focus-visible { outline: 2px solid #FFD9A0; outline-offset: 4px; }
+.hero-focus {
+  margin-top: 24px; font: 700 12px 'Fraunces', Georgia, serif; letter-spacing: 0.12em; text-transform: uppercase;
+  color: rgba(244, 233, 218, 0.8) !important; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+@media (max-width: 639px) {
+  .hero-rule { margin: 16px 0 12px; }
+  .hero-cta { margin-top: 18px; padding: 11px 22px; font-size: 15px; }
+  .hero-focus { margin-top: 16px; font-size: 11px; }
+}
+.hero-title .hero-name em span:nth-child(2) { width: 0.26em; }

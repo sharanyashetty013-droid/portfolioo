@@ -22,7 +22,7 @@ interface OverlayHUDProps {
 export const OverlayHUD: React.FC<OverlayHUDProps> = ({
   activeSection,
   onNavigate,
-  onOpenContact,
+  onOpenContact: _onOpenContact,
   onOpenAllProjects,
   isSailing = false,
   introDone = true,
@@ -56,22 +56,28 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
       <div className="flex-1 flex flex-col justify-center sm:justify-start">
         {/* HOME Island Personal Profile Card - Strictly NO scrollbar, completely visible */}
         {activeSection === 'home' && (
-          <Tilt3D className="sm:w-auto sm:max-w-[60%] lg:max-w-md lg:mt-6">
+          <>
+          {/* soft shade behind the title so the words read over the sea */}
+          <div
+            aria-hidden="true"
+            className={`hero-shade fixed inset-0 -z-10 transition-opacity duration-700 ${isSailing || !introDone ? 'opacity-0' : 'opacity-100'}`}
+          />
           <div
             id="hero-card"
-            className={`pointer-events-auto transition-all duration-500 transform ${
-              isSailing || !introDone ? 'opacity-0 -translate-x-8 pointer-events-none' : 'opacity-100 translate-x-0 card-3d-in'
-            } 
-            fixed left-3 right-3 bottom-[calc(56px+env(safe-area-inset-bottom,0px))] z-40
-            sm:static sm:w-auto sm:mx-0 sm:mt-2
-            glass p-5 sm:p-7 [@media(max-height:500px)]:p-4 overflow-visible`}
+            className={`hero-title pointer-events-auto transition-all duration-700 transform ${
+              isSailing || !introDone ? 'opacity-0 -translate-x-8 pointer-events-none' : 'opacity-100 translate-x-0'
+            }
+            fixed left-5 right-5 bottom-[calc(70px+env(safe-area-inset-bottom,0px))] z-40
+            sm:static sm:max-w-[520px] sm:ml-6 sm:mt-10 lg:ml-12 lg:mt-14`}
           >
-            {/* Name */}
+            <div className="hero-kicker">2nd-year CSE · NMAMIT · CGPA 9.36</div>
+
             {introDone && !isSailing && (
-              <h1 className="hero-name text-[28px] sm:text-[40px] [@media(max-height:500px)]:text-[26px] leading-[1.05]" aria-label={personal.name}>
+              <h1 className="hero-name" aria-label={personal.name}>
                 {'Sharanya'.split('').map((ch, i) => (
                   <span key={i} style={{ '--i': i } as React.CSSProperties} aria-hidden="true">{ch}</span>
-                ))}{' '}
+                ))}
+                <br />
                 <em>
                   {'L Shetty'.split('').map((ch, i) => (
                     <span key={i} style={{ '--i': i + 9 } as React.CSSProperties} aria-hidden="true">{ch}</span>
@@ -80,35 +86,19 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
               </h1>
             )}
 
-            <div className="text-[12px] sm:text-[14px] font-bold text-[#3E6B73] mt-2">
-              2nd-year CSE · NMAMIT · CGPA 9.36
-            </div>
+            <div className="hero-rule" aria-hidden="true" />
 
-            <p className="text-[12.5px] sm:text-[15px] font-semibold text-[#24505A] leading-relaxed mt-2.5 sm:mt-3 max-w-[38ch] [@media(max-height:500px)]:hidden">
+            <p className="hero-lede [@media(max-height:500px)]:hidden">
               I build backend systems and smart contracts, and I spend a lot of weekends at hackathons.
             </p>
 
-            <div className="depth-1 flex flex-wrap items-center gap-2 mt-3 sm:mt-4">
-              <span className="glass-chip">Backend Systems</span>
-              <span className="glass-chip">Blockchain &amp; Solidity</span>
-            </div>
+            <button onClick={() => onNavigate('skills')} className="hero-cta">
+              See my work <span aria-hidden="true">→</span>
+            </button>
 
-            <div className="depth-3 mt-4 sm:mt-5 [@media(max-height:500px)]:mt-3 flex flex-wrap items-center gap-2.5">
-              <button
-                onClick={() => onNavigate('skills')}
-                className="btn-glow px-4 py-2 sm:px-5 sm:py-2.5 text-[13px] sm:text-[15px]"
-              >
-                See my work
-              </button>
-              <button
-                onClick={onOpenContact}
-                className="btn-glass px-4 py-2 sm:px-5 sm:py-2.5 text-[13px] sm:text-[15px]"
-              >
-                Say hi
-              </button>
-            </div>
+            <div className="hero-focus">Backend systems / Blockchain &amp; Solidity</div>
           </div>
-          </Tilt3D>
+          </>
         )}
       </div>
 
