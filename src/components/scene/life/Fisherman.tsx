@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import type { PersonPose } from './LowPolyPerson';
 import { ModelPerson } from './ModelPerson';
+import { Fish } from './Fish';
 import { IslandConfig } from '../../../constants/islandLayout';
 import { pierFrame, PIER_DECK_Y } from '../common/IslandPier';
 
@@ -198,24 +199,7 @@ export const Fisherman: React.FC<{ cfg: IslandConfig; reducedMotion?: boolean }>
       </group>
 
       {/* the catch */}
-      <group ref={fish} visible={false} scale={0.75}>
-        <mesh scale={[1, 0.55, 0.38]}>
-          <sphereGeometry args={[0.3, 16, 12]} />
-          <meshStandardMaterial color="#5FA8C9" roughness={0.3} metalness={0.35} />
-        </mesh>
-        <mesh position={[-0.34, 0, 0]} rotation={[0, 0, Math.PI / 2]} scale={[1, 1, 0.3]}>
-          <coneGeometry args={[0.16, 0.24, 10]} />
-          <meshStandardMaterial color="#3F86A8" roughness={0.3} />
-        </mesh>
-        <mesh position={[0.2, 0.05, 0.1]}>
-          <sphereGeometry args={[0.03, 8, 6]} />
-          <meshBasicMaterial color="#111111" />
-        </mesh>
-        <mesh position={[0.2, 0.05, -0.1]}>
-          <sphereGeometry args={[0.03, 8, 6]} />
-          <meshBasicMaterial color="#111111" />
-        </mesh>
-      </group>
+      <Fish ref={fish} visible={false} scale={1.15} />
 
       <mesh ref={ring} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
         <ringGeometry args={[0.45, 0.62, 24]} />
