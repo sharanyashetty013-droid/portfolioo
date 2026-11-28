@@ -202,7 +202,6 @@ export const SimpleView: React.FC<SimpleViewProps> = ({
                 className="bg-[#FFF8E7] rounded-2xl p-6 border-2 border-[#0B1B2D] shadow-[4px_4px_0_#0B1B2D] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0_#0B1B2D] transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="w-3.5 h-3.5 rounded-full border border-[#0B1B2D]" style={{ backgroundColor: g.color }} />
                   <h3 className="font-heading font-bold text-[#0B1B2D] text-lg">{g.name}</h3>
                 </div>
                 <p className="text-xs text-[#334155] font-medium mb-4 leading-relaxed">

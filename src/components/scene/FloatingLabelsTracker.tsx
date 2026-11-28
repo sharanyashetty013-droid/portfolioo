@@ -144,7 +144,7 @@ export const FloatingLabelsTracker: React.FC<FloatingLabelsTrackerProps> = ({
           id: 'crash-cove',
           name: 'midsave crash test',
           shortName: 'Crash test',
-          badge: 'Click to crash it',
+          badge: 'Click to release the kraken',
           dotColor: '#F2765D',
           worldPos: new THREE.Vector3(CRASH_COVE.pos[0], 4.2, CRASH_COVE.pos[2]),
           onClick: () => crashCoveBus.crash(),

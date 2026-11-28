@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { useFrame } from '@react-three/fiber';
 import { TropicalIslandBase } from '../common/TropicalIslandBase';
@@ -9,6 +9,7 @@ import { FlowerBush, LampPost, Bunting } from '../common/IslandProps';
 import { ProjectItem } from '../../../types/portfolio';
 import { portfolioData } from '../../../data/portfolioData';
 import { ISLAND_LAYOUT } from '../../../constants/islandLayout';
+import { KrakenCove } from './KrakenCove';
 
 type V3 = [number, number, number];
 
@@ -33,7 +34,6 @@ const [IX, , IZ] = cfg.position;
 
 // Where things sit in the world (island centre + offset)
 export const HARBOR_SHIP = { pos: [IX + 9.9, 0, IZ + 9.7] as V3, rotY: Math.PI / 4 };
-export const CRASH_COVE = { pos: [IX + 17, 0, IZ + 16] as V3, scale: 1.2 };
 // Deck slots along the ship, in ship-local x (bow points to -x)
 export const SHIP_SLOTS = [-3.3, -1.6, 0.1];
 const DROP_SLOT = 1.75;
@@ -46,11 +46,7 @@ export const shipToWorld = (x: number, y: number, z: number) => {
   return new THREE.Vector3(HARBOR_SHIP.pos[0] + x * c + z * s, y, HARBOR_SHIP.pos[2] - x * s + z * c);
 };
 
-/**
- * Tiny bus so the 2D label overlay can trigger the crash test
- * (the overlay lives outside the Canvas).
- */
-export const crashCoveBus: { crash: () => void } = { crash: () => {} };
+export { CRASH_COVE, crashCoveBus } from './KrakenCove';
 
 // ---------------------------------------------------------------------------
 // Shipping container: corrugated box in the repo's colour
@@ -383,310 +379,6 @@ const HarborCrane: React.FC<{ reducedMotion?: boolean }> = ({ reducedMotion }) =
 };
 
 // ---------------------------------------------------------------------------
-// Crash Test Cove: a beached sailing ship. Click it and it gets smashed apart,
-// floats for a beat, then every piece flies back: midsave's "data survived".
-// ---------------------------------------------------------------------------
-type Piece = { home: THREE.Vector3; homeRot: THREE.Euler; out: THREE.Vector3; outRot: THREE.Euler; arc: number };
-
-const badgeTexture = () => {
-  const c = document.createElement('canvas');
-  c.width = 512;
-  c.height = 160;
-  const x = c.getContext('2d')!;
-  const r = 70;
-  x.fillStyle = 'rgba(255,255,255,0.96)';
-  x.beginPath();
-  x.moveTo(r, 10);
-  x.arcTo(502, 10, 502, 150, r);
-  x.arcTo(502, 150, 10, 150, r);
-  x.arcTo(10, 150, 10, 10, r);
-  x.arcTo(10, 10, 502, 10, r);
-  x.fill();
-  x.lineWidth = 6;
-  x.strokeStyle = '#1AA6A6';
-  x.stroke();
-  x.fillStyle = '#1AA6A6';
-  x.beginPath();
-  x.arc(84, 80, 36, 0, Math.PI * 2);
-  x.fill();
-  x.strokeStyle = '#fff';
-  x.lineWidth = 9;
-  x.lineCap = 'round';
-  x.beginPath();
-  x.moveTo(68, 82);
-  x.lineTo(80, 95);
-  x.lineTo(102, 66);
-  x.stroke();
-  x.fillStyle = '#0F4C5C';
-  x.font = '800 44px system-ui, -apple-system, Segoe UI, sans-serif';
-  x.fillText('Data survived', 138, 76);
-  x.fillStyle = '#3E6B73';
-  x.font = '600 28px system-ui, -apple-system, Segoe UI, sans-serif';
-  x.fillText('midsave crash test · PASS', 140, 116);
-  const t = new THREE.CanvasTexture(c);
-  t.colorSpace = THREE.SRGBColorSpace;
-  t.anisotropy = 4;
-  return t;
-};
-
-const CrashCove: React.FC<{ isAnyModalOpen: boolean; reducedMotion?: boolean }> = ({ isAnyModalOpen, reducedMotion }) => {
-  const group = useRef<THREE.Group>(null);
-  const pieceRefs = useRef<(THREE.Group | null)[]>([]);
-  const ripples = useRef<(THREE.Mesh | null)[]>([]);
-  const badge = useRef<THREE.Sprite>(null);
-  const flagRef = useRef<THREE.Mesh>(null);
-  const startedAt = useRef(-1);
-  const clockRef = useRef(0);
-  const [hovered, setHovered] = useState(false);
-  const tex = useMemo(() => (typeof document !== 'undefined' ? badgeTexture() : null), []);
-
-  const hullHalf = useMemo(() => {
-    // top view of half a hull, extruded upward
-    const s = new THREE.Shape();
-    s.moveTo(0, -0.95);
-    s.lineTo(2.1, -0.95);
-    s.quadraticCurveTo(3.1, -0.7, 3.4, 0);
-    s.quadraticCurveTo(3.1, 0.7, 2.1, 0.95);
-    s.lineTo(0, 0.95);
-    s.lineTo(0, -0.95);
-    const g = new THREE.ExtrudeGeometry(s, { depth: 0.9, bevelEnabled: false, curveSegments: 5 });
-    g.rotateX(-Math.PI / 2);
-    return g;
-  }, []);
-
-  // every loose part of the ship, with where it lives and where it gets thrown
-  const pieces = useMemo<Piece[]>(() => {
-    let sd = 7;
-    const rnd = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
-    const homes: [V3, V3][] = [
-      [[0.05, 0.35, 0], [0, 0, 0]], // bow half
-      [[-0.05, 0.35, 0], [0, Math.PI, 0]], // stern half
-      [[0, 1.27, 0], [0, 0, 0]], // deck
-      [[0.3, 2.5, 0], [0, 0, 0]], // mast + sail
-      [[-1.6, 1.62, 0.3], [0, 0, 0]], // cabin
-      [[1.6, 1.47, -0.35], [0, 0.4, 0]], // crate
-      [[1.5, 1.52, 0.4], [0, 0, 0]], // barrel
-      [[-2.6, 1.37, 0], [0, 0, 0]], // stern rail
-      [[2.6, 1.37, 0], [0, 0, 0.0]], // bow rail
-    ];
-    return homes.map(([p, r], i) => {
-      const a = (i / homes.length) * Math.PI * 2 + rnd() * 0.6;
-      const d = 3.2 + rnd() * 3.2;
-      return {
-        home: new THREE.Vector3(...p),
-        homeRot: new THREE.Euler(...r),
-        out: new THREE.Vector3(Math.cos(a) * d, 0.18, Math.sin(a) * d * 0.8),
-        outRot: new THREE.Euler(r[0] + (rnd() - 0.5) * 1.2, r[1] + (rnd() - 0.5) * 3, r[2] + (rnd() - 0.5) * 1.6),
-        arc: 2.2 + rnd() * 2.2,
-      };
-    });
-  }, []);
-
-  const crash = () => {
-    if (startedAt.current >= 0 || isAnyModalOpen) return;
-    startedAt.current = clockRef.current;
-  };
-  useEffect(() => {
-    crashCoveBus.crash = crash;
-    return () => {
-      crashCoveBus.crash = () => {};
-    };
-  });
-
-  const q0 = useMemo(() => new THREE.Quaternion(), []);
-  const q1 = useMemo(() => new THREE.Quaternion(), []);
-
-  useFrame((state) => {
-    const now = state.clock.elapsedTime;
-    clockRef.current = now;
-    let t = startedAt.current < 0 ? -1 : now - startedAt.current;
-    if (reducedMotion && t >= 0 && t < 3.9) t = 3.9; // skip straight to the result
-    if (t > 7.2) {
-      startedAt.current = -1;
-      t = -1;
-    }
-    // phases: 0-0.3 shudder, 0.3-1.4 blown apart, 1.4-2.5 floating, 2.5-4.0 reassembling, then badge
-    const out = t < 0 ? 0 : seg(t, 0.3, 1.4) * (1 - seg(t, 2.5, 4.0));
-    const flying = t >= 0.3 && t < 4.0;
-    const shudder = t >= 0 && t < 0.3 ? Math.sin(t * 90) * 0.06 : 0;
-
-    pieces.forEach((pc, i) => {
-      const g = pieceRefs.current[i];
-      if (!g) return;
-      const k = out;
-      g.position.lerpVectors(pc.home, pc.out, k);
-      // arc up while travelling, bob once landed
-      const travel = t < 2.5 ? seg(t, 0.3, 1.4) : 1 - seg(t, 2.5, 4.0);
-      g.position.y += Math.sin(travel * Math.PI) * pc.arc * (flying ? 1 : 0);
-      if (k > 0.98) g.position.y += Math.sin(now * 2.2 + i) * 0.06;
-      g.position.x += shudder;
-      q0.setFromEuler(pc.homeRot);
-      q1.setFromEuler(pc.outRot);
-      g.quaternion.copy(q0).slerp(q1, k);
-      if (flying && travel > 0.05 && travel < 0.95) g.rotateY(Math.sin(travel * Math.PI) * (i % 2 ? 1 : -1) * 1.4);
-    });
-
-    // splash rings where the pieces hit the water, and one under the ship
-    ripples.current.forEach((m, i) => {
-      if (!m) return;
-      const at = i === 0 ? 0.3 : 1.4;
-      const life = t < 0 ? -1 : (t - at) / 1.1;
-      const show = life > 0 && life < 1;
-      m.visible = show;
-      if (!show) return;
-      const src = i === 0 ? new THREE.Vector3(0, 0, 0) : pieces[(i - 1) % pieces.length].out;
-      m.position.set(src.x, 0.06, src.z);
-      m.scale.setScalar(0.4 + life * (i === 0 ? 5 : 2.2));
-      (m.material as THREE.MeshBasicMaterial).opacity = (1 - life) * 0.8;
-    });
-
-    if (badge.current) {
-      const b = t < 0 ? 0 : seg(t, 3.9, 4.3) * (1 - seg(t, 6.6, 7.2));
-      badge.current.visible = b > 0.01;
-      const pop = b * (1 + Math.sin(Math.min(1, (t - 3.9) / 0.4) * Math.PI) * 0.15);
-      badge.current.scale.set(4.6 * pop, 1.44 * pop, 1);
-      badge.current.position.y = 5.9 + b * 0.3;
-      (badge.current.material as THREE.SpriteMaterial).opacity = b;
-    }
-    if (flagRef.current && !reducedMotion) flagRef.current.rotation.y = Math.sin(now * 3.2) * 0.3;
-    if (group.current) {
-      const s = hovered && t < 0 ? 1.04 : 1;
-      group.current.scale.lerp(new THREE.Vector3(s, s, s), 0.15);
-    }
-  });
-
-  const wood = '#B9874F';
-  const dark = '#8D6B4F';
-  const setPiece = (i: number) => (el: THREE.Group | null) => {
-    pieceRefs.current[i] = el;
-  };
-
-  return (
-    <group position={CRASH_COVE.pos} scale={CRASH_COVE.scale} userData={{ noMerge: true }}>
-      {/* sandbar + rocks the ship is beached on */}
-      <mesh position={[0, -0.05, 0]} receiveShadow>
-        <cylinderGeometry args={[4.4, 5.2, 0.5, 14]} />
-        {flat('#F3DFAE')}
-      </mesh>
-      <LowPolyBoulder position={[-3.4, 0.1, 1.6]} scale={0.7} />
-      <LowPolyBoulder position={[3.1, 0.1, -2.0]} scale={0.55} />
-      <LowPolyBoulder position={[2.6, 0.05, 2.4]} scale={0.4} />
-
-      <group
-        ref={group}
-        rotation={[0, -0.5, 0.06]}
-        onClick={(e) => {
-          e.stopPropagation();
-          crash();
-        }}
-        onPointerOver={(e) => {
-          e.stopPropagation();
-          if (isAnyModalOpen) return;
-          setHovered(true);
-          document.body.style.cursor = 'pointer';
-        }}
-        onPointerOut={() => {
-          setHovered(false);
-          document.body.style.cursor = 'auto';
-        }}
-      >
-        {/* 0 bow half, 1 stern half */}
-        {[0, 1].map((i) => (
-          <group key={i} ref={setPiece(i)}>
-            <mesh geometry={hullHalf} castShadow receiveShadow>
-              {flat(wood)}
-            </mesh>
-            <mesh geometry={hullHalf} position={[0, 0.62, 0]} scale={[1.01, 0.12, 1.03]}>
-              {flat('#1AA6A6')}
-            </mesh>
-          </group>
-        ))}
-        {/* 2 deck */}
-        <group ref={setPiece(2)}>
-          {[-0.6, -0.2, 0.2, 0.6].map((z) => (
-            <mesh key={z} position={[0, 0, z]} castShadow>
-              <boxGeometry args={[5.4, 0.08, 0.36]} />
-              {flat(z === -0.2 || z === 0.6 ? dark : '#C99A62')}
-            </mesh>
-          ))}
-        </group>
-        {/* 3 mast + sail + flag */}
-        <group ref={setPiece(3)}>
-          <mesh castShadow>
-            <cylinderGeometry args={[0.07, 0.09, 2.5, 6]} />
-            {flat(dark)}
-          </mesh>
-          <mesh position={[0.62, 0.15, 0]} castShadow>
-            <coneGeometry args={[0.9, 1.9, 3]} />
-            {flat('#FFF8E7')}
-          </mesh>
-          <mesh ref={flagRef} position={[0.22, 1.3, 0]}>
-            <boxGeometry args={[0.42, 0.26, 0.02]} />
-            {flat('#F2765D')}
-          </mesh>
-        </group>
-        {/* 4 cabin */}
-        <group ref={setPiece(4)}>
-          <mesh castShadow>
-            <boxGeometry args={[1.1, 0.6, 1.0]} />
-            {flat('#FFF8E7')}
-          </mesh>
-          <mesh position={[0, 0.38, 0]} castShadow>
-            <boxGeometry args={[1.25, 0.12, 1.15]} />
-            {flat('#A9714B')}
-          </mesh>
-          <mesh position={[0.56, 0.05, 0]}>
-            <boxGeometry args={[0.02, 0.24, 0.36]} />
-            <meshStandardMaterial color="#BAE6FD" emissive="#7DD3FC" emissiveIntensity={0.3} />
-          </mesh>
-        </group>
-        {/* 5 crate, 6 barrel */}
-        <group ref={setPiece(5)}>
-          <mesh castShadow>
-            <boxGeometry args={[0.45, 0.45, 0.45]} />
-            {flat(wood)}
-          </mesh>
-        </group>
-        <group ref={setPiece(6)}>
-          <mesh castShadow>
-            <cylinderGeometry args={[0.2, 0.2, 0.5, 8]} />
-            {flat('#A0522D')}
-          </mesh>
-        </group>
-        {/* 7, 8 rails */}
-        {[7, 8].map((i) => (
-          <group key={i} ref={setPiece(i)}>
-            <mesh>
-              <boxGeometry args={[0.08, 0.3, 1.9]} />
-              {flat(dark)}
-            </mesh>
-          </group>
-        ))}
-        {/* invisible hit box so the whole ship is easy to click */}
-        <mesh position={[0, 1.3, 0]} visible={false}>
-          <boxGeometry args={[7.2, 3.2, 2.6]} />
-          <meshBasicMaterial />
-        </mesh>
-      </group>
-
-      {/* splash rings */}
-      {Array.from({ length: 1 + pieces.length }, (_, i) => (
-        <mesh key={i} ref={(el) => { ripples.current[i] = el; }} rotation={[-Math.PI / 2, 0, 0]} visible={false}>
-          <ringGeometry args={[0.7, 0.85, 28]} />
-          <meshBasicMaterial color="#FFFFFF" transparent opacity={0} depthWrite={false} />
-        </mesh>
-      ))}
-
-      {tex && (
-        <sprite ref={badge} position={[0, 5.9, 0]} visible={false} renderOrder={10}>
-          <spriteMaterial map={tex} transparent opacity={0} depthTest={false} depthWrite={false} />
-        </sprite>
-      )}
-    </group>
-  );
-};
-
-// ---------------------------------------------------------------------------
 // The island itself
 // ---------------------------------------------------------------------------
 interface OpenSourceHarborProps {
@@ -777,7 +469,7 @@ export const OpenSourceHarbor: React.FC<OpenSourceHarborProps> = ({ isAnyModalOp
 
       <HarborCrane reducedMotion={reducedMotion} />
       <CargoShip ossProjects={ossProjects} isAnyModalOpen={isAnyModalOpen} onSelectProject={onSelectProject} reducedMotion={reducedMotion} shipRef={shipRef} />
-      <CrashCove isAnyModalOpen={isAnyModalOpen} reducedMotion={reducedMotion} />
+      <KrakenCove isAnyModalOpen={isAnyModalOpen} reducedMotion={reducedMotion} />
     </>
   );
 };
