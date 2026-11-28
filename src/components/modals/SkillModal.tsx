@@ -28,10 +28,6 @@ export const SkillModal: React.FC<SkillModalProps> = ({ skillGroup, onClose }) =
         </button>
 
         <div className="flex items-center gap-2 mb-2">
-          <span 
-            className="w-3.5 h-3.5 rounded-full border border-[#0B1B2D]" 
-            style={{ backgroundColor: skillGroup.color }} 
-          />
           <span className="text-xs uppercase font-bold text-[#0F766E] tracking-wider font-sans">
             Discipline
           </span>
