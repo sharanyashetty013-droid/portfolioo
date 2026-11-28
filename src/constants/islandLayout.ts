@@ -85,7 +85,7 @@ export const ISLAND_LAYOUT: Record<SectionId, IslandConfig> = {
     name: 'Open Source Harbor',
     chapterTitle: 'Chapter 4: Shipped upstream',
     chapterNumber: 4,
-    storyLine: 'Merged pull requests in golang/go, Gitea and Relay, plus my own crash tester, midsave.',
+    storyLine: 'Merged pull requests in golang/go, Gitea and Relay.',
     radius: 10,
     height: 3.2,
     position: [-6, 0, -172],

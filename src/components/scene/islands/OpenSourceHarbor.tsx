@@ -9,7 +9,6 @@ import { FlowerBush, LampPost, Bunting } from '../common/IslandProps';
 import { ProjectItem } from '../../../types/portfolio';
 import { portfolioData } from '../../../data/portfolioData';
 import { ISLAND_LAYOUT } from '../../../constants/islandLayout';
-import { VolcanoCove } from './VolcanoCove';
 
 type V3 = [number, number, number];
 
@@ -46,7 +45,6 @@ export const shipToWorld = (x: number, y: number, z: number) => {
   return new THREE.Vector3(HARBOR_SHIP.pos[0] + x * c + z * s, y, HARBOR_SHIP.pos[2] - x * s + z * c);
 };
 
-export { CRASH_COVE, crashCoveBus } from './VolcanoCove';
 
 const LID_NAMES: Record<string, string> = { 'oss-golang': 'GO', 'oss-gitea': 'GITEA', 'oss-relay': 'RELAY' };
 const lidTexture = (text: string) => {
@@ -505,7 +503,6 @@ export const OpenSourceHarbor: React.FC<OpenSourceHarborProps> = ({ isAnyModalOp
 
       <HarborCrane reducedMotion={reducedMotion} />
       <CargoShip ossProjects={ossProjects} isAnyModalOpen={isAnyModalOpen} onSelectProject={onSelectProject} reducedMotion={reducedMotion} shipRef={shipRef} />
-      <VolcanoCove isAnyModalOpen={isAnyModalOpen} reducedMotion={reducedMotion} />
     </>
   );
 };

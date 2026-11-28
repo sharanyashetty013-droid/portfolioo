@@ -154,7 +154,7 @@ export const OverlayHUD: React.FC<OverlayHUDProps> = ({
             )}
             {activeSection === 'opensource' && (
               <p className="mt-1.5 text-[11px] sm:text-[12px] font-bold text-[#1AA6A6] [@media(max-height:500px)]:hidden">
-                Tap a container on the ship to see the PR · tap the volcano to crash-test it
+                Tap a container on the ship to see the PR
               </p>
             )}
           </div>
